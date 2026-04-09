@@ -75,26 +75,157 @@ body::before{
 .sr-item-title{font-size:13px;font-weight:600;color:#e2e8f0}
 .sr-item-snippet{font-size:11px;color:#6b8aaa;margin-top:2px}
 
-/* SIDEBAR */
-#sidebar{position:fixed;top:var(--header-h);left:0;width:var(--sidebar-w);bottom:0;background:linear-gradient(180deg,#080f20 0%,#0a1228 100%);border-right:1px solid rgba(59,130,246,.12);overflow-y:auto;z-index:50;display:flex;flex-direction:column}
-.sidebar-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.07)}
-.sidebar-tab{flex:1;padding:9px 3px;text-align:center;font-size:11.5px;font-weight:600;cursor:pointer;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:.2s}
-.sidebar-tab.active{color:#60a5fa;border-bottom-color:#3b82f6;text-shadow:0 0 8px rgba(96,165,250,.4)}
-.sidebar-tab:hover{background:rgba(59,130,246,.06);color:#93c5fd}
+/* SIDEBAR — neural network theme */
+@keyframes sidebar-node-pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes nav-slide-in{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes active-glow{0%,100%{box-shadow:inset 0 0 0 0 transparent}50%{box-shadow:inset 2px 0 12px -4px var(--tab-clr,#3b82f6)}}
+
+#sidebar{
+  position:fixed;top:var(--header-h);left:0;width:var(--sidebar-w);bottom:0;
+  background:linear-gradient(180deg,#060d1c 0%,#08111f 50%,#060d1c 100%);
+  border-right:1px solid rgba(59,130,246,.15);
+  overflow-y:auto;z-index:50;display:flex;flex-direction:column;
+  box-shadow:4px 0 24px rgba(0,0,0,.4);
+}
+
+/* Sidebar header branding */
+.sidebar-brand{
+  padding:10px 14px 8px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid rgba(59,130,246,.1);
+  background:rgba(59,130,246,.04);
+  position:relative;overflow:hidden;
+}
+.sidebar-brand::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 100% at 50% 0%,rgba(59,130,246,.08),transparent);
+}
+.sidebar-brand-icon{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,#1e3a6b,#2255a4);
+  border:1px solid rgba(96,165,250,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+  box-shadow:0 0 10px rgba(59,130,246,.3);
+}
+.sidebar-brand-nodes{display:flex;gap:5px;align-items:center}
+.sb-node{
+  width:6px;height:6px;border-radius:50%;
+  animation:sidebar-node-pulse 2s ease-in-out infinite;
+}
+.sb-node.n1{background:#3b82f6;animation-delay:0s}
+.sb-node.n2{background:#10b981;animation-delay:.5s}
+.sb-node.n3{background:#8b5cf6;animation-delay:1s}
+.sb-node.n4{background:#06b6d4;animation-delay:1.5s}
+.sidebar-brand-label{font-size:10px;font-weight:700;letter-spacing:.8px;color:#4b6a8a;text-transform:uppercase;margin-left:auto}
+
+/* Tabs */
+.sidebar-tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.06);padding:4px 4px 0;gap:2px;background:rgba(0,0,0,.2)}
+.sidebar-tab{
+  flex:1;min-width:40px;padding:7px 2px;text-align:center;font-size:10.5px;font-weight:700;
+  cursor:pointer;color:#4b6a8a;border-radius:6px 6px 0 0;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:all .2s ease;position:relative;
+  letter-spacing:.2px;
+}
+.sidebar-tab:hover{background:rgba(255,255,255,.05);color:#8ba8c8}
+
+/* Per-subject tab colors */
+.sidebar-tab[data-subject="farm"].active{
+  color:#60a5fa;border-bottom-color:#3b82f6;
+  background:rgba(59,130,246,.1);
+  text-shadow:0 0 10px rgba(96,165,250,.6);
+  --tab-clr:#3b82f6;
+}
+.sidebar-tab[data-subject="fisio"].active{
+  color:#34d399;border-bottom-color:#10b981;
+  background:rgba(16,185,129,.1);
+  text-shadow:0 0 10px rgba(52,211,153,.6);
+  --tab-clr:#10b981;
+}
+.sidebar-tab[data-subject="cuid"].active{
+  color:#c4b5fd;border-bottom-color:#8b5cf6;
+  background:rgba(139,92,246,.1);
+  text-shadow:0 0 10px rgba(196,181,253,.5);
+  --tab-clr:#8b5cf6;
+}
+.sidebar-tab[data-subject="tools"].active{
+  color:#67e8f9;border-bottom-color:#06b6d4;
+  background:rgba(6,182,212,.08);
+  text-shadow:0 0 10px rgba(103,232,249,.5);
+}
+.sidebar-tab[data-subject="extra"].active{
+  color:#fbbf24;border-bottom-color:#f59e0b;
+  background:rgba(245,158,11,.08);
+  text-shadow:0 0 10px rgba(251,191,36,.4);
+}
+
+/* Active tab glow dot */
+.sidebar-tab.active::after{
+  content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;
+  background:currentColor;box-shadow:0 0 8px 2px currentColor;
+}
+
 .sidebar-content{display:none;flex:1;overflow-y:auto}
-.sidebar-content.active{display:block}
-.unit-group{border-bottom:1px solid rgba(255,255,255,.05)}
-.unit-header{padding:9px 14px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#3b6ea0;background:rgba(255,255,255,.02);cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:.15s}
-.unit-header:hover{background:rgba(59,130,246,.06);color:#60a5fa}
-.unit-header .arrow{transition:.2s;font-size:10px}
-.unit-header.open .arrow{transform:rotate(90deg)}
-.unit-header.open{color:#60a5fa}
+.sidebar-content.active{display:block;animation:nav-slide-in .2s ease}
+
+/* Unit groups */
+.unit-group{border-bottom:1px solid rgba(255,255,255,.04)}
+.unit-header{
+  padding:8px 14px;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:#2d5a82;background:rgba(255,255,255,.015);
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  user-select:none;transition:.15s;position:relative;
+}
+.unit-header::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:transparent;transition:.2s;
+}
+.unit-header:hover{background:rgba(59,130,246,.05);color:#5080aa}
+.unit-header:hover::before{background:rgba(59,130,246,.3)}
+.unit-header .arrow{transition:.25s;font-size:9px;opacity:.6}
+.unit-header.open .arrow{transform:rotate(90deg);opacity:1}
+.unit-header.open{color:#4b87c8}
+.unit-header.open::before{background:rgba(59,130,246,.5);box-shadow:0 0 8px rgba(59,130,246,.3)}
 .unit-items{display:none}
 .unit-header.open + .unit-items{display:block}
-.nav-item{padding:8px 14px 8px 22px;font-size:12.5px;cursor:pointer;color:#8ba8c8;border-left:3px solid transparent;line-height:1.35;transition:.15s}
-.nav-item:hover{background:rgba(59,130,246,.07);border-left-color:rgba(59,130,246,.4);color:#c8daf0}
-.nav-item.active{background:rgba(59,130,246,.12);border-left-color:#3b82f6;color:#93c5fd;font-weight:600;text-shadow:0 0 6px rgba(59,130,246,.3)}
-.nav-item .nav-tag{font-size:9px;color:#4b6a8a;display:block}
+
+/* Nav items — per subject color */
+.nav-item{
+  padding:7px 14px 7px 20px;font-size:12.5px;cursor:pointer;
+  color:#7090ae;border-left:3px solid transparent;line-height:1.35;
+  transition:all .15s ease;position:relative;
+}
+.nav-item::after{
+  content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  width:4px;height:4px;border-radius:50%;background:transparent;transition:.2s;
+}
+.nav-item:hover{background:rgba(59,130,246,.06);border-left-color:rgba(59,130,246,.35);color:#b0ccee}
+.nav-item:hover::after{background:rgba(59,130,246,.4)}
+.nav-item.active{
+  background:rgba(59,130,246,.1);border-left-color:#3b82f6;
+  color:#93c5fd;font-weight:600;
+  text-shadow:0 0 8px rgba(59,130,246,.25);
+}
+.nav-item.active::after{background:#3b82f6;box-shadow:0 0 6px #3b82f6}
+.nav-item .nav-tag{font-size:9px;color:#3a5872;display:block}
+
+/* Fisio subject colors */
+#sidebar-fisio .nav-item:hover{background:rgba(16,185,129,.06);border-left-color:rgba(16,185,129,.35);color:#a7f0d0}
+#sidebar-fisio .nav-item:hover::after{background:rgba(16,185,129,.4)}
+#sidebar-fisio .nav-item.active{background:rgba(16,185,129,.1);border-left-color:#10b981;color:#6ee7b7;text-shadow:0 0 8px rgba(16,185,129,.25)}
+#sidebar-fisio .nav-item.active::after{background:#10b981;box-shadow:0 0 6px #10b981}
+#sidebar-fisio .unit-header:hover::before{background:rgba(16,185,129,.3)}
+#sidebar-fisio .unit-header.open::before{background:#10b981}
+
+/* Cuid subject colors */
+#sidebar-cuid .nav-item:hover{background:rgba(139,92,246,.06);border-left-color:rgba(139,92,246,.35);color:#d8c8fc}
+#sidebar-cuid .nav-item:hover::after{background:rgba(139,92,246,.4)}
+#sidebar-cuid .nav-item.active{background:rgba(139,92,246,.1);border-left-color:#8b5cf6;color:#c4b5fd;text-shadow:0 0 8px rgba(139,92,246,.25)}
+#sidebar-cuid .nav-item.active::after{background:#8b5cf6;box-shadow:0 0 6px #8b5cf6}
+#sidebar-cuid .unit-header:hover::before{background:rgba(139,92,246,.3)}
+#sidebar-cuid .unit-header.open::before{background:#8b5cf6}
 
 /* MAIN */
 #main{margin-left:var(--sidebar-w);margin-top:var(--header-h);padding:24px;min-height:calc(100vh - var(--header-h));position:relative;z-index:1}
@@ -344,7 +475,13 @@ body::before{
 .stat-box .sl{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px;font-weight:500}
 
 /* CONTENT VIEW */
+@keyframes panel-hero-in{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes hero-line-grow{from{width:0;opacity:0}to{width:100%;opacity:1}}
+@keyframes panel-dot-pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+
 #content-view{display:none;animation:slide-up .3s ease both}
+
+/* Standard content header (session view) */
 .cv-header{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(59,130,246,.15)}
 .cv-breadcrumb{font-size:11px;color:var(--text-muted);margin-bottom:6px}
 .cv-breadcrumb span{cursor:pointer;transition:.15s}
@@ -352,6 +489,64 @@ body::before{
 .cv-title{font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff 30%,#93c5fd 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
 .cv-meta{font-size:12px;color:var(--text-muted);display:flex;gap:16px;flex-wrap:wrap}
 .cv-meta-item{display:flex;align-items:center;gap:4px}
+
+/* Panel hero headers (Anexos, Progress, Biblio, XRef) */
+.panel-hero{
+  position:relative;overflow:hidden;
+  border-radius:14px;margin-bottom:22px;
+  padding:22px 26px 20px;
+  animation:panel-hero-in .35s ease both;
+}
+.panel-hero::before{
+  content:'';position:absolute;inset:0;
+  background:inherit;filter:blur(0);z-index:0;
+}
+.panel-hero-content{position:relative;z-index:1}
+.panel-hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  padding:3px 10px;border-radius:10px;margin-bottom:10px;
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);
+}
+.panel-hero-title{
+  font-size:22px;font-weight:800;color:#fff;
+  text-shadow:0 0 20px rgba(255,255,255,.2);
+  margin-bottom:6px;line-height:1.2;
+}
+.panel-hero-sub{font-size:12px;color:rgba(255,255,255,.55);line-height:1.5;margin-bottom:12px}
+.panel-hero-line{
+  height:2px;border-radius:1px;
+  background:linear-gradient(90deg,currentColor,transparent);
+  animation:hero-line-grow .6s ease .2s both;
+}
+.panel-hero-dots{display:flex;gap:6px;margin-top:10px}
+.ph-dot{
+  width:7px;height:7px;border-radius:50%;opacity:.7;
+  animation:panel-dot-pop .4s ease both;
+}
+/* Decorative neural node in corner */
+.panel-hero-node{
+  position:absolute;right:-20px;top:50%;transform:translateY(-50%);
+  width:120px;height:120px;border-radius:50%;opacity:.08;
+  background:radial-gradient(circle,#fff 0%,transparent 70%);
+  pointer-events:none;
+}
+.panel-hero-node2{
+  position:absolute;right:40px;top:-20px;
+  width:80px;height:80px;border-radius:50%;opacity:.06;
+  background:radial-gradient(circle,#fff 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* Color themes for each panel */
+.panel-hero.blue{background:linear-gradient(135deg,rgba(13,24,50,.95) 0%,rgba(30,58,130,.6) 50%,rgba(13,21,40,.9) 100%);border:1px solid rgba(59,130,246,.25);color:#60a5fa}
+.panel-hero.blue .panel-hero-line{color:#3b82f6}
+.panel-hero.green{background:linear-gradient(135deg,rgba(6,22,18,.95) 0%,rgba(5,78,54,.6) 50%,rgba(6,20,16,.9) 100%);border:1px solid rgba(16,185,129,.25);color:#34d399}
+.panel-hero.green .panel-hero-line{color:#10b981}
+.panel-hero.purple{background:linear-gradient(135deg,rgba(18,10,40,.95) 0%,rgba(76,29,149,.5) 50%,rgba(12,8,30,.9) 100%);border:1px solid rgba(139,92,246,.25);color:#a78bfa}
+.panel-hero.purple .panel-hero-line{color:#8b5cf6}
+.panel-hero.teal{background:linear-gradient(135deg,rgba(4,16,22,.95) 0%,rgba(8,82,106,.5) 50%,rgba(4,14,20,.9) 100%);border:1px solid rgba(6,182,212,.25);color:#67e8f9}
+.panel-hero.teal .panel-hero-line{color:#06b6d4}
 .content-tabs{display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:20px;flex-wrap:wrap;background:rgba(255,255,255,.02);border-radius:10px 10px 0 0;padding:4px 4px 0}
 .content-tab{padding:9px 18px;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s;border-radius:8px 8px 0 0}
 .content-tab.active{color:#60a5fa;border-bottom-color:#3b82f6;font-weight:600;background:rgba(59,130,246,.08);text-shadow:0 0 8px rgba(59,130,246,.3)}
@@ -559,39 +754,39 @@ body::before{
 .ges-enf{background:rgba(16,185,129,.08);border-radius:8px;padding:8px 10px;border-left:3px solid #10b981}
 .ges-enf .ges-section-label{color:#34d399}
 
-/* QUIZ */
+/* QUIZ — dark theme */
 .quiz-container{display:flex;flex-direction:column;gap:14px}
-.quiz-question{background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.08);padding:18px 20px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.quiz-question{background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(59,130,246,.15);padding:18px 20px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
 .quiz-q-text{font-size:14px;font-weight:600;color:#93c5fd;margin-bottom:14px;line-height:1.6}
 .quiz-q-num{display:inline-block;background:var(--udp-blue);color:#fff;width:26px;height:26px;border-radius:50%;text-align:center;line-height:26px;font-size:12px;font-weight:700;margin-right:8px}
 .quiz-options{display:flex;flex-direction:column;gap:8px}
-.quiz-opt{padding:11px 16px;border-radius:8px;border:2px solid var(--border);cursor:pointer;font-size:13px;transition:.2s;display:flex;align-items:center;gap:10px;line-height:1.5}
-.quiz-opt:hover{border-color:var(--udp-blue-light);background:#f0f6ff}
-.quiz-opt.selected{border-color:var(--udp-blue);background:#e8f0fb;font-weight:600}
-.quiz-opt.correct{border-color:#16a34a;background:#dcfce7;color:#15803d}
-.quiz-opt.incorrect{border-color:#dc2626;background:#fee2e2;color:#991b1b}
-.quiz-opt.reveal-correct{border-color:#16a34a;background:#dcfce7}
-.quiz-opt-letter{min-width:26px;height:26px;border-radius:50%;background:#e8f0fb;color:var(--udp-blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-.quiz-explanation{display:none;margin-top:10px;padding:12px 16px;background:#f0f7ff;border-radius:8px;border-left:3px solid var(--udp-blue-light);font-size:12.5px;color:#374151;line-height:1.7}
+.quiz-opt{padding:11px 16px;border-radius:8px;border:2px solid rgba(255,255,255,.08);cursor:pointer;font-size:13px;transition:.2s;display:flex;align-items:center;gap:10px;line-height:1.5;background:rgba(255,255,255,.03);color:var(--text)}
+.quiz-opt:hover{border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.1);color:#c8daf0}
+.quiz-opt.selected{border-color:var(--udp-blue);background:rgba(59,130,246,.15);font-weight:600;color:#e2e8f0}
+.quiz-opt.correct{border-color:#16a34a;background:rgba(16,163,74,.18);color:#86efac}
+.quiz-opt.incorrect{border-color:#dc2626;background:rgba(220,38,38,.18);color:#fca5a5}
+.quiz-opt.reveal-correct{border-color:#16a34a;background:rgba(16,163,74,.18);color:#86efac}
+.quiz-opt-letter{min-width:26px;height:26px;border-radius:50%;background:rgba(59,130,246,.2);color:#93c5fd;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.quiz-explanation{display:none;margin-top:10px;padding:12px 16px;background:rgba(59,130,246,.08);border-radius:8px;border-left:3px solid rgba(96,165,250,.5);font-size:12.5px;color:#c8daf0;line-height:1.7}
 .quiz-explanation.show{display:block}
-.quiz-score{background:linear-gradient(135deg,#1a3a6b,#2255a4);color:#fff;border-radius:12px;padding:24px;text-align:center;margin-top:16px}
-.quiz-score h3{font-size:20px;margin-bottom:6px}
-.quiz-score p{font-size:14px;opacity:.9}
-.quiz-btn{display:inline-block;margin-top:14px;padding:10px 24px;background:#fff;color:var(--udp-blue);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
-.quiz-btn:hover{background:#e8f0fb}
+.quiz-score{background:linear-gradient(135deg,rgba(59,130,246,.25),rgba(139,92,246,.25));color:#fff;border-radius:12px;padding:24px;text-align:center;margin-top:16px;border:1px solid rgba(59,130,246,.3);backdrop-filter:blur(10px)}
+.quiz-score h3{font-size:20px;margin-bottom:6px;text-shadow:0 0 12px rgba(96,165,250,.5)}
+.quiz-score p{font-size:14px;opacity:.85;color:#c8daf0}
+.quiz-btn{display:inline-block;margin-top:14px;padding:10px 24px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 0 14px rgba(59,130,246,.3)}
+.quiz-btn:hover{box-shadow:0 0 22px rgba(59,130,246,.5);transform:translateY(-1px)}
 
-/* VIGNETTE */
-.vignette-card{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.vignette-header{background:linear-gradient(135deg,#1a7a4a,#22a06b);color:#fff;padding:18px 22px}
-.vignette-header h3{font-size:15px;margin-bottom:4px}
-.vignette-header p{font-size:12px;opacity:.85}
-.vignette-body{padding:20px 22px}
-.vignette-scenario{font-size:13.5px;line-height:1.8;color:var(--text);margin-bottom:16px;padding:14px 16px;background:#f8faf8;border-radius:8px;border-left:4px solid var(--green)}
-.vignette-question{font-size:14px;font-weight:600;color:var(--udp-blue);margin-bottom:12px}
-.vignette-answer{display:none;padding:14px 16px;background:#f0f7ff;border-radius:8px;border-left:3px solid var(--udp-blue-light);font-size:13px;line-height:1.7;color:#374151}
+/* VIGNETTE — dark theme */
+.vignette-card{background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(16,185,129,.2);overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.vignette-header{background:linear-gradient(135deg,rgba(16,122,74,.6),rgba(34,160,107,.4));color:#fff;padding:18px 22px;border-bottom:1px solid rgba(16,185,129,.2)}
+.vignette-header h3{font-size:15px;margin-bottom:4px;color:#6ee7b7}
+.vignette-header p{font-size:12px;opacity:.8;color:#a7f3d0}
+.vignette-body{padding:20px 22px;background:rgba(255,255,255,.01)}
+.vignette-scenario{font-size:13.5px;line-height:1.8;color:#c8daf0;margin-bottom:16px;padding:14px 16px;background:rgba(16,185,129,.07);border-radius:8px;border-left:4px solid var(--green)}
+.vignette-question{font-size:14px;font-weight:600;color:#93c5fd;margin-bottom:12px}
+.vignette-answer{display:none;padding:14px 16px;background:rgba(59,130,246,.08);border-radius:8px;border-left:3px solid rgba(96,165,250,.5);font-size:13px;line-height:1.7;color:#c8daf0}
 .vignette-answer.show{display:block}
-.vignette-toggle{padding:10px 20px;background:var(--udp-blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
-.vignette-toggle:hover{background:var(--udp-blue-light)}
+.vignette-toggle{padding:10px 20px;background:linear-gradient(135deg,var(--green),#059669);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 0 12px rgba(16,185,129,.3)}
+.vignette-toggle:hover{box-shadow:0 0 22px rgba(16,185,129,.5);transform:translateY(-1px)}
 
 /* CDSS MODES */
 .cdss-modes{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
@@ -670,7 +865,7 @@ body::before{
 <!-- HEADER -->
 <div id="header">
   <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
-  <div class="logo">⚕ Consulta <span>Rápida</span></div>
+  <div class="logo" onclick="showHome()" title="Ir al inicio" style="cursor:pointer">⚕ Consulta <span>Rápida</span></div>
   <div class="subtitle">ENF3013 · ENF3014 — UDP 2026</div>
   <div id="search-box">
     <span class="icon">🔍</span>
@@ -684,13 +879,25 @@ body::before{
 
 <!-- SIDEBAR -->
 <div id="sidebar">
+  <!-- Branding header con nodos animados -->
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">⚕</div>
+    <div class="sidebar-brand-nodes">
+      <div class="sb-node n1"></div>
+      <div class="sb-node n2"></div>
+      <div class="sb-node n3"></div>
+      <div class="sb-node n4"></div>
+    </div>
+    <div class="sidebar-brand-label">ENF · UDP</div>
+  </div>
+  <!-- Tabs de navegación -->
   <div class="sidebar-tabs">
-    <div class="sidebar-tab active" onclick="switchSidebarTab('farm',this)">💊 Farmaco</div>
-    <div class="sidebar-tab" onclick="switchSidebarTab('fisio',this)">🫀 Fisiopato</div>
-    <div class="sidebar-tab" onclick="switchSidebarTab('cuid',this)">💙 Cuidados</div>
-    <div class="sidebar-tab" onclick="showCalculator()">🧩 Anexos</div>
-    <div class="sidebar-tab" onclick="showProgress()">📊</div>
-    <div class="sidebar-tab" onclick="showBibliography()">📚</div>
+    <div class="sidebar-tab active" data-subject="farm" onclick="switchSidebarTab('farm',this)">💊 Farm</div>
+    <div class="sidebar-tab" data-subject="fisio" onclick="switchSidebarTab('fisio',this)">🫀 Fisio</div>
+    <div class="sidebar-tab" data-subject="cuid" onclick="switchSidebarTab('cuid',this)">💙 Cuid</div>
+    <div class="sidebar-tab" data-subject="tools" onclick="showCalculator()">🧩 Anexos</div>
+    <div class="sidebar-tab" data-subject="extra" onclick="showProgress()">📊</div>
+    <div class="sidebar-tab" data-subject="extra" onclick="showBibliography()">📚</div>
   </div>
   <div id="sidebar-farm" class="sidebar-content active"></div>
   <div id="sidebar-fisio" class="sidebar-content"></div>
@@ -838,9 +1045,21 @@ body::before{
 
   <!-- ANEXOS PANEL -->
   <div id="calc-view" style="display:none">
-    <div class="cv-header">
-      <div class="cv-title">🧩 Anexos Clínicos</div>
-      <div class="cv-meta">Herramientas de soporte a la decisión · Scores · Calculadoras · Referencia GES Chile</div>
+    <div class="panel-hero teal">
+      <div class="panel-hero-node"></div>
+      <div class="panel-hero-node2"></div>
+      <div class="panel-hero-content">
+        <div class="panel-hero-badge">🧩 Módulo Clínico</div>
+        <div class="panel-hero-title">Anexos Clínicos</div>
+        <div class="panel-hero-sub">Scores · Calculadoras hemodinámicas · GES Chile · Cincinnati · GSA · Interacciones</div>
+        <div class="panel-hero-line"></div>
+        <div class="panel-hero-dots">
+          <div class="ph-dot" style="background:#67e8f9;animation-delay:.1s"></div>
+          <div class="ph-dot" style="background:#34d399;animation-delay:.2s"></div>
+          <div class="ph-dot" style="background:#a78bfa;animation-delay:.3s"></div>
+          <div class="ph-dot" style="background:#60a5fa;animation-delay:.4s"></div>
+        </div>
+      </div>
     </div>
     <div class="cdss-modes">
       <div class="cdss-mode active" onclick="switchCDSSMode('interactions',this)">⚠️ Interacciones</div>
@@ -857,27 +1076,61 @@ body::before{
 
   <!-- PROGRESS -->
   <div id="progress-view" style="display:none">
-    <div class="cv-header">
-      <div class="cv-title">📊 Mi Progreso de Estudio</div>
-      <div class="cv-meta">Registro de sesiones visitadas · Datos almacenados en tu dispositivo</div>
+    <div class="panel-hero green">
+      <div class="panel-hero-node"></div>
+      <div class="panel-hero-node2"></div>
+      <div class="panel-hero-content">
+        <div class="panel-hero-badge">📊 Dashboard Personal</div>
+        <div class="panel-hero-title">Mi Progreso de Estudio</div>
+        <div class="panel-hero-sub">Sesiones visitadas · Quizzes resueltos · Datos almacenados en tu dispositivo</div>
+        <div class="panel-hero-line"></div>
+        <div class="panel-hero-dots">
+          <div class="ph-dot" style="background:#34d399;animation-delay:.1s"></div>
+          <div class="ph-dot" style="background:#6ee7b7;animation-delay:.2s"></div>
+          <div class="ph-dot" style="background:#a7f3d0;animation-delay:.3s"></div>
+        </div>
+      </div>
     </div>
     <div id="progress-content"></div>
   </div>
 
   <!-- BIBLIOGRAFÍA -->
   <div id="biblio-view" style="display:none">
-    <div class="cv-header">
-      <div class="cv-title">📚 Bibliografía y Guías Clínicas 2024–2025</div>
-      <div class="cv-meta">Fuentes verificadas · 50+ referencias · Actualización: Abril 2026</div>
+    <div class="panel-hero blue">
+      <div class="panel-hero-node"></div>
+      <div class="panel-hero-node2"></div>
+      <div class="panel-hero-content">
+        <div class="panel-hero-badge">📚 Bibliografía Científica</div>
+        <div class="panel-hero-title">Guías Clínicas 2024–2026</div>
+        <div class="panel-hero-sub">50+ referencias verificadas · IDSA · ADA · ESC · ACC/AHA · WHO · MINSAL · Actualización Abril 2026</div>
+        <div class="panel-hero-line"></div>
+        <div class="panel-hero-dots">
+          <div class="ph-dot" style="background:#60a5fa;animation-delay:.1s"></div>
+          <div class="ph-dot" style="background:#93c5fd;animation-delay:.2s"></div>
+          <div class="ph-dot" style="background:#bfdbfe;animation-delay:.3s"></div>
+        </div>
+      </div>
     </div>
     <div id="biblio-content"></div>
   </div>
 
   <!-- CROSS REFERENCES -->
   <div id="xref-view" style="display:none">
-    <div class="cv-header">
-      <div class="cv-title">🔗 Referencias Cruzadas — Fisiopatología ↔ Farmacología</div>
-      <div class="cv-meta">Integración entre ambas asignaturas · ENF3013 + ENF3014</div>
+    <div class="panel-hero purple">
+      <div class="panel-hero-node"></div>
+      <div class="panel-hero-node2"></div>
+      <div class="panel-hero-content">
+        <div class="panel-hero-badge">🔗 Integración Curricular</div>
+        <div class="panel-hero-title">Referencias Cruzadas</div>
+        <div class="panel-hero-sub">Fisiopatología ↔ Farmacología · ENF3013 + ENF3014 · Situaciones clínicas en común</div>
+        <div class="panel-hero-line"></div>
+        <div class="panel-hero-dots">
+          <div class="ph-dot" style="background:#a78bfa;animation-delay:.1s"></div>
+          <div class="ph-dot" style="background:#c4b5fd;animation-delay:.2s"></div>
+          <div class="ph-dot" style="background:#34d399;animation-delay:.3s"></div>
+          <div class="ph-dot" style="background:#60a5fa;animation-delay:.4s"></div>
+        </div>
+      </div>
     </div>
     <div id="xref-content"></div>
   </div>

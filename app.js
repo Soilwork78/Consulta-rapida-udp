@@ -210,10 +210,24 @@ function showSubject(subject) {
   const code  = subject === 'farm' ? 'ENF3013 · 3° semestre'
               : subject === 'fisio' ? 'ENF3014 · 4° semestre'
               : 'ENF2010–ENF2011 · 2°–3° semestre';
+  const heroTheme = subject === 'farm' ? 'blue' : subject === 'fisio' ? 'green' : 'purple';
+  const dotColors = subject === 'farm'
+    ? ['#60a5fa','#93c5fd','#bfdbfe']
+    : subject === 'fisio'
+    ? ['#34d399','#6ee7b7','#a7f3d0']
+    : ['#a78bfa','#c4b5fd','#ddd6fe'];
   let html = `
-    <div class="cv-header">
-      <div class="cv-title">${label}</div>
-      <div class="cv-meta"><span class="cv-meta-item">${code}</span></div>
+    <div class="panel-hero ${heroTheme}">
+      <div class="panel-hero-node"></div>
+      <div class="panel-hero-node2"></div>
+      <div class="panel-hero-content">
+        <div class="panel-hero-badge">📖 ${code}</div>
+        <div class="panel-hero-title">${label}</div>
+        <div class="panel-hero-line"></div>
+        <div class="panel-hero-dots">
+          ${dotColors.map((c,i)=>`<div class="ph-dot" style="background:${c};animation-delay:${i*.1}s"></div>`).join('')}
+        </div>
+      </div>
     </div>
     <div class="unit-index">`;
   data.units.forEach(unit => {
@@ -630,34 +644,59 @@ function renderBibliography() {
     }
   ];
 
+  // Color map per grupo (dark glassmorphism palette)
+  const colorMap = {
+    '🦠 Antiinfecciosos':           { bg:'rgba(16,185,129,.12)', border:'rgba(16,185,129,.25)', accent:'#34d399', badge:'rgba(16,185,129,.2)', badgeText:'#6ee7b7' },
+    '❤️ Cardiovascular':            { bg:'rgba(239,68,68,.1)',   border:'rgba(239,68,68,.2)',   accent:'#f87171', badge:'rgba(239,68,68,.15)', badgeText:'#fca5a5' },
+    '🩺 Endocrina':                  { bg:'rgba(245,158,11,.1)',  border:'rgba(245,158,11,.2)',  accent:'#fbbf24', badge:'rgba(245,158,11,.15)',badgeText:'#fde68a' },
+    '🧠 SNC':                        { bg:'rgba(139,92,246,.1)',  border:'rgba(139,92,246,.2)',  accent:'#a78bfa', badge:'rgba(139,92,246,.15)',badgeText:'#ddd6fe' },
+    '🫀 Fisiopatología ENF3014':     { bg:'rgba(6,182,212,.1)',   border:'rgba(6,182,212,.2)',   accent:'#67e8f9', badge:'rgba(6,182,212,.15)', badgeText:'#a5f3fc' },
+    '🫁 Digestivo · AINEs · Vacunas':{ bg:'rgba(59,130,246,.1)',  border:'rgba(59,130,246,.2)',  accent:'#60a5fa', badge:'rgba(59,130,246,.15)',badgeText:'#93c5fd' },
+  };
+
+  const totalRefs = BIBLIO.reduce((acc,g)=>acc+g.refs.length,0);
+
   let html = `
-    <div style="margin-bottom:20px;padding:14px 18px;background:#f0f6ff;border-radius:10px;border-left:4px solid var(--udp-blue);">
-      <p style="font-size:13px;color:#1a3a6b;margin:0;">
-        <strong>📋 ${BIBLIO.reduce((acc,g)=>acc+g.refs.length,0)} referencias</strong> verificadas de organismos internacionales (IDSA, ADA, ESC, ACC/AHA, WHO, PAHO, MINSAL, ACG, ETA, ECMM, SCCM, AES, CANMAT).
-        Búsqueda ejecutada en <strong>Abril 2026</strong> via Exa Web Search. Todas las fuentes son de acceso abierto o institucional.
-      </p>
+    <div style="margin-bottom:24px;padding:16px 20px;background:rgba(59,130,246,.08);border-radius:12px;border:1px solid rgba(59,130,246,.2);backdrop-filter:blur(10px);">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:22px;">📚</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#93c5fd;margin-bottom:2px;">Bibliografía — ${totalRefs} referencias verificadas</div>
+          <div style="font-size:11.5px;color:#6b8aaa;line-height:1.5;">IDSA · ADA · ESC · ACC/AHA · WHO · PAHO · MINSAL · ACG · ETA · ECMM · SCCM · AES · CANMAT<br>
+          Búsqueda ejecutada <strong style="color:#60a5fa;">Abril 2026</strong> via Exa Web Search · Acceso abierto o institucional.</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;flex-shrink:0;">
+          <div style="font-size:24px;font-weight:800;color:#60a5fa;line-height:1;">${totalRefs}</div>
+          <div style="font-size:9px;color:#4b6a8a;letter-spacing:.5px;text-transform:uppercase;">refs.</div>
+        </div>
+      </div>
     </div>`;
 
   BIBLIO.forEach(grupo => {
+    const c = colorMap[grupo.grupo] || { bg:'rgba(255,255,255,.04)', border:'rgba(255,255,255,.1)', accent:'#e2e8f0', badge:'rgba(255,255,255,.1)', badgeText:'#e2e8f0' };
     html += `
-      <div style="margin-bottom:24px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:${grupo.color};border-radius:8px;">
-          <span style="font-size:15px;font-weight:700;color:#fff;">${grupo.grupo}</span>
-          <span style="font-size:11px;color:rgba(255,255,255,.7);margin-left:auto;">${grupo.refs.length} referencias</span>
+      <div style="margin-bottom:28px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:11px 16px;background:${c.bg};border-radius:10px;border:1px solid ${c.border};backdrop-filter:blur(8px);">
+          <span style="font-size:15px;font-weight:700;color:${c.accent};">${grupo.grupo}</span>
+          <span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;background:${c.badge};color:${c.badgeText};border-radius:12px;font-size:11px;font-weight:700;padding:0 8px;margin-left:auto;">${grupo.refs.length}</span>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;">`;
 
-    grupo.refs.forEach((ref, i) => {
+    grupo.refs.forEach((ref) => {
       html += `
-          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;">
-            <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-bottom:4px;">
-              <span style="font-size:10px;background:#e8f0fb;color:var(--udp-blue);padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap;">${ref.tipo}</span>
-              <span style="font-size:10px;color:#888;">${ref.autores} · ${ref.año}</span>
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px;transition:.2s;cursor:default;"
+               onmouseover="this.style.background='rgba(255,255,255,.06)';this.style.borderColor='${c.border}'"
+               onmouseout="this.style.background='rgba(255,255,255,.03)';this.style.borderColor='rgba(255,255,255,.07)'">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;">
+              <span style="font-size:10px;background:${c.badge};color:${c.badgeText};padding:2px 9px;border-radius:10px;font-weight:600;white-space:nowrap;">${ref.tipo}</span>
+              <span style="font-size:10.5px;color:#5a7a9a;">${ref.autores} · <strong style="color:#7090aa;">${ref.año}</strong></span>
             </div>
-            <div style="font-weight:600;font-size:13px;color:#1a2540;margin-bottom:4px;">${ref.titulo}</div>
-            <div style="font-size:12px;color:#555;margin-bottom:8px;line-height:1.5;">${ref.resumen}</div>
+            <div style="font-weight:600;font-size:13px;color:#c8daf0;margin-bottom:5px;line-height:1.4;">${ref.titulo}</div>
+            <div style="font-size:12px;color:#6b8aaa;margin-bottom:10px;line-height:1.6;">${ref.resumen}</div>
             <a href="${ref.url}" target="_blank" rel="noopener"
-               style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--udp-blue);text-decoration:none;font-weight:600;padding:4px 10px;border:1px solid #c5d5f0;border-radius:6px;">
+               style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:${c.accent};text-decoration:none;font-weight:600;padding:5px 12px;border:1px solid ${c.border};border-radius:20px;background:${c.bg};transition:.2s;"
+               onmouseover="this.style.background='${c.badge}';this.style.boxShadow='0 0 10px ${c.border}'"
+               onmouseout="this.style.background='${c.bg}';this.style.boxShadow='none'">
               🔗 Acceder a la fuente
             </a>
           </div>`;
