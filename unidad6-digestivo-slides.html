@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farmacología: Digestivo, AINEs y Vacunas — ENF3013 UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+.slide { width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; scroll-snap-align: start; display: flex; flex-direction: column; position: relative; }
+.slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; max-height: 100%; overflow: hidden; padding: var(--slide-padding); }
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+  --bg-dark: #0b1520; --bg-mid: #111e2e; --bg-card: #16263a;
+  --teal: #00c9a7; --teal-dim: #00917a; --cyan: #38bdf8;
+  --amber: #fbbf24; --red-warn: #f87171; --green-ok: #4ade80;
+  --text-main: #e8f1fb; --text-muted: #7a9ab8;
+  --border: rgba(0,201,167,0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-main); background: var(--bg-dark); color: var(--text-main); font-size: var(--body-size); }
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+.bg-gradient { background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%); }
+.grid-overlay::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+.glow-circle { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; opacity: .3; }
+#nav-dots { position: fixed; right: clamp(12px,2vw,28px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.2); cursor: pointer; transition: all .25s; border: none; }
+.dot.active { background: var(--teal); width: 7px; height: 14px; border-radius: 4px; }
+.dot:hover { background: var(--cyan); }
+#progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--teal), var(--cyan)); transition: width .3s ease; z-index: 200; }
+#slide-counter { position: fixed; bottom: clamp(12px,2vh,24px); right: clamp(16px,2.5vw,32px); font-family: var(--font-mono); font-size: var(--small-size); color: var(--text-muted); z-index: 100; }
+#kbd-hint { position: fixed; bottom: clamp(12px,2vh,24px); left: clamp(16px,2.5vw,32px); font-size: var(--small-size); color: var(--text-muted); z-index: 100; display: flex; gap: 8px; align-items: center; }
+.kbd { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: .75em; }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .55s ease, transform .55s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; } .reveal-delay-2 { transition-delay: .2s; } .reveal-delay-3 { transition-delay: .3s; } .reveal-delay-4 { transition-delay: .4s; } .reveal-delay-5 { transition-delay: .5s; } .reveal-delay-6 { transition-delay: .6s; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: var(--small-size); font-weight: 600; letter-spacing: .5px; }
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: clamp(8px,1.5vw,16px); padding: clamp(0.75rem,2vw,1.5rem); }
+.card-grid { display: grid; gap: clamp(0.5rem,1.5vw,1rem); }
+.card-grid-2 { grid-template-columns: repeat(2,1fr); }
+.card-grid-3 { grid-template-columns: repeat(3,1fr); }
+.accent-line { width: clamp(40px,6vw,80px); height: 3px; background: linear-gradient(90deg, var(--teal), var(--cyan)); border-radius: 2px; margin-bottom: var(--content-gap); }
+.clinical-table { width: 100%; border-collapse: collapse; font-size: var(--small-size); }
+.clinical-table th { background: rgba(0,201,167,.12); color: var(--teal); padding: clamp(4px,1vw,10px) clamp(6px,1.5vw,14px); text-align: left; font-weight: 700; border-bottom: 1px solid var(--border); font-size: var(--small-size); }
+.clinical-table td { padding: clamp(4px,1vw,9px) clamp(6px,1.5vw,14px); border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; line-height: 1.45; }
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+.bullet-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.35rem,1vh,0.7rem); }
+.bullet-list li { display: flex; align-items: flex-start; gap: 10px; }
+.bullet-list li::before { content: '▸'; color: var(--teal); flex-shrink: 0; margin-top: .1em; }
+.mech-box { border-left: 3px solid var(--teal); padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); background: rgba(0,201,167,.06); border-radius: 0 8px 8px 0; }
+.mech-box .mech-title { font-size: var(--small-size); font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.warn-band { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 8px; padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); display: flex; align-items: flex-start; gap: 10px; }
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+.section-num { font-family: var(--font-mono); font-size: clamp(3rem,12vw,9rem); font-weight: 700; color: rgba(0,201,167,.08); position: absolute; right: var(--slide-padding); bottom: clamp(1rem,4vh,3rem); line-height: 1; pointer-events: none; user-select: none; }
+@media (max-height:700px) { :root { --slide-padding: clamp(0.75rem,3vw,2rem); --content-gap: clamp(0.35rem,1.5vw,0.85rem); --title-size: clamp(1.25rem,4.5vw,2.5rem); --h2-size: clamp(1rem,3vw,1.75rem); } }
+@media (max-height:600px) { :root { --slide-padding: clamp(0.5rem,2.5vw,1.2rem); --content-gap: clamp(0.25rem,1vw,0.6rem); --title-size: clamp(1.1rem,4vw,1.8rem); --body-size: clamp(0.65rem,1.2vw,0.88rem); } #nav-dots, #kbd-hint, .section-num { display: none; } }
+@media (max-height:500px) { :root { --slide-padding: clamp(0.4rem,2vw,0.9rem); --title-size: clamp(1rem,3.5vw,1.4rem); --h2-size: clamp(0.9rem,2.5vw,1.2rem); --body-size: clamp(0.62rem,1vw,0.8rem); } }
+@media (max-width:600px) { :root { --title-size: clamp(1.25rem,7vw,2.2rem); } .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } html { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+<div id="kbd-hint"><span class="kbd">↑↓</span><span class="kbd">← →</span><span style="margin-left:4px">navegar</span></div>
+
+<main>
+
+<!-- SLIDE 1 — PORTADA -->
+<section class="slide bg-gradient grid-overlay" id="slide-1">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.12"></div>
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--green-ok);bottom:-100px;left:-50px;opacity:.07"></div>
+  <div class="slide-content" style="justify-content:center;">
+    <div style="max-width:min(90vw,820px);">
+      <div class="reveal" style="margin-bottom:var(--content-gap);"><span class="tag tag-teal">ENF3013 · Unidad VI</span></div>
+      <h1 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Digestivo, AINEs<br><span style="color:var(--teal);">y Vacunas</span></h1>
+      <p class="reveal reveal-delay-2" style="color:var(--text-muted);max-width:600px;margin-bottom:var(--content-gap);">Gastroprotección · H. pylori · AINEs/COX · Corticoides · Anestésicos locales · Vacunas e inmunomoduladores</p>
+      <div class="reveal reveal-delay-3" style="display:flex;gap:clamp(12px,2vw,24px);flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:var(--small-size);color:var(--text-muted);">Sesiones</span>
+          <span style="font-weight:700;color:var(--teal);">farm-sgastro · farm-saines · farm-svacunas</span>
+        </div>
+        <div style="width:1px;height:32px;background:var(--border);"></div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:var(--small-size);color:var(--text-muted);">Docente</span>
+          <span style="font-weight:700;">Rodrigo Pincheira G.</span>
+        </div>
+        <div style="width:1px;height:32px;background:var(--border);"></div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:var(--small-size);color:var(--text-muted);">Carrera</span>
+          <span style="font-weight:700;">Enfermería · UDP 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">1</div>
+</section>
+
+<!-- SLIDE 2 — IBP: Inhibidores de la Bomba de Protones -->
+<section class="slide bg-gradient grid-overlay" id="slide-2">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">IBP — Inhibidores de la Bomba de Protones</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MECANISMO DE ACCIÓN</p>
+        <ul class="bullet-list">
+          <li>Inhiben irreversiblemente la <strong>H⁺/K⁺-ATPasa</strong> (bomba de protones) en célula parietal</li>
+          <li>Reducen hasta 90–95% la secreción ácida basal y estimulada</li>
+          <li>Son profármacos: se activan en canalículo secretor (pH ácido)</li>
+          <li>Efecto dura 24–48 h aunque t½ plasmática sea 1–2 h</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">FÁRMACOS Y ADMINISTRACIÓN</p>
+        <table class="clinical-table">
+          <thead><tr><th>Fármaco</th><th>Dosis habitual</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Omeprazol</strong></td><td>20–40 mg/día</td></tr>
+            <tr><td><strong>Pantoprazol</strong></td><td>40 mg/día</td></tr>
+            <tr><td><strong>Esomeprazol</strong></td><td>20–40 mg/día</td></tr>
+            <tr><td><strong>Lansoprazol</strong></td><td>15–30 mg/día</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mech-box reveal reveal-delay-4">
+      <p class="mech-title">Rol enfermería</p>
+      <p>Administrar 30 min <strong>antes del desayuno</strong> (activan cuando la bomba se reactiva con la comida). No triturar cápsulas entéricas. Uso prolongado: riesgo de hipomagnesemia, déficit B12 y fracturas.</p>
+    </div>
+  </div>
+  <div class="section-num">2</div>
+</section>
+
+<!-- SLIDE 3 — H. pylori: Diagnóstico y Erradicación -->
+<section class="slide bg-gradient grid-overlay" id="slide-3">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--cyan);bottom:-150px;right:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);"><em>Helicobacter pylori</em> — Erradicación</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">TERAPIA TRIPLE (14 días)</p>
+        <ul class="bullet-list">
+          <li><strong>IBP</strong> (omeprazol 20 mg) + <strong>Amoxicilina</strong> 1 g + <strong>Claritromicina</strong> 500 mg — 2 veces al día</li>
+          <li>Si alergia a penicilina: IBP + Claritromicina + Metronidazol</li>
+          <li>Confirmar erradicación con test de urea (4 semanas post-tratamiento)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">TERAPIA CUÁDRUPLE (rescate)</p>
+        <ul class="bullet-list">
+          <li>IBP + Bismuto + Metronidazol + Tetraciclina × 10–14 días</li>
+          <li>Se usa cuando falla la terapia triple (resistencia a claritromicina)</li>
+          <li>Bismuto: protector mucosa, no se absorbe sistémicamente</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-4">
+      <span class="warn-icon">⚠</span>
+      <div>
+        <strong style="color:var(--red-warn);">Adherencia crítica:</strong> suspender el tratamiento antes de tiempo genera resistencia. Educar al paciente: completar los 14 días aunque los síntomas mejoren. Metronidazol: evitar alcohol (efecto disulfiram-like).
+      </div>
+    </div>
+  </div>
+  <div class="section-num">3</div>
+</section>
+
+<!-- SLIDE 4 — Antiácidos, Procinéticos y Protectores de Mucosa -->
+<section class="slide bg-gradient grid-overlay" id="slide-4">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--green-ok);top:-100px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Antiácidos · Procinéticos · Protectores de Mucosa</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <thead>
+        <tr><th>Fármaco</th><th>Mecanismo</th><th>Uso clínico</th><th>Precaución</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Hidróxido Al/Mg</strong></td>
+          <td>Neutralizan HCl gástrico</td>
+          <td>Pirosis, dispepsia leve</td>
+          <td>Al → constipación; Mg → diarrea</td>
+        </tr>
+        <tr>
+          <td><strong>Metoclopramida</strong></td>
+          <td>Anti-D2: ↑ motilidad gástrica</td>
+          <td>Náuseas, reflujo, ERGE</td>
+          <td>Riesgo síntomas extrapiramidales</td>
+        </tr>
+        <tr>
+          <td><strong>Domperidona</strong></td>
+          <td>Anti-D2 periférico</td>
+          <td>Náuseas, gastroparesia</td>
+          <td>Prolongación QT (precaución cardíaco)</td>
+        </tr>
+        <tr>
+          <td><strong>Dimenhidrinato</strong></td>
+          <td>Anti-H1 central</td>
+          <td>Cinetosis, vértigo, náuseas</td>
+          <td>Sedación, efectos anticolinérgicos</td>
+        </tr>
+        <tr>
+          <td><strong>Sucralfato</strong></td>
+          <td>Protege mucosa úlcera</td>
+          <td>Úlcera gástrica/duodenal</td>
+          <td>Administrar con estómago vacío; ↓ absorción de otros fármacos</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="mech-box reveal reveal-delay-3">
+      <p class="mech-title">Punto clave enfermería</p>
+      <p>Metoclopramida y domperidona: observar signos extrapiramidales (distonía, inquietud). Riesgo mayor en jóvenes y adultos mayores. Comunicar inmediatamente si aparecen movimientos involuntarios.</p>
+    </div>
+  </div>
+  <div class="section-num">4</div>
+</section>
+
+<!-- SLIDE 5 — AINEs: Mecanismo y Clasificación -->
+<section class="slide bg-gradient grid-overlay" id="slide-5">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--amber);top:-200px;left:-100px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">AINEs — Mecanismo COX y Clasificación</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">VÍA COX (Ciclooxigenasa)</p>
+        <ul class="bullet-list">
+          <li><strong>COX-1</strong> (constitutiva): protección gástrica (prostaglandinas), agregación plaquetaria (TXA₂), función renal</li>
+          <li><strong>COX-2</strong> (inducible): inflamación, dolor, fiebre — mediada por citoquinas</li>
+          <li>AINEs clásicos inhiben <strong>ambas</strong> COX → efecto terapéutico + toxicidad GI/renal</li>
+          <li>Coxibs (celecoxib) inhiben solo <strong>COX-2</strong> → menor toxicidad GI, pero ↑ riesgo CV</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">EFECTOS FARMACOLÓGICOS</p>
+        <ul class="bullet-list">
+          <li><strong>Analgésico:</strong> dolor leve-moderado (periférico y central)</li>
+          <li><strong>Antipirético:</strong> resetea el termostato hipotalámico</li>
+          <li><strong>Antiinflamatorio:</strong> ↓ prostaglandinas en tejido inflamado</li>
+          <li><strong>Antiagregante</strong> (AAS dosis baja): inhibe TXA₂ irreversiblemente</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-4">
+      <span class="warn-icon">⚠</span>
+      <div>
+        <strong style="color:var(--red-warn);">Contraindicaciones clave:</strong> úlcera péptica activa, insuficiencia renal/hepática grave, embarazo 3er trimestre (cierre prematuro ductus), falla cardíaca descompensada. Siempre administrar con alimentos o IBP profiláctico.
+      </div>
+    </div>
+  </div>
+  <div class="section-num">5</div>
+</section>
+
+<!-- SLIDE 6 — AINEs: Tabla comparativa -->
+<section class="slide bg-gradient grid-overlay" id="slide-6">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--red-warn);bottom:-120px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">AINEs — Comparativa Clínica</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <thead>
+        <tr><th>Fármaco</th><th>Selectividad</th><th>Vía / Dosis</th><th>Indicación principal</th><th>RAM destacada</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Ibuprofeno</strong></td>
+          <td>COX-1 y COX-2</td>
+          <td>VO 400–800 mg c/8h</td>
+          <td>Dolor, fiebre, dismenorrea</td>
+          <td>Gastrolesividad, retención Na⁺</td>
+        </tr>
+        <tr>
+          <td><strong>Naproxeno</strong></td>
+          <td>COX-1 y COX-2</td>
+          <td>VO 250–500 mg c/12h</td>
+          <td>Artritis, gota, dolor crónico</td>
+          <td>Gastropatía, edema</td>
+        </tr>
+        <tr>
+          <td><strong>Ketorolaco</strong></td>
+          <td>COX-1 y COX-2</td>
+          <td>IV/IM 15–30 mg c/6–8h (máx. 5 días)</td>
+          <td>Dolor postoperatorio agudo</td>
+          <td>Nefrotoxicidad, sangrado GI</td>
+        </tr>
+        <tr>
+          <td><strong>AAS (dosis alta)</strong></td>
+          <td>COX-1 y COX-2</td>
+          <td>VO 500–1000 mg c/6h</td>
+          <td>Fiebre, dolor, inflamación</td>
+          <td>Síndrome Reye (niños), ototoxicidad</td>
+        </tr>
+        <tr>
+          <td><strong>Celecoxib</strong></td>
+          <td><span style="color:var(--teal);">COX-2 selectivo</span></td>
+          <td>VO 100–200 mg c/12–24h</td>
+          <td>Artritis, dolor crónico (riesgo GI alto)</td>
+          <td>↑ riesgo cardiovascular</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="mech-box reveal reveal-delay-3">
+      <p class="mech-title">Ketorolaco parenteral</p>
+      <p>Potente analgésico postoperatorio. Máximo 5 días (acumulación nefrotóxica). Monitorear diuresis y creatinina. No usar en pacientes con VFG &lt; 30 mL/min.</p>
+    </div>
+  </div>
+  <div class="section-num">6</div>
+</section>
+
+<!-- SLIDE 7 — Paracetamol -->
+<section class="slide bg-gradient grid-overlay" id="slide-7">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--cyan);top:-150px;right:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Paracetamol (Acetaminofén)</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">PERFIL FARMACOLÓGICO</p>
+        <ul class="bullet-list">
+          <li>Mecanismo: inhibición central de COX-3 (?), modulación endocannabinoide — debate vigente</li>
+          <li><strong>Analgésico y antipirético</strong> — sin efecto antiinflamatorio periférico significativo</li>
+          <li>Sin efecto antiagregante plaquetario</li>
+          <li>Seguro en: embarazo, niños, adultos mayores, úlcera péptica</li>
+          <li>Dosis: 500–1000 mg c/6–8h · Máx. <strong>4 g/día</strong> (adulto sano)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--red-warn);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">HEPATOTOXICIDAD — EMERGENCIA</p>
+        <ul class="bullet-list">
+          <li>Metabolito tóxico <strong>NAPQI</strong> se acumula al agotar reservas de glutatión</li>
+          <li>Riesgo: dosis &gt; 10 g en adultos; &gt; 150 mg/kg en niños</li>
+          <li>Factores de riesgo: alcohol crónico, ayuno prolongado, hepatopatía</li>
+          <li><strong>Antídoto:</strong> N-acetilcisteína (NAC) IV — eficaz en primeras 8–10 h</li>
+          <li>Nomograma de Rumack-Matthew para indicar NAC</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-4">
+      <span class="warn-icon">⚠</span>
+      <div>
+        <strong style="color:var(--red-warn);">Precaución:</strong> múltiples productos OTC contienen paracetamol oculto (antigripales, combinaciones). El paciente puede superar la dosis máxima sin saberlo. Educar activamente sobre la dosis total diaria.
+      </div>
+    </div>
+  </div>
+  <div class="section-num">7</div>
+</section>
+
+<!-- SLIDE 8 — Corticoides: Mecanismo y Clasificación -->
+<section class="slide bg-gradient grid-overlay" id="slide-8">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--amber);bottom:-150px;left:-100px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Corticoides — Mecanismo y Clasificación</h2>
+    <div class="card reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MECANISMO</p>
+      <p>Actúan sobre receptores nucleares intracelulares → inhiben NF-κB → ↓ síntesis de citoquinas proinflamatorias (IL-1, IL-6, TNF-α), fosfolipasa A2 → ↓↓ prostaglandinas y leucotrienos. Efecto inmunosupresor y antiinflamatorio potente.</p>
+    </div>
+    <table class="clinical-table reveal reveal-delay-3" style="margin-bottom:var(--content-gap);">
+      <thead>
+        <tr><th>Fármaco</th><th>Potencia relativa</th><th>Efecto mineralocorticoide</th><th>t½ biológica</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Hidrocortisona</strong></td><td>1× (referencia)</td><td>+++</td><td>8–12 h</td></tr>
+        <tr><td><strong>Prednisona</strong></td><td>4×</td><td>+</td><td>18–36 h</td></tr>
+        <tr><td><strong>Metilprednisolona</strong></td><td>5×</td><td>mínimo</td><td>18–36 h</td></tr>
+        <tr><td><strong>Dexametasona</strong></td><td>25×</td><td>ninguno</td><td>36–54 h</td></tr>
+        <tr><td><strong>Betametasona</strong></td><td>25×</td><td>ninguno</td><td>36–54 h</td></tr>
+      </tbody>
+    </table>
+    <div class="mech-box reveal reveal-delay-4">
+      <p class="mech-title">Usos críticos en enfermería</p>
+      <p>Dexametasona en anafilaxia/edema cerebral; hidrocortisona en shock séptico/insuficiencia suprarrenal; betametasona prenatal para maduración pulmonar fetal (32–34 sem); metilprednisolona en crisis asmática y exacerbaciones de EPOC.</p>
+    </div>
+  </div>
+  <div class="section-num">8</div>
+</section>
+
+<!-- SLIDE 9 — Corticoides: Efectos Adversos y Tapering -->
+<section class="slide bg-gradient grid-overlay" id="slide-9">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--teal);top:-100px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Corticoides — Efectos Adversos y Tapering</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--red-warn);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">RAM POR USO PROLONGADO</p>
+        <ul class="bullet-list">
+          <li>Síndrome de Cushing iatrogénico: cara de luna, joroba de búfalo, estrías</li>
+          <li>Hiperglucemia → diabetes corticoidea</li>
+          <li>Hipertensión arterial (retención Na⁺/H₂O)</li>
+          <li>Osteoporosis (↓ absorción Ca²⁺, ↑ resorción ósea)</li>
+          <li>Inmunosupresión → infecciones oportunistas (candida, TBC reactivada)</li>
+          <li>Úlcera péptica (combinada con AINEs: riesgo muy alto)</li>
+          <li>Miopatía proximal, cataratas, glaucoma</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">TAPERING (REDUCCIÓN GRADUAL)</p>
+        <ul class="bullet-list">
+          <li>Uso &gt; 3 semanas suprime el eje HHA (hipotálamo-hipófisis-adrenal)</li>
+          <li>Suspensión brusca → <strong>crisis adrenal</strong>: hipotensión, hipoglucemia, vómitos</li>
+          <li>Reducir 10–25% cada 1–2 semanas según respuesta clínica</li>
+          <li>Administrar preferentemente en la <strong>mañana</strong> (mimetiza pico cortisol fisiológico)</li>
+        </ul>
+        <div class="mech-box" style="margin-top:8px;">
+          <p class="mech-title">Monitoreo enfermería</p>
+          <p>Glucemia, PA, peso, signos infección. Suplementar Ca²⁺ y vitamina D profilácticamente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">9</div>
+</section>
+
+<!-- SLIDE 10 — Anestésicos Locales -->
+<section class="slide bg-gradient grid-overlay" id="slide-10">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--cyan);bottom:-150px;left:-100px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Anestésicos Locales</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MECANISMO</p>
+        <ul class="bullet-list">
+          <li>Bloquean canales de Na⁺ voltaje-dependientes → impiden potencial de acción neuronal</li>
+          <li>Actúan solo sobre fibras nerviosas activas (estado abierto del canal)</li>
+          <li>Orden de bloqueo: fibras C (dolor) → B (autonómicas) → Aδ → Aβ → Aα (motoras)</li>
+          <li>pH ácido (inflamación) → ↓ fracción no ionizada → menor penetración → menor efecto</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">FÁRMACOS PRINCIPALES</p>
+        <table class="clinical-table">
+          <thead><tr><th>Fármaco</th><th>Inicio</th><th>Duración</th><th>Uso</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Lidocaína</strong></td><td>Rápido (2–5 min)</td><td>1–2 h</td><td>Procedimientos cortos, dental, sutura</td></tr>
+            <tr><td><strong>Bupivacaína</strong></td><td>Lento (10–20 min)</td><td>4–8 h</td><td>Anestesia epidural, bloqueos largos</td></tr>
+            <tr><td><strong>Ropivacaína</strong></td><td>Moderado</td><td>4–6 h</td><td>Epidural, menor cardiotoxicidad que bupivacaína</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-4">
+      <span class="warn-icon">⚠</span>
+      <div>
+        <strong style="color:var(--red-warn);">Toxicidad sistémica:</strong> por inyección IV inadvertida o sobredosis. SNC: acúfenos, sabor metálico, convulsiones. Cardiovascular: arritmias, colapso (bupivacaína especialmente peligrosa). Antídoto: emulsión lipídica IV 20% (Intralipid).
+      </div>
+    </div>
+  </div>
+  <div class="section-num">10</div>
+</section>
+
+<!-- SLIDE 11 — Vacunas: Tipos y Mecanismo -->
+<section class="slide bg-gradient grid-overlay" id="slide-11">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--green-ok);top:-100px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Vacunas — Tipos e Inmunidad</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <thead>
+        <tr><th>Tipo</th><th>Ejemplo</th><th>Inmunidad</th><th>Consideraciones</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Viva atenuada</strong></td>
+          <td>SRP, varicela, fiebre amarilla, BCG</td>
+          <td>Duradera, 1 dosis (generalmente)</td>
+          <td>Contraindicada en inmunocomprometidos; cadena de frío estricta</td>
+        </tr>
+        <tr>
+          <td><strong>Inactivada</strong></td>
+          <td>Influenza inyectable, hepatitis A, polio IPV</td>
+          <td>Requiere refuerzo</td>
+          <td>Segura en inmunodeprimidos; puede producir fiebre leve</td>
+        </tr>
+        <tr>
+          <td><strong>Subunitaria/recombinante</strong></td>
+          <td>HBV, HPV, pertussis acelular</td>
+          <td>Requiere adyuvante + refuerzo</td>
+          <td>Alta seguridad; necesita adyuvante (Al) para potenciar respuesta</td>
+        </tr>
+        <tr>
+          <td><strong>Toxoide</strong></td>
+          <td>Difteria, tétanos (DTP/dTpa)</td>
+          <td>Requiere serie + refuerzo c/10 años</td>
+          <td>Dolor local frecuente; nódulo si inyección subcutánea</td>
+        </tr>
+        <tr>
+          <td><strong>ARNm</strong></td>
+          <td>COVID-19 (Pfizer, Moderna)</td>
+          <td>Buena; requiere refuerzos</td>
+          <td>Cadena de frío ultrafría; miocarditis (rara) en jóvenes varones</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="mech-box reveal reveal-delay-3">
+      <p class="mech-title">Rol enfermería en vacunación</p>
+      <p>Verificar cadena de frío, lote y fecha de vencimiento. Técnica IM correcta (deltoides, ángulo 90°). Observar 15–30 min post-vacunación (anafilaxia). Registrar en carnet y sistema de vacunación.</p>
+    </div>
+  </div>
+  <div class="section-num">11</div>
+</section>
+
+<!-- SLIDE 12 — RESUMEN -->
+<section class="slide bg-gradient grid-overlay" id="slide-12">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);bottom:-200px;left:-100px;opacity:.1"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Puntos Críticos — Enfermería Digestivo/AINEs/Vacunas</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">DIGESTIVO Y AINEs</p>
+        <ul class="bullet-list">
+          <li>IBP: 30 min antes del desayuno; no triturar cápsulas</li>
+          <li>H. pylori: completar los 14 días aunque mejoren síntomas</li>
+          <li>AINEs: siempre con alimentos; no en IRC, úlcera, 3er trimestre</li>
+          <li>Ketorolaco IV: máximo 5 días — vigilar función renal</li>
+          <li>Paracetamol: máx. 4 g/día; antídoto NAC en sobredosis</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">CORTICOIDES Y VACUNAS</p>
+        <ul class="bullet-list">
+          <li>Corticoides: no suspender bruscamente (tapering); administrar en mañana</li>
+          <li>Monitorear glucemia, PA, peso y signos de infección</li>
+          <li>Anestésicos locales: antídoto emulsión lipídica 20% (Intralipid) en toxicidad</li>
+          <li>Vacunas vivas: contraindicadas en inmunocomprometidos</li>
+          <li>Observar 15–30 min post-vacunación: anafilaxia</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mech-box reveal reveal-delay-4">
+      <p class="mech-title">Mensaje final</p>
+      <p>La farmacología digestiva y antiinflamatoria es la más usada en la práctica diaria. Un enfermero/a que conoce COX, IBP y el tapering de corticoides evita eventos adversos evitables. La vacunación segura depende tanto de la técnica como del conocimiento inmunológico.</p>
+    </div>
+    <div class="reveal reveal-delay-5" style="margin-top:var(--content-gap); display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+      <span class="tag tag-teal">ENF3013</span>
+      <span class="tag tag-cyan">UDP 2026</span>
+      <span class="tag" style="background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.15);">Consulta Rápida ENF</span>
+    </div>
+  </div>
+  <div class="section-num">12</div>
+</section>
+
+</main>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const navDotsContainer = document.getElementById('nav-dots');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('slide-counter');
+let current = 0;
+let scrolling = false;
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', `Ir a diapositiva ${i + 1}`);
+  dot.addEventListener('click', () => goTo(i));
+  navDotsContainer.appendChild(dot);
+});
+function updateUI(idx) {
+  current = idx;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  progress.style.width = ((idx + 1) / slides.length * 100) + '%';
+  counter.textContent = `${idx + 1} / ${slides.length}`;
+}
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateUI(idx);
+}
+function goNext() { if (current < slides.length - 1) goTo(current + 1); }
+function goPrev() { if (current > 0) goTo(current - 1); }
+document.addEventListener('keydown', (e) => {
+  if (['ArrowDown','ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); goNext(); }
+  else if (['ArrowUp','ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); goPrev(); }
+  else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+document.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (scrolling) return;
+  scrolling = true;
+  if (e.deltaY > 30) goNext();
+  else if (e.deltaY < -30) goPrev();
+  setTimeout(() => { scrolling = false; }, 700);
+}, { passive: false });
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (dy > 50) goNext();
+  else if (dy < -50) goPrev();
+});
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      const idx = slides.indexOf(entry.target);
+      if (idx !== -1) updateUI(idx);
+    }
+  });
+}, { threshold: 0.6 });
+slides.forEach(s => revealObserver.observe(s));
+updateUI(0);
+slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>

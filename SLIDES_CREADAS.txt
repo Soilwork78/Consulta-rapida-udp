@@ -1,0 +1,119 @@
+=== SLIDES CREADAS - CONSULTA RAPIDA ENFERMERIA UDP v1 ===
+Fecha: 8 Abril 2026
+Sistema de Diseño: Ultra Dinámico (Dark Mode, Glassmorphism, Scroll-Snap)
+
+ARCHIVO 1: cuid2-u9-balance-slides.html
+- Tema: Balance Hídrico (Generalidades)
+- Docente: E.U. Paula Ortiz
+- Asignatura: ENF3015 - UDP 2025
+- Total de slides: 14
+- Color Accent: #06b6d4 (CYAN)
+- Contenido:
+  * S1: Cover
+  * S2: Definición
+  * S3: Grupos de riesgo
+  * S4: Tipos de balance (neutro/positivo/negativo)
+  * S5: Ingresos de agua
+  * S6: Pérdidas sensibles
+  * S7: Pérdidas insensibles
+  * S8: Fiebre - cálculo
+  * S9: Taquipnea - cálculo
+  * S10: Sudoración
+  * S11: Cálculo del BH
+  * S12: Exploración física
+  * S13: Monitorización avanzada
+  * S14: Proceso de enfermería (NANDA/NIC/NOC)
+
+ARCHIVO 2: cuid2-u10-inhalatoria-slides.html
+- Tema: Administración de Medicamentos Vía Inhalatoria y Aspiración de Secreciones
+- Asignatura: ENF3015 - UDP 2025
+- Total de slides: 12
+- Color Accent: #818cf8 (INDIGO)
+- Contenido:
+  * S1: Cover
+  * S2: Ventajas vía inhalatoria
+  * S3: Dispositivos inhalatorios
+  * S4: Técnica MDI (pMDI)
+  * S5: Cámara espaciadora
+  * S6: Nebulización
+  * S7: Medicamentos inhalatorios frecuentes
+  * S8: Aspiración de secreciones - indicaciones
+  * S9: Equipo para aspiración
+  * S10: Técnica de aspiración
+  * S11: Complicaciones de aspiración
+  * S12: Cuidados de traqueostomía
+
+ARCHIVO 3: cuid2-u12-visita-slides.html
+- Tema: Visita de Enfermería
+- Asignatura: ENF3015 - UDP 2025
+- Total de slides: 13
+- Color Accent: #4ade80 (GREEN)
+- Contenido:
+  * S1: Cover
+  * S2: Definición
+  * S3: Objetivos
+  * S4: Estructura de la visita
+  * S5: Entrevista clínica
+  * S6: Valoración subjetiva
+  * S7: Valoración objetiva
+  * S8: Comunicación terapéutica
+  * S9: Barreras en la comunicación
+  * S10: Familia en la visita
+  * S11: Registro de la visita (SOAP)
+  * S12: Seguridad del paciente
+  * S13: Cierre
+
+=== CARACTERÍSTICAS COMUNES A TODOS LOS ARCHIVOS ===
+
+DISEÑO SISTEMA:
+- Dark background: #0b1520
+- Card background: #16263a
+- HTML scroll-snap-type: y mandatory
+- Scroll behavior: smooth
+- Font: Google Manrope
+- Viewport height: 100vh (100dvh para mobile)
+
+ANIMACIONES INCLUIDAS:
+- @keyframes float (translateY -10px)
+- @keyframes pulse-ring (scale 0.8->2)
+- @keyframes slideInLeft/Right
+- @keyframes fadeInUp
+- @keyframes particle-drift
+- IntersectionObserver para scroll reveal
+
+ELEMENTOS INTERACTIVOS:
+- 15 partículas flotantes animadas
+- Nav dots (fijos lado derecho)
+- Progress bar (3px top)
+- Scroll snap en cada slide
+- Keyboard navigation (ArrowUp/Down, Space)
+- Touch swipe support
+- Mouse wheel prevention + navegación
+
+GLASSMORPHISM:
+- Background: rgba(22, 38, 58, 0.7-0.8)
+- Backdrop-filter: blur(10px)
+- Border: 1px solid color accent con 0.2 opacity
+- Border-radius: 12-16px
+
+RESPONSIVE DESIGN:
+- Mobile: Grid collapses to 1 column
+- Tablet: Adaptable
+- Desktop: Full layout
+
+=== CÓMO USAR ===
+
+Cada archivo es completamente independiente y auto-contenido:
+- Abrir en navegador web moderno
+- Scroll/flecha arriba-abajo para navegar
+- Click en dots laterales para saltar
+- Todas las animaciones son CSS puro
+- Compatible con mobile
+
+=== REQUISITOS ===
+- Navegador moderno con soporte para:
+  * CSS Grid y Flexbox
+  * CSS Animations y Transforms
+  * IntersectionObserver API
+  * ES6 JavaScript
+

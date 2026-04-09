@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fisiopatología Endocrina y Metabólica — ENF3013 UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+.slide { width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; scroll-snap-align: start; display: flex; flex-direction: column; position: relative; }
+.slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; max-height: 100%; overflow: hidden; padding: var(--slide-padding); }
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+  --bg-dark: #0b1520; --bg-mid: #111e2e; --bg-card: #16263a;
+  --teal: #00c9a7; --teal-dim: #00917a; --cyan: #38bdf8;
+  --amber: #fbbf24; --red-warn: #f87171; --green-ok: #4ade80;
+  --text-main: #e8f1fb; --text-muted: #7a9ab8;
+  --border: rgba(0,201,167,0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-main); background: var(--bg-dark); color: var(--text-main); font-size: var(--body-size); }
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+.bg-gradient { background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%); }
+.grid-overlay::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+.glow-circle { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; opacity: .3; }
+#nav-dots { position: fixed; right: clamp(12px,2vw,28px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.2); cursor: pointer; transition: all .25s; border: none; }
+.dot.active { background: var(--teal); width: 7px; height: 14px; border-radius: 4px; }
+.dot:hover { background: var(--cyan); }
+#progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--teal), var(--cyan)); transition: width .3s ease; z-index: 200; }
+#slide-counter { position: fixed; bottom: clamp(12px,2vh,24px); right: clamp(16px,2.5vw,32px); font-family: var(--font-mono); font-size: var(--small-size); color: var(--text-muted); z-index: 100; }
+#kbd-hint { position: fixed; bottom: clamp(12px,2vh,24px); left: clamp(16px,2.5vw,32px); font-size: var(--small-size); color: var(--text-muted); z-index: 100; display: flex; gap: 8px; align-items: center; }
+.kbd { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: .75em; }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .55s ease, transform .55s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; } .reveal-delay-2 { transition-delay: .2s; } .reveal-delay-3 { transition-delay: .3s; } .reveal-delay-4 { transition-delay: .4s; } .reveal-delay-5 { transition-delay: .5s; } .reveal-delay-6 { transition-delay: .6s; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: var(--small-size); font-weight: 600; letter-spacing: .5px; }
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: clamp(8px,1.5vw,16px); padding: clamp(0.75rem,2vw,1.5rem); }
+.card-grid { display: grid; gap: clamp(0.5rem,1.5vw,1rem); }
+.card-grid-2 { grid-template-columns: repeat(2,1fr); }
+.card-grid-3 { grid-template-columns: repeat(3,1fr); }
+.accent-line { width: clamp(40px,6vw,80px); height: 3px; background: linear-gradient(90deg, var(--teal), var(--cyan)); border-radius: 2px; margin-bottom: var(--content-gap); }
+.clinical-table { width: 100%; border-collapse: collapse; font-size: var(--small-size); }
+.clinical-table th { background: rgba(0,201,167,.12); color: var(--teal); padding: clamp(4px,1vw,10px) clamp(6px,1.5vw,14px); text-align: left; font-weight: 700; border-bottom: 1px solid var(--border); font-size: var(--small-size); }
+.clinical-table td { padding: clamp(4px,1vw,9px) clamp(6px,1.5vw,14px); border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; line-height: 1.45; }
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+.bullet-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.35rem,1vh,0.7rem); }
+.bullet-list li { display: flex; align-items: flex-start; gap: 10px; }
+.bullet-list li::before { content: '▸'; color: var(--teal); flex-shrink: 0; margin-top: .1em; }
+.mech-box { border-left: 3px solid var(--teal); padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); background: rgba(0,201,167,.06); border-radius: 0 8px 8px 0; }
+.mech-box .mech-title { font-size: var(--small-size); font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.warn-band { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 8px; padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); display: flex; align-items: flex-start; gap: 10px; }
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+.section-num { font-family: var(--font-mono); font-size: clamp(3rem,12vw,9rem); font-weight: 700; color: rgba(0,201,167,.08); position: absolute; right: var(--slide-padding); bottom: clamp(1rem,4vh,3rem); line-height: 1; pointer-events: none; user-select: none; }
+@media (max-height:700px) { :root { --slide-padding: clamp(0.75rem,3vw,2rem); --content-gap: clamp(0.35rem,1.5vw,0.85rem); --title-size: clamp(1.25rem,4.5vw,2.5rem); --h2-size: clamp(1rem,3vw,1.75rem); } }
+@media (max-height:600px) { :root { --slide-padding: clamp(0.5rem,2.5vw,1.2rem); --content-gap: clamp(0.25rem,1vw,0.6rem); --title-size: clamp(1.1rem,4vw,1.8rem); --body-size: clamp(0.65rem,1.2vw,0.88rem); } #nav-dots, #kbd-hint, .section-num { display: none; } }
+@media (max-height:500px) { :root { --slide-padding: clamp(0.4rem,2vw,0.9rem); --title-size: clamp(1rem,3.5vw,1.4rem); --h2-size: clamp(0.9rem,2.5vw,1.2rem); --body-size: clamp(0.62rem,1vw,0.8rem); } }
+@media (max-width:600px) { :root { --title-size: clamp(1.25rem,7vw,2.2rem); } .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } html { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+<div id="kbd-hint"><span class="kbd">↑↓</span><span class="kbd">← →</span><span style="margin-left:4px">navegar</span></div>
+
+<main>
+
+<!-- SLIDE 1 — PORTADA -->
+<section class="slide bg-gradient grid-overlay" id="slide-1">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.12"></div>
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--green-ok);bottom:-100px;left:-50px;opacity:.07"></div>
+  <div class="slide-content" style="justify-content:center;">
+    <div style="max-width:min(90vw,820px);">
+      <div class="reveal" style="margin-bottom:var(--content-gap);"><span class="tag tag-teal">Fisiopatología 2° Año Enfermería · UDP</span></div>
+      <h1 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Fisiopatología Endocrina<br><span style="color:var(--teal);">y Metabólica</span></h1>
+      <p class="reveal reveal-delay-2" style="color:var(--text-muted);max-width:600px;margin-bottom:var(--content-gap);">Unidad 4 · Obesidad Visceral · Metainflamación · DM1 · DM2 · Complicaciones · Tiroides</p>
+      <div class="reveal reveal-delay-3" style="display:flex;gap:clamp(12px,2vw,24px);flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:var(--small-size);color:var(--text-muted);">Sesiones</span>
+          <span style="font-weight:700;color:var(--teal);">2 sesiones</span>
+        </div>
+        <div style="width:1px;height:32px;background:var(--border);"></div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:var(--small-size);color:var(--text-muted);">Diapositivas</span>
+          <span style="font-weight:700;color:var(--teal);">12 slides</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">1</div>
+</section>
+
+<!-- SLIDE 2 — Tejido Adiposo Visceral -->
+<section class="slide bg-gradient grid-overlay" id="slide-2">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Tejido Adiposo Visceral y Metainflamación</h2>
+    <div class="mech-box reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <p class="mech-title">Mecanismo patogénico</p>
+      <p>Sobrecarga calórica → adipocitos viscerales hipertrofiados → disfunción → ↑AGL → ↑citocinas proinflamatorias (TNF-α, IL-6, resistina) + ↓adiponectina → resistencia insulínica sistémica</p>
+    </div>
+    <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">ADIPOKINAS PROINFLAMATORIAS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>TNF-α: bloquea señal receptor insulina</li>
+          <li>IL-6: proteína C-reactiva hepática ↑</li>
+          <li>Leptina: saciedad alterada, resistencia en obesidad</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">ADIPOKINAS PROTECTORAS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Adiponectina ↓ en obesidad</li>
+          <li>↓ efecto antiinflamatorio</li>
+          <li>↓ sensibilización insulínica</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-5">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">METAINFLAMACIÓN</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Inflamación crónica bajo grado</li>
+          <li>Macrófagos M1 infiltran TAV</li>
+          <li>Activación NF-κB perpetuada</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">2</div>
+</section>
+
+<!-- SLIDE 3 — Síndrome Metabólico -->
+<section class="slide bg-gradient grid-overlay" id="slide-3">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--cyan);bottom:-150px;right:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Síndrome Metabólico (NCEP-ATP III)</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);font-size:var(--small-size);">
+      <li><strong>≥3 de los siguientes criterios diagnósticos:</strong></li>
+      <li>Obesidad abdominal: CC >102 cm (H) / >88 cm (M)</li>
+      <li>Triglicéridos ≥150 mg/dL</li>
+      <li>HDL <40 mg/dL (H) / <50 mg/dL (M)</li>
+      <li>PA ≥130/85 mmHg (o en tratamiento)</li>
+      <li>Glucosa ayunas ≥100 mg/dL (o DM2 diagnosticada)</li>
+    </ul>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">FISIOPATOLOGÍA CENTRAL</p>
+        <p style="font-size:var(--small-size);">Resistencia insulínica → hiperinsulinemia compensadora → disfunción endotelial → ateromatosis acelerada + HTA + HGNA (hígado graso no alcohólico)</p>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">GLP-1 Y NUEVOS TRATAMIENTOS</p>
+        <p style="font-size:var(--small-size);">Incretina secretada por células L intestinales → ↑insulina glucosa-dependiente, ↓glucagón, ↓apetito, vaciamiento gástrico lento. Semaglutida/liraglutida: pérdida peso 10–15%</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">3</div>
+</section>
+
+<!-- SLIDE 4 — Obesidad y Complicaciones -->
+<section class="slide bg-gradient grid-overlay" id="slide-4">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--green-ok);top:-100px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Obesidad — Clasificación y Complicaciones</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <thead>
+        <tr><th>Categoría</th><th>IMC (kg/m²)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Bajo peso</td><td>&lt;18.5</td></tr>
+        <tr><td>Normal</td><td>18.5–24.9</td></tr>
+        <tr><td>Sobrepeso</td><td>25–29.9</td></tr>
+        <tr><td>Obesidad I</td><td>30–34.9</td></tr>
+        <tr><td>Obesidad II</td><td>35–39.9</td></tr>
+        <tr><td>Obesidad III (mórbida)</td><td>≥40</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">COMPLICACIONES METABÓLICAS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>DM2 (riesgo ×7)</li>
+          <li>Dislipidemia (↑TG, ↓HDL)</li>
+          <li>HGNA/NASH/cirrosis</li>
+          <li>SOP, hiperuricemia/gota</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">COMPLICACIONES MECÁNICAS/OTRAS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>SAOS (apnea del sueño)</li>
+          <li>Osteoartritis rodilla/cadera</li>
+          <li>Incontinencia urinaria, RGE</li>
+          <li>Mayor riesgo oncológico (mama, colon, endometrio), depresión</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">4</div>
+</section>
+
+<!-- SLIDE 5 — Diabetes Mellitus Tipo 1 -->
+<section class="slide bg-gradient grid-overlay" id="slide-5">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--amber);top:-200px;left:-100px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">DM1 — Fisiopatología Autoinmune</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);font-size:var(--small-size);">
+      <li><strong>Predisposición genética:</strong> HLA DR3/DR4, polimorfismo INS (insulina)</li>
+      <li><strong>Trigger ambiental:</strong> Enterovirus, gliadina, microbioma alterado</li>
+      <li><strong>Autoinmunidad:</strong> Linfocitos T CD8+ destruyen células β insulares → anticuerpos GAD65, IA2, IAA, ZnT8</li>
+      <li><strong>Pérdida masa β:</strong> >80% destruidas → insulinopenia absoluta → hiperglucemia + cetoacidosis</li>
+      <li><strong>Cetoacidosis diabética (CAD):</strong> Déficit insulina → ↑lipolisis → AGL → cetogénesis (acetoacetato, β-OH-butirato) → acidosis metabólica AG amplio</li>
+    </ul>
+  </div>
+  <div class="section-num">5</div>
+</section>
+
+<!-- SLIDE 6 — CAD: Diagnóstico y Tratamiento -->
+<section class="slide bg-gradient grid-overlay" id="slide-6">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--red-warn);bottom:-120px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Cetoacidosis Diabética — Diagnóstico y Tratamiento</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);font-size:var(--small-size);">
+      <thead>
+        <tr><th>Severidad</th><th>Glucosa</th><th>pH</th><th>HCO₃</th><th>Cetonas</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Leve</strong></td><td>>250</td><td>7.25–7.30</td><td>15–18</td><td>+</td></tr>
+        <tr><td><strong>Moderada</strong></td><td>>250</td><td>7.00–7.25</td><td>10–15</td><td>++</td></tr>
+        <tr><td><strong>Grave</strong></td><td>>250</td><td>&lt;7.00</td><td>&lt;10</td><td>+++</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">TRATAMIENTO CAD (PROTOCOLO)</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>1° Fluidos: NaCl 0.9% 1 L/h primera hora</li>
+          <li>2° Insulina: 0.1 U/kg/h regular IV</li>
+          <li>3° K+: si K>3.5 antes de insulina</li>
+          <li>4° Bicarbonato: solo si pH<6.9</li>
+          <li>Monitorizar K+ cada hora</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">ROL ENFERMERÍA CAD</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Control glucemia horaria, BH estricto</li>
+          <li>Na+ K+ seriados</li>
+          <li>Monitorización ECG (hipopotasemia)</li>
+          <li>Estado de consciencia</li>
+          <li>Resolver causa desencadenante</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">6</div>
+</section>
+
+<!-- SLIDE 7 — Diabetes Mellitus Tipo 2 -->
+<section class="slide bg-gradient grid-overlay" id="slide-7">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-200px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">DM2 — Fisiopatología Progresiva</h2>
+    <div class="mech-box reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <p class="mech-title">Ciclo patogénico</p>
+      <p>Resistencia insulínica (músculo/hígado/grasa) → hiperinsulinemia compensadora → agotamiento células β → deficiencia insulínica relativa → hiperglucemia crónica → toxicidad glucosa → acelera disfunción β</p>
+    </div>
+    <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">8 DEFECTOS DEFRONSO</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>↓ secreción insulina (β)</li>
+          <li>↑ glucagón (α)</li>
+          <li>RI muscular</li>
+          <li>RI hepática (gluconeogénesis↑)</li>
+          <li>↓ incretinas (GLP-1/GIP)</li>
+          <li>↑ reabsorción renal glucosa (SGLT2)</li>
+          <li>↑ lipolisis (adipocito)</li>
+          <li>Disfunción cerebral (apetito)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">DIAGNÓSTICO DM2</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Glucemia ayunas ≥126 mg/dL (×2)</li>
+          <li>PTGO 2h ≥200</li>
+          <li>HbA1c ≥6.5%</li>
+          <li>Glucemia aleatoria ≥200 + síntomas</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-5">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">METAS HBA1C</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>General: <7%</li>
+          <li>Ancianos frágiles: <8%</li>
+          <li>Con hipoglucemia: <8.5%</li>
+          <li>Embarazo: <6.5%</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">7</div>
+</section>
+
+<!-- SLIDE 8 — DM2: Complicaciones -->
+<section class="slide bg-gradient grid-overlay" id="slide-8">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--green-ok);bottom:-100px;right:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">DM2 — Complicaciones Micro y Macrovasculares</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MICROANGIOPATÍA</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li><strong>Retinopatía:</strong> 4 etapas; 1ª causa ceguera <75a en DM</li>
+          <li><strong>Nefropatía:</strong> microalbuminuria → macroalbuminuria → ERC (ADA 2025: IECA/ARA-II + finerenona + SGLT2i)</li>
+          <li><strong>Neuropatía:</strong> sensitiva distal, autonómica (ortostasis, gastroparesia), mononeuritis</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MACROANGIOPATÍA</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li><strong>Ateroesclerosis acelerada</strong> → IAM/ACV (riesgo ×2–4)</li>
+          <li><strong>Enfermedad arterial periférica</strong> → pie diabético</li>
+          <li><strong>Mecanismo:</strong> Glicación proteínas + estrés oxidativo + inflamación crónica</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-4">
+      <span class="warn-icon">⚠</span>
+      <div>
+        <strong style="color:var(--red-warn);">Pie diabético:</strong> neuropatía + isquemia + infección. Clasificación Wagner 0–5. Exploración podológica anual en todo diabético.
+      </div>
+    </div>
+  </div>
+  <div class="section-num">8</div>
+</section>
+
+<!-- SLIDE 9 — DM2: Tratamiento Farmacológico -->
+<section class="slide bg-gradient grid-overlay" id="slide-9">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--cyan);top:-150px;left:-100px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">DM2 — Tratamiento Escalonado (ADA 2025)</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);font-size:var(--small-size);">
+      <li><strong>1° Escalón:</strong> Metformina (↓gluconeogénesis hepática, peso neutro/↓, económico) + cambios estilo de vida</li>
+      <li><strong>Con ECV establecida:</strong> Agregar SGLT2i (empagliflozina/dapagliflozina) o GLP-1 RA (semaglutida) → beneficio cardiovascular demostrado</li>
+      <li><strong>Con IC o ERC:</strong> SGLT2i preferentes (↓hospitalización IC, ↓progresión ERC)</li>
+      <li><strong>Con obesidad:</strong> GLP-1 RA o SGLT2i (pérdida peso)</li>
+      <li><strong>Si HbA1c muy elevada:</strong> Insulina basal (glargina/degludec) + reevaluar</li>
+    </ul>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">HIPOGLUCEMIA</p>
+        <p style="font-size:var(--small-size);margin-bottom:8px;"><strong>Síntomas:</strong> adrenérgicos (temblor, taquicardia, diaforesis) y neuroglucopénicos (confusión)</p>
+        <p style="font-size:var(--small-size);"><strong>Regla 15-15:</strong> 15 g CHO + control 15 min. Severa/inconsciente: glucagón IM o glucosa IV</p>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">INSULINOTERAPIA</p>
+        <p style="font-size:var(--small-size);margin-bottom:8px;"><strong>Basal-bolo:</strong> Glargina/detemir (basal, 1×/día) + Aspart/Lispro (bolo preprandial)</p>
+        <p style="font-size:var(--small-size);"><strong>Mezclas:</strong> 70/30. Ajuste por automonitoreo (ayunas + postprandial 2h)</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">9</div>
+</section>
+
+<!-- SLIDE 10 — Disfunción Tiroidea -->
+<section class="slide bg-gradient grid-overlay" id="slide-10">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--amber);bottom:-100px;left:-50px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Disfunción Tiroidea — Hipo e Hipertiroidismo</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);font-size:var(--small-size);">
+      <thead>
+        <tr><th>Parámetro</th><th>Hipotiroidismo</th><th>Hipertiroidismo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Hormonas</strong></td><td>TSH↑ T4L↓</td><td>TSH↓ T4L↑ T3↑</td></tr>
+        <tr><td><strong>Causa principal</strong></td><td>Hashimoto (anti-TPO, anti-Tg)</td><td>Graves (TRAb+), bocio tóxico, adenoma</td></tr>
+        <tr><td><strong>Síntomas</strong></td><td>Frío, bradicardia, constipación, edema mixedematoso, bradipsiquia</td><td>Calor, taquicardia, diarrea, temblor fino, pérdida peso, exoftalmos (Graves)</td></tr>
+        <tr><td><strong>Tratamiento</strong></td><td>Levotiroxina VO en ayunas</td><td>Metimazol/PTU, radioyodo, cirugía</td></tr>
+      </tbody>
+    </table>
+    <div class="warn-band reveal reveal-delay-3">
+      <span class="warn-icon">⚠</span>
+      <div>
+        <strong style="color:var(--red-warn);">Crisis tirotóxica (tormenta tiroidea):</strong> emergencia. FC>150, fiebre, delirium → PTU + β-bloqueador + corticoides + solución yodada.
+      </div>
+    </div>
+  </div>
+  <div class="section-num">10</div>
+</section>
+
+<!-- SLIDE 11 — Rol de Enfermería — Endocrino -->
+<section class="slide bg-gradient grid-overlay" id="slide-11">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-150px;right:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Rol de Enfermería — Sistema Endocrino</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">DIABETES MELLITUS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Educación insulinoterapia (técnica, rotación sitios, conservación)</li>
+          <li>Automonitoreo glucemia</li>
+          <li>Hipoglucemia: reconocimiento + regla 15-15</li>
+          <li>CAD: síntomas + cuándo consultar</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">PIE DIABÉTICO</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Inspección diaria pie</li>
+          <li>Calzado adecuado (ancho, cerrado)</li>
+          <li>Higiene, hidratación sin macerar</li>
+          <li>Escala Wagner. Derivar podología</li>
+          <li>No agua caliente/bolsas calor</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">OBESIDAD</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>IMC + CC</li>
+          <li>Consejería motivacional</li>
+          <li>Dieta hipocalórica + actividad física</li>
+          <li>Apnea del sueño (STOP-BANG)</li>
+          <li>Adherencia GLP-1 RA (náuseas iniciales)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-5">
+        <p style="color:var(--green-ok);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">TIROIDES</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Administración levotiroxina (ayunas, 30 min antes desayuno)</li>
+          <li>No calcio/hierro cercano</li>
+          <li>Crisis tirotóxica: identificar, piel fría, control FC</li>
+          <li>Preparar PTU/propranolol</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">11</div>
+</section>
+
+<!-- SLIDE 12 — RESUMEN -->
+<section class="slide bg-gradient grid-overlay" id="slide-12">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--cyan);top:-200px;right:-150px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Resumen — Fisiopatología Endocrina</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="font-size:var(--small-size);">
+      <li>TAV → AGL + TNF-α/IL-6 → RI → SM</li>
+      <li>SM: ≥3 criterios (CC, TG, HDL, PA, glucosa). GLP-1 RA: pérdida peso 10–15%</li>
+      <li>DM1: autoinmune (CD8+), insulinopenia absoluta. CAD: fluidos→insulina→K+</li>
+      <li>DM2: 8 defectos DeFronzo. HbA1c <7%. ADA 2025: SGLT2i + GLP-1 RA en ECV/IC/ERC</li>
+      <li>Complicaciones micro: retinopatía/nefropatía/neuropatía. Macro: IAM/ACV/EAP</li>
+      <li>Hipoglucemia: regla 15-15. Severa: glucagón IM. Pie diabético: Wagner, inspección diaria</li>
+      <li>Hipotiroidismo: TSH↑ T4↓, levotiroxina. Hipertiroidismo: TSH↓ T4↑, metimazol/radioyodo</li>
+    </ul>
+  </div>
+  <div class="section-num">12</div>
+</section>
+
+</main>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const navDots = document.getElementById('nav-dots');
+const progressBar = document.getElementById('progress');
+const slideCounter = document.getElementById('slide-counter');
+let currentSlide = 0;
+const totalSlides = slides.length;
+
+function initDots() {
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.classList.add('dot');
+    if (i === 0) dot.classList.add('active');
+    dot.setAttribute('aria-label', `Ir a diapositiva ${i + 1}`);
+    dot.addEventListener('click', () => goToSlide(i));
+    navDots.appendChild(dot);
+  });
+}
+
+function goToSlide(n) {
+  if (n < 0) n = totalSlides - 1;
+  if (n >= totalSlides) n = 0;
+  currentSlide = n;
+  slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+  updateUI();
+}
+
+function updateUI() {
+  document.querySelectorAll('.dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === currentSlide);
+  });
+  progressBar.style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+  slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+
+  slides.forEach((slide, i) => {
+    const inView = i === currentSlide;
+    slide.querySelectorAll('.reveal').forEach(el => {
+      el.classList.toggle('visible', inView);
+    });
+  });
+}
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      currentSlide = Array.from(slides).indexOf(entry.target);
+      updateUI();
+    }
+  });
+}, { threshold: 0.5 });
+
+slides.forEach(slide => observer.observe(slide));
+
+document.addEventListener('wheel', e => {
+  if (e.deltaY > 0) goToSlide(currentSlide + 1);
+  else goToSlide(currentSlide - 1);
+}, { passive: true });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    goToSlide(currentSlide + 1);
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    goToSlide(currentSlide - 1);
+  }
+});
+
+let touchStart = 0;
+document.addEventListener('touchstart', e => { touchStart = e.touches[0].clientY; }, false);
+document.addEventListener('touchend', e => {
+  const touchEnd = e.changedTouches[0].clientY;
+  if (touchStart - touchEnd > 50) goToSlide(currentSlide + 1);
+  if (touchEnd - touchStart > 50) goToSlide(currentSlide - 1);
+}, false);
+
+initDots();
+updateUI();
+</script>
+</body>
+</html>

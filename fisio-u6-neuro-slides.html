@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fisiopatología Neurológica — Unidad 6 ENF UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+.slide { width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; scroll-snap-align: start; display: flex; flex-direction: column; position: relative; }
+.slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; max-height: 100%; overflow: hidden; padding: var(--slide-padding); }
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+  --bg-dark: #0b1520; --bg-mid: #111e2e; --bg-card: #16263a;
+  --teal: #00c9a7; --teal-dim: #00917a; --cyan: #38bdf8;
+  --amber: #fbbf24; --red-warn: #f87171; --green-ok: #4ade80;
+  --text-main: #e8f1fb; --text-muted: #7a9ab8;
+  --border: rgba(0,201,167,0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-main); background: var(--bg-dark); color: var(--text-main); font-size: var(--body-size); }
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+.bg-gradient { background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%); }
+.grid-overlay::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+.glow-circle { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; opacity: .3; }
+#nav-dots { position: fixed; right: clamp(12px,2vw,28px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.2); cursor: pointer; transition: all .25s; border: none; }
+.dot.active { background: var(--teal); width: 7px; height: 14px; border-radius: 4px; }
+.dot:hover { background: var(--cyan); }
+#progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--teal), var(--cyan)); transition: width .3s ease; z-index: 200; }
+#slide-counter { position: fixed; bottom: clamp(12px,2vh,24px); right: clamp(16px,2.5vw,32px); font-family: var(--font-mono); font-size: var(--small-size); color: var(--text-muted); z-index: 100; }
+#kbd-hint { position: fixed; bottom: clamp(12px,2vh,24px); left: clamp(16px,2.5vw,32px); font-size: var(--small-size); color: var(--text-muted); z-index: 100; display: flex; gap: 8px; align-items: center; }
+.kbd { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: .75em; }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .55s ease, transform .55s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; } .reveal-delay-2 { transition-delay: .2s; } .reveal-delay-3 { transition-delay: .3s; } .reveal-delay-4 { transition-delay: .4s; } .reveal-delay-5 { transition-delay: .5s; } .reveal-delay-6 { transition-delay: .6s; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: var(--small-size); font-weight: 600; letter-spacing: .5px; }
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: clamp(8px,1.5vw,16px); padding: clamp(0.75rem,2vw,1.5rem); }
+.card-grid { display: grid; gap: clamp(0.5rem,1.5vw,1rem); }
+.card-grid-2 { grid-template-columns: repeat(2,1fr); }
+.card-grid-3 { grid-template-columns: repeat(3,1fr); }
+.card-grid-4 { grid-template-columns: repeat(4,1fr); }
+.accent-line { width: clamp(40px,6vw,80px); height: 3px; background: linear-gradient(90deg, var(--teal), var(--cyan)); border-radius: 2px; margin-bottom: var(--content-gap); }
+.clinical-table { width: 100%; border-collapse: collapse; font-size: var(--small-size); }
+.clinical-table th { background: rgba(0,201,167,.12); color: var(--teal); padding: clamp(4px,1vw,10px) clamp(6px,1.5vw,14px); text-align: left; font-weight: 700; border-bottom: 1px solid var(--border); font-size: var(--small-size); }
+.clinical-table td { padding: clamp(4px,1vw,9px) clamp(6px,1.5vw,14px); border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; line-height: 1.45; }
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+.bullet-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.35rem,1vh,0.7rem); }
+.bullet-list li { display: flex; align-items: flex-start; gap: 10px; }
+.bullet-list li::before { content: '▸'; color: var(--teal); flex-shrink: 0; margin-top: .1em; }
+.mech-box { border-left: 3px solid var(--teal); padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); background: rgba(0,201,167,.06); border-radius: 0 8px 8px 0; }
+.mech-box .mech-title { font-size: var(--small-size); font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.warn-band { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 8px; padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); display: flex; align-items: flex-start; gap: 10px; }
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+.section-num { font-family: var(--font-mono); font-size: clamp(3rem,12vw,9rem); font-weight: 700; color: rgba(0,201,167,.08); position: absolute; right: var(--slide-padding); bottom: clamp(1rem,4vh,3rem); line-height: 1; pointer-events: none; user-select: none; }
+@media (max-height:700px) { :root { --slide-padding: clamp(0.75rem,3vw,2rem); --content-gap: clamp(0.35rem,1.5vw,0.85rem); --title-size: clamp(1.25rem,4.5vw,2.5rem); --h2-size: clamp(1rem,3vw,1.75rem); } }
+@media (max-height:600px) { :root { --slide-padding: clamp(0.5rem,2.5vw,1.2rem); --content-gap: clamp(0.25rem,1vw,0.6rem); --title-size: clamp(1.1rem,4vw,1.8rem); --body-size: clamp(0.65rem,1.2vw,0.88rem); } #nav-dots, #kbd-hint, .section-num { display: none; } }
+@media (max-height:500px) { :root { --slide-padding: clamp(0.4rem,2vw,0.9rem); --title-size: clamp(1rem,3.5vw,1.4rem); --h2-size: clamp(0.9rem,2.5vw,1.2rem); --body-size: clamp(0.62rem,1vw,0.8rem); } }
+@media (max-width:600px) { :root { --title-size: clamp(1.25rem,7vw,2.2rem); } .card-grid-2, .card-grid-3, .card-grid-4 { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } html { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+<div id="kbd-hint"><span class="kbd">↑↓</span><span class="kbd">← →</span><span style="margin-left:4px">navegar</span></div>
+
+<main>
+
+<!-- SLIDE 1 — PORTADA -->
+<section class="slide bg-gradient grid-overlay" id="slide-1">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.12"></div>
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--cyan);bottom:-100px;left:-50px;opacity:.07"></div>
+  <div class="slide-content" style="justify-content:center;">
+    <div style="max-width:min(90vw,820px);">
+      <div class="reveal" style="margin-bottom:var(--content-gap);"><span class="tag tag-teal">Fisiopatología 2° Año · UDP</span></div>
+      <h1 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Fisiopatología<br><span style="color:var(--teal);">Neurológica</span></h1>
+      <p class="reveal reveal-delay-2" style="color:var(--text-muted);max-width:600px;margin-bottom:var(--content-gap);">Unidad 6 · AVE · Alzheimer · Parkinson</p>
+      <div class="reveal reveal-delay-3" style="display:flex;gap:clamp(12px,2vw,24px);flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:var(--small-size);color:var(--text-muted);">Sesiones</span>
+          <span style="font-weight:700;color:var(--teal);">1 sesión · 12 slides</span>
+        </div>
+        <div style="width:1px;height:32px;background:var(--border);"></div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:var(--small-size);color:var(--text-muted);">Contenido</span>
+          <span style="font-weight:700;">Neurología clínica para enfermería</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">6</div>
+</section>
+
+<!-- SLIDE 2 — AVE ISQUÉMICO -->
+<section class="slide bg-gradient grid-overlay" id="slide-2">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--cyan);top:-150px;right:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">AVE Isquémico: Penumbra y Excitotoxicidad</h2>
+    <div class="mech-box reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <div class="mech-title">Cascada Isquémica</div>
+      <p>Oclusión arteria → ↓flujo (&lt;10 mL/100g/min) → muerte neuronal en minutos <strong>(núcleo)</strong> → zona penumbra (10-20 mL/100g/min) → neurona disfuncional pero viable → <strong>ventana terapéutica 4.5 h</strong></p>
+    </div>
+    <div class="card-grid card-grid-3 reveal reveal-delay-3">
+      <div class="card">
+        <h3 style="color:var(--teal);margin-bottom:var(--element-gap);">Excitotoxicidad</h3>
+        <p>Isquemia → despolarización masiva → glutamato → receptores NMDA/AMPA → <strong>Ca²⁺ intracelular</strong> → proteasas/caspasas → muerte neuronal</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--amber);margin-bottom:var(--element-gap);">Edema Cerebral</h3>
+        <p><strong>Citotóxico</strong> (intracelular, precoz, maligno). <strong>Vasogénico</strong> (rotura BHE, tardío, responde a corticoides)</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--green-ok);margin-bottom:var(--element-gap);">Penumbra Isquémica</h3>
+        <p>Tejido rescatable. tPA IV: <strong>4.5 h</strong>. Trombectomía mecánica: hasta <strong>24 h</strong> con imagen favorable (DAWN/DEFUSE-3)</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">2</div>
+</section>
+
+<!-- SLIDE 3 — CLASIFICACIÓN AVE -->
+<section class="slide bg-gradient grid-overlay" id="slide-3">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--teal);bottom:-120px;left:-80px;opacity:.09"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Clasificación AVE y Diagnóstico</h2>
+    <div class="card-grid card-grid-2 reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <div class="card">
+        <h3 style="color:var(--teal);margin-bottom:var(--element-gap);">AVE Isquémico (85%)</h3>
+        <ul class="bullet-list">
+          <li><strong>Cardioembólico:</strong> FA, trombo VE → mayor tamaño</li>
+          <li><strong>Aterotrombótico:</strong> placas carótida/ACM</li>
+          <li><strong>Lacunar:</strong> pequeños vasos HTA/DM, síndrome lagunar puro</li>
+          <li>Perfil: inicio agudo, déficit focal, sin cefalea intensa</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--red-warn);margin-bottom:var(--element-gap);">AVE Hemorrágico (15%)</h3>
+        <ul class="bullet-list">
+          <li><strong>HIC:</strong> HTA (&gt;65%) → ganglios basales/cápsula interna</li>
+          <li><strong>HSA:</strong> aneurisma roto → cefalea thunderclap, meningismo, xantocromía LCR</li>
+          <li>TAC sin contraste: hiperdensidad inmediata</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-3">
+      <span class="warn-icon">⚡</span>
+      <p><strong>FAST:</strong> Facial drooping · Arm weakness · Speech difficulty · Time to call. AIT (&lt;24 h síntomas): riesgo AVE 48 h siguiente → ABCD2 score urgente</p>
+    </div>
+  </div>
+  <div class="section-num">3</div>
+</section>
+
+<!-- SLIDE 4 — MANEJO AVE -->
+<section class="slide bg-gradient grid-overlay" id="slide-4">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--amber);top:-180px;right:-100px;opacity:.06"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Manejo AVE Agudo — Unidad ACV</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <li><strong>1. ABC + glucemia:</strong> corregir hipo/hiperglucemia (meta 140-180 mg/dL fase aguda)</li>
+      <li><strong>2. TAC sin contraste:</strong> descartar hemorragia antes de cualquier terapia</li>
+      <li><strong>3. tPA IV (alteplase 0.9 mg/kg):</strong> si &lt;4.5 h, NIHSS ≥4, sin contraindicaciones</li>
+      <li><strong>4. Angiografía TAC:</strong> si NIHSS ≥6 → valorar trombectomía mecánica (oclusión gran vaso)</li>
+      <li><strong>5. Unidad ACV:</strong> monitorización continua, disfagia, temperatura, PA, posición 30°</li>
+    </ul>
+    <div class="card-grid card-grid-2 reveal reveal-delay-3">
+      <div class="card">
+        <h3 style="color:var(--amber);margin-bottom:var(--element-gap);">Control PA — AVE Isquémico</h3>
+        <p>Sin tPA: tolerar hasta <strong>220/120 mmHg</strong>.<br>Con tPA: &lt;185/110 antes; &lt;180/105 post-infusión.<br>No bajar bruscamente (autorregulación alterada)</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--green-ok);margin-bottom:var(--element-gap);">Prevención Secundaria</h3>
+        <p>AAS 300 mg (isquémico). Anticoagulación si FA. Estatinas de alta potencia. Control HTA/DM/tabaco. Rehabilitación precoz 24-48 h</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">4</div>
+</section>
+
+<!-- SLIDE 5 — ALZHEIMER PATOLOGÍA -->
+<section class="slide bg-gradient grid-overlay" id="slide-5">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Alzheimer: β-Amiloide y Proteína Tau</h2>
+    <div class="mech-box reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <div class="mech-title">Cascada Amiloide</div>
+      <p>APP → β y γ-secretasas → péptido <strong>Aβ42</strong> → oligómeros tóxicos → placas seniles extracelulares → activación microglia → inflamación → disfunción sináptica → muerte neuronal</p>
+    </div>
+    <div class="card-grid card-grid-3 reveal reveal-delay-3">
+      <div class="card">
+        <h3 style="color:var(--red-warn);margin-bottom:var(--element-gap);">Proteína Tau</h3>
+        <p>Tau normal estabiliza microtúbulos. Tau <strong>hiperfosforilada</strong> forma ovillos neurofibrilares (NFT) → colapso transporte axonal → muerte neuronal</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--amber);margin-bottom:var(--element-gap);">Hipótesis Colinérgica</h3>
+        <p>Degeneración núcleo basal de <strong>Meynert</strong> (acetilcolina) → déficit ACh → base de IAChE (donepezilo/rivastigmina)</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--cyan);margin-bottom:var(--element-gap);">Biomarcadores</h3>
+        <p>LCR: Aβ42↓, tau-total↑, tau-p↑. PET amiloide/tau. <strong>Lecanemab</strong> (2023): anti-Aβ aprobado, ↓progresión estadio temprano</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">5</div>
+</section>
+
+<!-- SLIDE 6 — ALZHEIMER ESTADIOS -->
+<section class="slide bg-gradient grid-overlay" id="slide-6">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--cyan);bottom:-100px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Alzheimer: Estadios y Tratamiento</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <thead><tr><th>Estadio</th><th>MMSE</th><th>Características</th><th>Tratamiento</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Leve</strong></td><td>21–26</td><td>Olvidos recientes, desorientación temporal, insight parcial</td><td>IAChE (donepezilo 5-10 mg/día)</td></tr>
+        <tr><td><strong>Moderado</strong></td><td>11–20</td><td>Desorientación espacial, afasia/apraxia/agnosia, BPSD</td><td>IAChE + Memantina</td></tr>
+        <tr><td><strong>Grave</strong></td><td>&lt;10</td><td>No comunicación, disfagia, encamado, incontinencia</td><td>Cuidados paliativos, confort</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid card-grid-2 reveal reveal-delay-3">
+      <div class="card">
+        <h3 style="color:var(--teal);margin-bottom:var(--element-gap);">Farmacológico</h3>
+        <p>IAChE (leve-moderado): donepezilo, rivastigmina parche. Memantina (ant-NMDA): moderado-grave. BPSD: antipsicóticos atípicos (risperidona) con precaución</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--amber);margin-bottom:var(--element-gap);">Familia y Cuidados</h3>
+        <p>Adaptación domicilio (rutinas, seguridad). Apoyo cuidador principal (burnout, escala Zarit). Testamento vital. Plan anticipado de cuidados en estadio grave</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">6</div>
+</section>
+
+<!-- SLIDE 7 — PARKINSON FISIOPATOLOGÍA -->
+<section class="slide bg-gradient grid-overlay" id="slide-7">
+  <div class="glow-circle" style="width:550px;height:550px;background:var(--teal);top:-180px;right:-120px;opacity:.09"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Parkinson: Pérdida Dopaminérgica</h2>
+    <div class="mech-box reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <div class="mech-title">Circuito Ganglio Basal</div>
+      <p>Degeneración neuronas dopaminérgicas <strong>sustancia negra pars compacta</strong> → ↓DA estriado → desequilibrio vía directa/indirecta → ↑actividad GPi/SNr → inhibición tálamo → <strong>bradicinesia</strong></p>
+    </div>
+    <div class="card-grid card-grid-3 reveal reveal-delay-3">
+      <div class="card">
+        <h3 style="color:var(--red-warn);margin-bottom:var(--element-gap);">α-sinucleína y Lewy</h3>
+        <p>Agregación α-sinucleína mal plegada → cuerpos de Lewy → disfunción neuronal. Propagación <strong>tipo prión</strong> (hipótesis Braak estadios 1-6)</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--teal);margin-bottom:var(--element-gap);">Tríada Clásica</h3>
+        <p><strong>Tremor en reposo</strong> (4-6 Hz, "cuenta monedas"). <strong>Rigidez</strong> (rueda dentada). <strong>Bradicinesia</strong> (hipomimia, micrografía). Criterios UK Brain Bank</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--amber);margin-bottom:var(--element-gap);">Síntomas No Motores</h3>
+        <p>Precoces: hiposmia, estreñimiento, trastorno REM. Tardíos: demencia (DLB), psicosis, hipotensión ortostática, disfagia, sialorrea</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">7</div>
+</section>
+
+<!-- SLIDE 8 — PARKINSON TRATAMIENTO -->
+<section class="slide bg-gradient grid-overlay" id="slide-8">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--green-ok);bottom:-100px;left:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Parkinson: Estrategia Terapéutica</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <li><strong>L-DOPA/Carbidopa:</strong> Gold standard. Carbidopa bloquea conversión periférica → ↑disponibilidad cerebral. Fluctuaciones: wearing-off, on-off con uso prolongado</li>
+      <li><strong>Agonistas dopaminérgicos:</strong> Pramipexol/ropinirol. Inicio en jóvenes o adyuvante. Mayor riesgo alucinaciones/compulsiones</li>
+      <li><strong>Inhibidores MAO-B:</strong> Rasagilina/selegilina → ↓catabolismo DA. Monoterapia leve o adyuvante</li>
+      <li><strong>Inhibidores COMT:</strong> Entacapona → ↓metabolismo periférico L-DOPA → ↑duración efecto</li>
+      <li><strong>DBS (estimulación cerebral profunda):</strong> Núcleo subtalámico. Fluctuaciones motoras severas refractarias</li>
+    </ul>
+    <div class="warn-band reveal reveal-delay-3">
+      <span class="warn-icon">⚠️</span>
+      <p><strong>Crisis off:</strong> inmovilidad total, disfagia, angustia → apomorfina SC rescate. <strong>NUNCA suspender bruscamente L-DOPA</strong> → síndrome similar a neuroléptico maligno</p>
+    </div>
+  </div>
+  <div class="section-num">8</div>
+</section>
+
+<!-- SLIDE 9 — EPILEPSIA Y EM -->
+<section class="slide bg-gradient grid-overlay" id="slide-9">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--cyan);top:-160px;right:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Epilepsia y Esclerosis Múltiple</h2>
+    <div class="card-grid card-grid-2 reveal reveal-delay-2">
+      <div class="card">
+        <h3 style="color:var(--teal);margin-bottom:var(--element-gap);">Epilepsia</h3>
+        <p style="margin-bottom:6px;">Descarga neuronal excesiva y sincrónica. <strong>Focal:</strong> inicio área específica. <strong>Generalizada:</strong> ambos hemisferios.</p>
+        <p style="margin-bottom:6px;"><strong>Status epiléptico (≥5 min):</strong> BZD IV (diazepam/lorazepam) → fenitoína/valproato → fenobarbital → propofol (anestesia)</p>
+        <p>AES nuevos (ILAE 2022): levetiracetam, lacosamida, brivaracetam</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--amber);margin-bottom:var(--element-gap);">Esclerosis Múltiple</h3>
+        <p style="margin-bottom:6px;">Desmielinización autoinmune SNC. Placas periventricular, cuerpo calloso, nervio óptico, médula. RMN: criterios McDonald</p>
+        <p style="margin-bottom:6px;"><strong>Brote-remisión (85%):</strong> corticoides IV en brote (metilprednisolona)</p>
+        <p>DMT: interferón-β, natalizumab, ocrelizumab (progresiva). EDSS escala discapacidad</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">9</div>
+</section>
+
+<!-- SLIDE 10 — CEFALEA E HIC -->
+<section class="slide bg-gradient grid-overlay" id="slide-10">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--amber);bottom:-100px;right:-80px;opacity:.06"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Cefalea e Hipertensión Intracraneal</h2>
+    <div class="card-grid card-grid-2 reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <div class="card">
+        <h3 style="color:var(--teal);margin-bottom:var(--element-gap);">Cefalea Primaria</h3>
+        <p><strong>Migraña:</strong> pulsátil unilateral, náusea, foto/fonofobia, aura 20%. Fisiopatología: onda cortical depresora → trigeminal → CGRP. Tx agudo: triptanes. Profilaxis: topiramato/propranolol/anti-CGRP (erenumab)</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--red-warn);margin-bottom:var(--element-gap);">Cefalea Secundaria — Alarmas</h3>
+        <p>Inicio súbito (thunderclap → HSA), cambio patrón, postural (↑acostado → HIC), fiebre+meningismo (meningitis), papiedema, VIH, tras trauma → TAC urgente</p>
+      </div>
+    </div>
+    <div class="mech-box reveal reveal-delay-3">
+      <div class="mech-title">Hipertensión Intracraneal</div>
+      <p>PIC normal 5-15 mmHg. <strong>Monroe-Kellie:</strong> cerebro+LCR+sangre = constante. HIC (&gt;20 mmHg): <strong>manitol</strong> 20% + cabecera 30° + hiperventilación controlada + evacuación quirúrgica. <strong>PPC = PAM − PIC</strong> (meta &gt;60 mmHg)</p>
+    </div>
+  </div>
+  <div class="section-num">10</div>
+</section>
+
+<!-- SLIDE 11 — ROL ENFERMERÍA -->
+<section class="slide bg-gradient grid-overlay" id="slide-11">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Rol de Enfermería — Neurológico</h2>
+    <div class="card-grid card-grid-2 reveal reveal-delay-2">
+      <div class="card">
+        <h3 style="color:var(--teal);margin-bottom:var(--element-gap);">AVE — Monitorización</h3>
+        <p>NIHSS, Glasgow, pupilas (R/T), déficit motor, afasia. Control PA cada 15 min fase aguda. Posición 30° (no Trendelenburg). <strong>Disfagia:</strong> protocolo GUSS/MASA antes de alimentar. Rehabilitación precoz (fisioterapia/fonoaudiología)</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--amber);margin-bottom:var(--element-gap);">Alzheimer — Seguridad</h3>
+        <p>Pulsera identificación, ambiente familiar y rutinas fijas, iluminación adecuada, puertas con seguro. MMSE/CDR, escala BPSD. Soporte cuidador (escala Zarit). Educación familia sobre estadios y expectativas</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--green-ok);margin-bottom:var(--element-gap);">Parkinson — Educación</h3>
+        <p>L-DOPA: horario fijo, alejado de proteínas. <strong>Prevención caídas:</strong> marcha festinante, freezing (líneas en piso). Hipotensión ortostática (levantarse lento). Disfagia avanzada. Ejercicio físico mejora rigidez y equilibrio</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--cyan);margin-bottom:var(--element-gap);">HIC y Epilepsia</h3>
+        <p>Monitorización PIC si sensor (manitol → diuresis). <strong>Durante crisis:</strong> proteger sin sujetar, decúbito lateral poscrisis, registrar duración/características, BZD protocolizado. Descartar causa secundaria</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">11</div>
+</section>
+
+<!-- SLIDE 12 — RESUMEN -->
+<section class="slide bg-gradient grid-overlay" id="slide-12">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.1"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Resumen — Fisiopatología Neurológica</h2>
+    <ul class="bullet-list reveal reveal-delay-2">
+      <li>AVE isquémico: penumbra rescatable → tPA IV (4.5 h) o trombectomía (24 h con imagen favorable)</li>
+      <li>AVE hemorrágico: HIC (HTA → ganglio basal). HSA (aneurisma → thunderclap). No tPA</li>
+      <li>Control PA isquémico: tolerar &lt;220/120 sin tPA; &lt;185/110 con tPA</li>
+      <li>Alzheimer: Aβ (placas) + Tau (ovillos NFT) + déficit colinérgico. IAChE (leve-mod) + Memantina (mod-grave)</li>
+      <li>Parkinson: α-sinucleína → Lewy → ↓DA sustancia negra → tríada tremor/rigidez/bradicinesia</li>
+      <li>L-DOPA/carbidopa = gold standard. DBS para fluctuaciones refractarias</li>
+      <li>Status epiléptico: BZD IV → fenitoína → fenobarbital → anestesia (propofol)</li>
+      <li>PIC normal &lt;15 mmHg. PPC = PAM − PIC &gt;60 mmHg. Manitol + cabecera 30°</li>
+    </ul>
+    <div style="margin-top:var(--content-gap);display:flex;gap:8px;flex-wrap:wrap;" class="reveal reveal-delay-3">
+      <span class="tag tag-teal">AVE</span>
+      <span class="tag tag-amber">Alzheimer</span>
+      <span class="tag tag-cyan">Parkinson</span>
+      <span class="tag tag-red">Epilepsia</span>
+      <span class="tag tag-teal">Fisiopatología UDP</span>
+    </div>
+  </div>
+  <div class="section-num">12</div>
+</section>
+
+</main>
+
+<script>
+const TOTAL = 12;
+const slides = Array.from(document.querySelectorAll('.slide'));
+const navDots = document.getElementById('nav-dots');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('slide-counter');
+let current = 0;
+
+slides.forEach((_, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'dot' + (i === 0 ? ' active' : '');
+  btn.setAttribute('aria-label', `Ir a diapositiva ${i + 1}`);
+  btn.addEventListener('click', () => goTo(i));
+  navDots.appendChild(btn);
+});
+
+function updateUI(idx) {
+  current = idx;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  progress.style.width = ((idx + 1) / TOTAL * 100) + '%';
+  counter.textContent = `${idx + 1} / ${TOTAL}`;
+}
+
+function goTo(idx) {
+  idx = Math.max(0, Math.min(TOTAL - 1, idx));
+  slides[idx].scrollIntoView({ behavior: 'smooth' });
+  updateUI(idx);
+}
+
+const goNext = () => goTo(current + 1);
+const goPrev = () => goTo(current - 1);
+
+document.addEventListener('keydown', e => {
+  if (['ArrowDown','ArrowRight'].includes(e.key)) { e.preventDefault(); goNext(); }
+  if (['ArrowUp','ArrowLeft'].includes(e.key)) { e.preventDefault(); goPrev(); }
+});
+
+let lastWheel = 0;
+window.addEventListener('wheel', e => {
+  const now = Date.now();
+  if (now - lastWheel < 800) return;
+  lastWheel = now;
+  e.deltaY > 0 ? goNext() : goPrev();
+}, { passive: true });
+
+let touchStartY = 0;
+window.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+window.addEventListener('touchend', e => {
+  const diff = touchStartY - e.changedTouches[0].clientY;
+  if (Math.abs(diff) > 50) diff > 0 ? goNext() : goPrev();
+}, { passive: true });
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const idx = slides.indexOf(entry.target);
+      updateUI(idx);
+      entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    }
+  });
+}, { threshold: 0.5 });
+
+slides.forEach(s => observer.observe(s));
+updateUI(0);
+slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>

@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farmacología: Antibióticos — ENF3013 UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ======================================================
+   VIEWPORT FITTING: MANDATORY BASE STYLES
+   ====================================================== */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 100%;
+  overflow: hidden;
+  padding: var(--slide-padding);
+}
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+
+  /* Paleta médica-clínica: dark teal + slate */
+  --bg-dark:    #0b1520;
+  --bg-mid:     #111e2e;
+  --bg-card:    #16263a;
+  --teal:       #00c9a7;
+  --teal-dim:   #00917a;
+  --cyan:       #38bdf8;
+  --amber:      #fbbf24;
+  --red-warn:   #f87171;
+  --green-ok:   #4ade80;
+  --text-main:  #e8f1fb;
+  --text-muted: #7a9ab8;
+  --border:     rgba(0, 201, 167, 0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-main);
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-size: var(--body-size);
+}
+
+/* ── Typography ────────────────────────────────────────── */
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+
+/* ── Background layers ─────────────────────────────────── */
+.bg-gradient {
+  background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%);
+}
+.grid-overlay::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.glow-circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: .3;
+}
+
+/* ── Nav dots ──────────────────────────────────────────── */
+#nav-dots {
+  position: fixed;
+  right: clamp(12px, 2vw, 28px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  cursor: pointer;
+  transition: all .25s;
+}
+.dot.active {
+  background: var(--teal);
+  width: 7px; height: 14px;
+  border-radius: 4px;
+}
+.dot:hover { background: var(--cyan); }
+
+/* ── Progress bar ──────────────────────────────────────── */
+#progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal), var(--cyan));
+  transition: width .3s ease;
+  z-index: 200;
+}
+
+/* ── Slide counter ─────────────────────────────────────── */
+#slide-counter {
+  position: fixed;
+  bottom: clamp(12px, 2vh, 24px);
+  right: clamp(16px, 2.5vw, 32px);
+  font-family: var(--font-mono);
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  z-index: 100;
+}
+
+/* ── Keyboard hint ─────────────────────────────────────── */
+#kbd-hint {
+  position: fixed;
+  bottom: clamp(12px, 2vh, 24px);
+  left: clamp(16px, 2.5vw, 32px);
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  z-index: 100;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.kbd {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: .75em;
+}
+
+/* ── Reveal animation ──────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .55s ease, transform .55s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+.reveal-delay-5 { transition-delay: .5s; }
+.reveal-delay-6 { transition-delay: .6s; }
+
+/* ── Tags / badges ─────────────────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: var(--small-size);
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+
+/* ── Cards ─────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: clamp(8px, 1.5vw, 16px);
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+}
+.card-grid {
+  display: grid;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+.card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* ── Accent line ───────────────────────────────────────── */
+.accent-line {
+  width: clamp(40px, 6vw, 80px);
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal), var(--cyan));
+  border-radius: 2px;
+  margin-bottom: var(--content-gap);
+}
+
+/* ── Table ─────────────────────────────────────────────── */
+.clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--small-size);
+}
+.clinical-table th {
+  background: rgba(0,201,167,.12);
+  color: var(--teal);
+  padding: clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 14px);
+  text-align: left;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--small-size);
+}
+.clinical-table td {
+  padding: clamp(4px, 1vw, 9px) clamp(6px, 1.5vw, 14px);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  vertical-align: top;
+  line-height: 1.45;
+}
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+
+/* ── Bullet list ───────────────────────────────────────── */
+.bullet-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.35rem, 1vh, 0.7rem);
+}
+.bullet-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.bullet-list li::before {
+  content: '▸';
+  color: var(--teal);
+  flex-shrink: 0;
+  margin-top: .1em;
+}
+
+/* ── Mechanism box ─────────────────────────────────────── */
+.mech-box {
+  border-left: 3px solid var(--teal);
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 1.5vw, 18px);
+  background: rgba(0,201,167,.06);
+  border-radius: 0 8px 8px 0;
+}
+.mech-box .mech-title {
+  font-size: var(--small-size);
+  font-weight: 700;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 4px;
+}
+
+/* ── Warning band ──────────────────────────────────────── */
+.warn-band {
+  background: rgba(248,113,113,.08);
+  border: 1px solid rgba(248,113,113,.25);
+  border-radius: 8px;
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 1.5vw, 18px);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+
+/* ── Section number ────────────────────────────────────── */
+.section-num {
+  font-family: var(--font-mono);
+  font-size: clamp(3rem, 12vw, 9rem);
+  font-weight: 700;
+  color: rgba(0,201,167,.08);
+  position: absolute;
+  right: var(--slide-padding);
+  bottom: clamp(1rem, 4vh, 3rem);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Responsive adjustments ────────────────────────────── */
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(0.75rem, 3vw, 2rem);
+    --content-gap: clamp(0.35rem, 1.5vw, 0.85rem);
+    --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+    --h2-size: clamp(1rem, 3vw, 1.75rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-padding: clamp(0.5rem, 2.5vw, 1.2rem);
+    --content-gap: clamp(0.25rem, 1vw, 0.6rem);
+    --title-size: clamp(1.1rem, 4vw, 1.8rem);
+    --body-size: clamp(0.65rem, 1.2vw, 0.88rem);
+  }
+  #nav-dots, #kbd-hint, .section-num { display: none; }
+}
+@media (max-height: 500px) {
+  :root {
+    --slide-padding: clamp(0.4rem, 2vw, 0.9rem);
+    --title-size: clamp(1rem, 3.5vw, 1.4rem);
+    --h2-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    --body-size: clamp(0.62rem, 1vw, 0.8rem);
+  }
+}
+@media (max-width: 600px) {
+  :root { --title-size: clamp(1.25rem, 7vw, 2.2rem); }
+  .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.2s !important;
+  }
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div id="progress"></div>
+
+<!-- Nav dots -->
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+
+<!-- Slide counter -->
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+
+<!-- Keyboard hint -->
+<div id="kbd-hint">
+  <span class="kbd">↑↓</span>
+  <span class="kbd">← →</span>
+  <span style="margin-left:4px">navegar</span>
+</div>
+
+<main>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 1 — PORTADA
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-1">
+    <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.12"></div>
+    <div class="glow-circle" style="width:400px;height:400px;background:var(--cyan);bottom:-100px;left:-50px;opacity:.1"></div>
+    <div class="slide-content" style="justify-content:center;">
+      <div style="max-width:min(90vw,820px);">
+        <div class="reveal" style="margin-bottom:var(--content-gap);">
+          <span class="tag tag-teal">ENF3013 · Farmacología</span>
+        </div>
+        <h1 class="reveal reveal-delay-1" style="color:var(--text-main); margin-bottom:var(--content-gap);">
+          Antibióticos<br><span style="color:var(--teal);">Fundamentos Clínicos</span>
+        </h1>
+        <p class="reveal reveal-delay-2" style="color:var(--text-muted); max-width:560px; margin-bottom:var(--content-gap);">
+          Mecanismos de acción · Clasificación · Resistencia bacteriana · Aplicación clínica en patologías GES
+        </p>
+        <div class="reveal reveal-delay-3" style="display:flex; gap:clamp(12px,2vw,24px); flex-wrap:wrap; align-items:center;">
+          <div style="font-size:var(--small-size); color:var(--text-muted);">
+            <strong style="color:var(--text-main);">Enfermería 2° año</strong><br>
+            Universidad Diego Portales · 2026
+          </div>
+          <div style="width:1px; height:32px; background:var(--border);"></div>
+          <div style="font-size:var(--small-size); color:var(--text-muted);">
+            12 diapositivas<br>
+            <span style="color:var(--teal);">↓ para avanzar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">01</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 2 — ¿QUÉ ES UN ANTIBIÓTICO?
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-2">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-100px;left:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">¿Qué es un Antibiótico?</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <p class="mech-title mono" style="font-size:var(--small-size); color:var(--teal); font-weight:700; margin-bottom:8px; letter-spacing:.8px;">BACTERICIDA</p>
+          <p style="font-size:var(--body-size);">Mata la bacteria directamente</p>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-top:6px;">β-lactámicos · Aminoglucósidos · Quinolonas · Vancomicina</p>
+          <div class="tag tag-teal" style="margin-top:10px;">1ª elección en sepsis</div>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <p class="mech-title mono" style="font-size:var(--small-size); color:var(--amber); font-weight:700; margin-bottom:8px; letter-spacing:.8px;">BACTERIOSTÁTICO</p>
+          <p style="font-size:var(--body-size);">Inhibe el crecimiento; el sistema inmune termina el trabajo</p>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-top:6px;">Macrólidos · Tetraciclinas · Clindamicina · Cloranfenicol</p>
+          <div class="tag tag-amber" style="margin-top:10px;">Depende de inmunidad intacta</div>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Concepto clave para enfermería</p>
+        <p>El antibiótico no reemplaza la respuesta inmune del paciente. En inmunosuprimidos, los bacteriostáticos pueden ser insuficientes: se prefieren bactericidas.</p>
+      </div>
+    </div>
+    <div class="section-num">02</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 3 — MECANISMOS DE ACCIÓN (overview)
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-3">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">4 Mecanismos de Acción</h2>
+      <div class="card-grid card-grid-2" style="gap:clamp(0.5rem,1.5vw,1rem);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(0,201,167,.35);">
+          <div style="font-size:1.5em; margin-bottom:8px;">🧱</div>
+          <h3 style="color:var(--teal); font-size:var(--h3-size); margin-bottom:6px;">Pared celular</h3>
+          <p>Inhiben síntesis de peptidoglicano → lisis osmótica</p>
+          <p style="color:var(--text-muted); margin-top:6px; font-size:var(--small-size);">β-lactámicos · Vancomicina · Fosfomicina</p>
+        </div>
+        <div class="card reveal reveal-delay-3" style="border-color:rgba(56,189,248,.35);">
+          <div style="font-size:1.5em; margin-bottom:8px;">🧬</div>
+          <h3 style="color:var(--cyan); font-size:var(--h3-size); margin-bottom:6px;">Síntesis proteica</h3>
+          <p>Bloquean ribosomas 30S ó 50S → sin proteínas bacterianas</p>
+          <p style="color:var(--text-muted); margin-top:6px; font-size:var(--small-size);">Aminoglucósidos · Macrólidos · Tetraciclinas · Cloranfenicol</p>
+        </div>
+        <div class="card reveal reveal-delay-4" style="border-color:rgba(251,191,36,.35);">
+          <div style="font-size:1.5em; margin-bottom:8px;">🔗</div>
+          <h3 style="color:var(--amber); font-size:var(--h3-size); margin-bottom:6px;">ADN / ARN</h3>
+          <p>Inhiben topoisomerasas o ARN-polimerasa → sin replicación</p>
+          <p style="color:var(--text-muted); margin-top:6px; font-size:var(--small-size);">Quinolonas · Rifampicina · Metronidazol</p>
+        </div>
+        <div class="card reveal reveal-delay-5" style="border-color:rgba(248,113,113,.35);">
+          <div style="font-size:1.5em; margin-bottom:8px;">🔬</div>
+          <h3 style="color:var(--red-warn); font-size:var(--h3-size); margin-bottom:6px;">Membrana celular</h3>
+          <p>Alteran permeabilidad → fuga de contenido citoplasmático</p>
+          <p style="color:var(--text-muted); margin-top:6px; font-size:var(--small-size);">Polimixinas · Daptomicina</p>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">03</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 4 — β-LACTÁMICOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-4">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);bottom:-150px;right:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:var(--content-gap);">
+        <div class="accent-line reveal" style="margin-bottom:0; flex-shrink:0;"></div>
+        <h2 class="reveal reveal-delay-1">β-Lactámicos — La familia más grande</h2>
+      </div>
+      <div class="reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+        <table class="clinical-table">
+          <thead>
+            <tr>
+              <th>Subgrupo</th>
+              <th>Ejemplos clave</th>
+              <th>Espectro principal</th>
+              <th>Uso clínico</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-teal" style="font-size:.75em;">Penicilinas</span></td>
+              <td>Amoxicilina, Ampicilina, Cloxacilina</td>
+              <td>Gram+ (Strep, Staph)</td>
+              <td>Faringitis, NAC leve, pie diabético</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-cyan" style="font-size:.75em;">Cefalosporinas</span></td>
+              <td>Cefazolina (1G), <strong style="color:var(--teal);">Ceftriaxona</strong> (3G), Cefotaxima</td>
+              <td>Gram+ y Gram− amplios</td>
+              <td><strong style="color:var(--teal);">Infecciones graves, sepsis</strong>, meningitis</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-amber" style="font-size:.75em;">Carbapenems</span></td>
+              <td><strong style="color:var(--amber);">Meropenem</strong>, Imipenem, Ertapenem</td>
+              <td>Amplísimo (incluso BLEE)</td>
+              <td>Sepsis grave, bacterias multirresistentes</td>
+            </tr>
+            <tr>
+              <td><span class="tag" style="font-size:.75em; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);">Combinados</span></td>
+              <td>Amoxicilina-Clavulanato, Pip-Tazo</td>
+              <td>+ cobertura β-lactamasas</td>
+              <td>Neumonías, infecciones abdominales</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn-band reveal reveal-delay-3">
+        <span class="warn-icon">⚠️</span>
+        <p>Riesgo de alergia cruzada entre penicilinas y cefalosporinas (~1-2%). Siempre preguntar antecedente de alergia a penicilina antes de administrar.</p>
+      </div>
+    </div>
+    <div class="section-num">04</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 5 — AMINOGLUCÓSIDOS Y QUINOLONAS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-5">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Aminoglucósidos y Quinolonas</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <h3 style="color:var(--cyan); margin-bottom:var(--element-gap);">🧪 Aminoglucósidos</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Gentamicina · Amikacina · Tobramicina</p>
+          <ul class="bullet-list" style="font-size:var(--body-size);">
+            <li>Bactericidas → bloquean ribosoma 30S</li>
+            <li>Gram− aerobios (Pseudomonas, E.coli)</li>
+            <li>Administración IV/IM — no oral (no absorbe)</li>
+            <li>Dosis única diaria: misma eficacia, menor toxicidad</li>
+          </ul>
+          <div class="warn-band" style="margin-top:10px; padding:6px 10px;">
+            <span class="warn-icon" style="font-size:1em;">⚠️</span>
+            <p style="font-size:var(--small-size);"><strong>Nefrotóxicos y ototóxicos.</strong> Monitorizar creatinina y audiometría. Furosemida potencia toxicidad.</p>
+          </div>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--amber); margin-bottom:var(--element-gap);">💊 Quinolonas (Fluoroquinolonas)</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Ciprofloxacino · Levofloxacino · Moxifloxacino</p>
+          <ul class="bullet-list" style="font-size:var(--body-size);">
+            <li>Inhiben ADN-girasa (topoisomerasa II y IV)</li>
+            <li>Buena biodisponibilidad oral → IV/oral equivalentes</li>
+            <li>Excelente penetración tisular (pulmón, próstata)</li>
+            <li>Ciprofloxacino: 1ª línea ITU complicada y Pseudomonas</li>
+          </ul>
+          <div class="warn-band" style="margin-top:10px; padding:6px 10px;">
+            <span class="warn-icon" style="font-size:1em;">⚠️</span>
+            <p style="font-size:var(--small-size);"><strong>Prolongan QTc. Riesgo tendinitis/rotura tendón de Aquiles.</strong> Evitar con antiácidos (↓absorción).</p>
+          </div>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Importancia en UCI — Terapia combinada</p>
+        <p>En sepsis por Gram− grave: β-lactámico + aminoglucósido → sinergia bactericida. Duración máx. 3-5 días para aminoglucósido y luego descalar.</p>
+      </div>
+    </div>
+    <div class="section-num">05</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 6 — MACRÓLIDOS, GLICOPÉPTIDOS Y OTROS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-6">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Otras Familias Importantes</h2>
+      <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--teal); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Macrólidos</p>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Azitromicina · Claritromicina · Eritromicina</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Bacteriostáticos → ribosoma 50S</li>
+            <li>Gérmenes atípicos (Mycoplasma, Chlamydia, Legionella)</li>
+            <li>Excelente para NAC ambulatoria</li>
+            <li>Prolongan QTc — vigilar ECG</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--red-warn); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Glicopéptidos</p>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Vancomicina · Teicoplanina</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Bactericidas → pared celular (sin β-lactámico)</li>
+            <li><strong style="color:var(--red-warn);">MRSA</strong> y Gram+ multirresistentes</li>
+            <li>Solo IV (oral solo para C. difficile intestinal)</li>
+            <li>Monitorizar niveles plasmáticos (target Cmin)</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-4">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--amber); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Nitroimidazoles</p>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Metronidazol · Tinidazol</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Bactericida → daño ADN en anaerobios</li>
+            <li>Anaerobios estrictos + protozoos (Giardia, Trichomonas)</li>
+            <li>C. difficile (oral en colitis leve)</li>
+            <li>Efecto antabuse: <strong style="color:var(--red-warn);">prohibido alcohol</strong></li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-5">
+        <p class="mech-title">Clindamicina — Lincosamida</p>
+        <p>Bacteriostático, espectro Gram+ y anaerobios. Muy útil en infecciones de tejidos blandos (pie diabético). Riesgo de colitis por C. difficile → vigilar diarrea.</p>
+      </div>
+    </div>
+    <div class="section-num">06</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 7 — RESISTENCIA BACTERIANA
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-7">
+    <div class="glow-circle" style="width:450px;height:450px;background:var(--red-warn);top:-100px;right:-80px;opacity:.08"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal" style="background:linear-gradient(90deg,var(--red-warn),var(--amber));"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Resistencia Bacteriana</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--amber); margin-bottom:var(--element-gap);">Mecanismos principales</h3>
+          <ul class="bullet-list reveal reveal-delay-3">
+            <li><strong>Producción de β-lactamasas</strong> — destruyen el anillo β-lactámico (BLEE, carbapenemasas)</li>
+            <li><strong>Modificación del blanco</strong> — PBP2a en MRSA, ribosoma en linezolid</li>
+            <li><strong>Eflujo activo</strong> — bombas que expulsan el antibiótico</li>
+            <li><strong>Impermeabilidad</strong> — pérdida de porinas en Pseudomonas</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--red-warn); margin-bottom:var(--element-gap);">Bacterias multirresistentes en Chile</h3>
+          <ul class="bullet-list reveal reveal-delay-3">
+            <li><strong style="color:var(--red-warn);">MRSA</strong> — S. aureus resistente a meticilina → vancomicina</li>
+            <li><strong style="color:var(--red-warn);">BLEE</strong> — E. coli / Klebsiella → carbapenems</li>
+            <li><strong style="color:var(--red-warn);">KPC / MBL</strong> — Enterobacterias productoras de carbapenemasas</li>
+            <li><strong style="color:var(--red-warn);">Pseudomonas MDR</strong> — piperacilina-tazobactam, ceftazidima</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn-band reveal reveal-delay-4" style="background:rgba(251,191,36,.07); border-color:rgba(251,191,36,.3);">
+        <span style="color:var(--amber); font-size:1.2em; flex-shrink:0;">💡</span>
+        <p><strong>Rol del enfermero/a:</strong> Toma de hemocultivos ANTES del antibiótico · Administración en el tiempo correcto · Vigilar signos de fracaso terapéutico · Educación al paciente sobre adherencia</p>
+      </div>
+    </div>
+    <div class="section-num">07</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 8 — FARMACOCINÉTICA CLAVE
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-8">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Farmacocinética Clínica</h2>
+      <div class="reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+        <table class="clinical-table">
+          <thead>
+            <tr>
+              <th>Principio PK/PD</th>
+              <th>Antibióticos</th>
+              <th>Implicancia clínica</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-teal" style="font-size:.75em;">Tiempo-dependiente</span></td>
+              <td>β-lactámicos, Vancomicina</td>
+              <td>Eficacia depende de <strong>tiempo sobre la MIC</strong> → infusiones prolongadas o fraccionadas. No sirve aumentar dosis.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-cyan" style="font-size:.75em;">Concentración-dep.</span></td>
+              <td>Aminoglucósidos, Quinolonas, Metronidazol</td>
+              <td>Eficacia depende del <strong>peak / MIC</strong> → dosis únicas altas más efectivas.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-amber" style="font-size:.75em;">Ajuste renal</span></td>
+              <td>Mayoría (excepto hepáticos: macrólidos, metronidazol)</td>
+              <td>En IRC / eGFR bajo: reducir dosis o ampliar intervalo. Riesgo acumulación y toxicidad.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-grid card-grid-2 reveal reveal-delay-3">
+        <div class="mech-box">
+          <p class="mech-title">Penetración al SNC</p>
+          <p>Ceftriaxona y meropenem cruzan bien la BHE inflamada → meningitis bacteriana. Las quinolonas y metronidazol también penetran.</p>
+        </div>
+        <div class="mech-box" style="border-color:var(--amber);">
+          <p class="mech-title" style="color:var(--amber);">Regla práctica de enfermería</p>
+          <p>Los β-lactámicos IV deben diluirse y pasarse en 30-60 min (algunos en 3-4 h si infusión extendida). Nunca en bolo rápido salvo indicación específica.</p>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">08</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 9 — ANTIBIÓTICOS EN SEPSIS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-9">
+    <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);bottom:-200px;left:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:var(--content-gap);">
+        <div class="accent-line reveal" style="margin-bottom:0;"></div>
+        <div>
+          <h2 class="reveal reveal-delay-1">Antibióticos en Sepsis</h2>
+          <p class="reveal reveal-delay-2" style="color:var(--text-muted); font-size:var(--small-size);">Protocolo Sobreviviendo a la Sepsis — GES Chile</p>
+        </div>
+      </div>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(248,113,113,.35);">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--red-warn); margin-bottom:8px;">⏰ HORA 1 — Regla de oro</p>
+          <ul class="bullet-list" style="font-size:var(--body-size);">
+            <li>Hemocultivos × 2 (antes del ATB)</li>
+            <li>Antibiótico <strong style="color:var(--teal);">en la primera hora</strong> del diagnóstico</li>
+            <li>Por cada hora de retraso: ↑ mortalidad ~7%</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--teal); margin-bottom:8px;">🦠 Esquemas empíricos</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Sepsis comunidad:</strong> ceftriaxona ± metronidazol</li>
+            <li><strong>Sepsis nosocomial:</strong> piperacilina-tazobactam o meropenem</li>
+            <li><strong>Sospecha MRSA:</strong> agregar vancomicina</li>
+            <li><strong>Descalar</strong> a las 48-72 h según cultivo</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Concepto descalada antibiótica</p>
+        <p>Empezar amplio → ajustar al germen identificado en cultivo. Reduce resistencia, costos y efectos adversos. El enfermero/a facilita obtención de muestras y registro oportuno.</p>
+      </div>
+    </div>
+    <div class="section-num">09</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 10 — INTERACCIONES RELEVANTES
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-10">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Interacciones Críticas</h2>
+      <div class="reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+        <table class="clinical-table">
+          <thead>
+            <tr><th>Antibiótico</th><th>+Fármaco</th><th>Riesgo</th><th>Manejo</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Aminoglucósidos</strong></td>
+              <td>Furosemida</td>
+              <td><span class="tag tag-red" style="font-size:.7em;">MAYOR</span></td>
+              <td>Ototoxicidad y nefrotoxicidad aditiva</td>
+            </tr>
+            <tr>
+              <td><strong>Ciprofloxacino</strong></td>
+              <td>Aminofilina</td>
+              <td><span class="tag tag-red" style="font-size:.7em;">MAYOR</span></td>
+              <td>↑ niveles teofilina → convulsiones, arritmias</td>
+            </tr>
+            <tr>
+              <td><strong>Metronidazol</strong></td>
+              <td>Alcohol</td>
+              <td><span class="tag tag-red" style="font-size:.7em;">MAYOR</span></td>
+              <td>Efecto antabuse severo (rubor, vómitos, hipotensión)</td>
+            </tr>
+            <tr>
+              <td><strong>Meropenem</strong></td>
+              <td>Ác. Valproico</td>
+              <td><span class="tag tag-red" style="font-size:.7em;">CRÍTICA</span></td>
+              <td>↓ niveles valproato hasta 90% → convulsiones</td>
+            </tr>
+            <tr>
+              <td><strong>Macrólidos</strong></td>
+              <td>Amiodarona / QTc</td>
+              <td><span class="tag tag-amber" style="font-size:.7em;">VIGILAR</span></td>
+              <td>Prolongación QTc → riesgo de Torsades de Pointes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mech-box reveal reveal-delay-3">
+        <p class="mech-title">Ceftriaxona — Interacción especial</p>
+        <p>No mezclar con soluciones que contengan calcio (precipita). En neonatos: contraindicada si recibe gluconato de calcio IV simultáneo.</p>
+      </div>
+    </div>
+    <div class="section-num">10</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 11 — ROL DEL ENFERMERO/A
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-11">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-100px;right:-100px;opacity:.12"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Rol del Enfermero/a en ATB</h2>
+      <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <div style="font-size:1.4em; margin-bottom:8px;">🧫</div>
+          <h3 style="color:var(--teal); font-size:var(--h3-size); margin-bottom:8px;">Antes</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Verificar alergias documentadas</li>
+            <li>Tomar hemocultivos previos al ATB</li>
+            <li>Confirmar vía de acceso IV</li>
+            <li>Revisar interacciones</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <div style="font-size:1.4em; margin-bottom:8px;">💉</div>
+          <h3 style="color:var(--cyan); font-size:var(--h3-size); margin-bottom:8px;">Durante</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Respetar tiempos de infusión</li>
+            <li>Observar primeros 15 min (anafilaxia)</li>
+            <li>Tener adrenalina disponible</li>
+            <li>Registrar hora de inicio</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-4">
+          <div style="font-size:1.4em; margin-bottom:8px;">📋</div>
+          <h3 style="color:var(--amber); font-size:var(--h3-size); margin-bottom:8px;">Después</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Monitorizar signos de respuesta</li>
+            <li>Vigilar función renal (creatinina)</li>
+            <li>Reportar RAM al equipo</li>
+            <li>Educación sobre adherencia</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn-band reveal reveal-delay-5">
+        <span class="warn-icon">🚨</span>
+        <p><strong>Anafilaxia:</strong> Rubor, urticaria, hipotensión, broncoespasmo en los primeros 15-30 min. Detener infusión · Adrenalina 0.5 mg IM · Avisar médico inmediatamente.</p>
+      </div>
+    </div>
+    <div class="section-num">11</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 12 — RESUMEN / CIERRE
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-12">
+    <div class="glow-circle" style="width:700px;height:700px;background:var(--teal);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.07"></div>
+    <div class="slide-content" style="align-items:center; text-align:center;">
+      <div class="reveal" style="margin-bottom:var(--content-gap);">
+        <span class="tag tag-teal">Resumen</span>
+      </div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap); max-width:700px;">
+        5 ideas que no puedes olvidar
+      </h2>
+      <div style="max-width:min(90vw,700px); text-align:left;">
+        <ul class="bullet-list reveal reveal-delay-2">
+          <li><strong style="color:var(--teal);">Mecanismo = familia:</strong> cada grupo actúa en un blanco diferente de la bacteria</li>
+          <li><strong style="color:var(--cyan);">β-lactámicos son tiempo-dependientes</strong> — importa el tiempo de infusión, no la dosis puntual</li>
+          <li><strong style="color:var(--amber);">Resistencia = problema global</strong> — tomar cultivos antes del ATB y descalar al resultado</li>
+          <li><strong style="color:var(--red-warn);">Aminoglucósidos y vancomicina son nefrotóxicos</strong> — monitorizar creatinina siempre</li>
+          <li><strong style="color:var(--green-ok);">Rol enfermero/a es crítico:</strong> timing correcto + vigilancia de RAM + hemocultivos previos = impacto en mortalidad</li>
+        </ul>
+      </div>
+      <div class="reveal reveal-delay-3" style="margin-top:var(--content-gap); display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <span class="tag tag-teal">ENF3013</span>
+        <span class="tag tag-cyan">UDP 2026</span>
+        <span class="tag" style="background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.15);">Consulta Rápida ENF</span>
+      </div>
+    </div>
+    <div class="section-num">12</div>
+  </section>
+
+</main>
+
+<script>
+// ====================================================
+// Presentation Controller — keyboard, wheel, touch
+// ====================================================
+const slides = Array.from(document.querySelectorAll('.slide'));
+const navDotsContainer = document.getElementById('nav-dots');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('slide-counter');
+let current = 0;
+let scrolling = false;
+
+// Build nav dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', `Ir a diapositiva ${i + 1}`);
+  dot.addEventListener('click', () => goTo(i));
+  navDotsContainer.appendChild(dot);
+});
+
+function updateUI(idx) {
+  current = idx;
+  // Update dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+  // Update progress bar
+  const pct = ((idx + 1) / slides.length) * 100;
+  progress.style.width = pct + '%';
+  // Update counter
+  counter.textContent = `${idx + 1} / ${slides.length}`;
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateUI(idx);
+}
+
+function goNext() { if (current < slides.length - 1) goTo(current + 1); }
+function goPrev() { if (current > 0) goTo(current - 1); }
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) {
+    e.preventDefault(); goNext();
+  } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+    e.preventDefault(); goPrev();
+  } else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+
+// Wheel navigation (debounced)
+document.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (scrolling) return;
+  scrolling = true;
+  if (e.deltaY > 30) goNext();
+  else if (e.deltaY < -30) goPrev();
+  setTimeout(() => { scrolling = false; }, 700);
+}, { passive: false });
+
+// Touch navigation
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (dy > 50) goNext();
+  else if (dy < -50) goPrev();
+});
+
+// IntersectionObserver: reveal animations + current slide tracking
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Trigger reveals in this slide
+      entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      // Update nav
+      const idx = slides.indexOf(entry.target);
+      if (idx !== -1) updateUI(idx);
+    }
+  });
+}, { threshold: 0.6 });
+
+slides.forEach(s => revealObserver.observe(s));
+
+// Init
+updateUI(0);
+slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>

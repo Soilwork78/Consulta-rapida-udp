@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrición Enteral y Dispositivos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            font-family: 'Manrope', sans-serif;
+            background: #0b1520;
+            color: #e0e7ff;
+        }
+
+        body {
+            background: #0b1520;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f97316, #fbbf24, #f97316);
+            z-index: 1000;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .slide {
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+            background: #0b1520;
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(249, 115, 22, 0.3);
+            border-radius: 50%;
+            animation: particle-drift linear infinite;
+        }
+
+        @keyframes particle-drift {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(20px, -15px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .anim {
+            opacity: 0;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .anim.revealed {
+            opacity: 1;
+        }
+
+        .anim.left { animation: slideInLeft 0.8s ease forwards; }
+        .anim.right { animation: slideInRight 0.8s ease forwards; }
+        .anim.up { animation: fadeInUp 0.8s ease forwards; }
+        .anim.scale { animation: scaleIn 0.8s ease forwards; }
+
+        .nav-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 999;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(249, 115, 22, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dot.active {
+            background: #f97316;
+            transform: scale(1.3);
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.6);
+        }
+
+        /* Slide 1: Cover */
+        .cover-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .cover-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: #f97316;
+            margin-bottom: 20px;
+            animation: slideInLeft 1s ease;
+            text-shadow: 0 0 30px rgba(249, 115, 22, 0.3);
+        }
+
+        .cover-subtitle {
+            font-size: 1.3rem;
+            color: #cbd5e1;
+            margin-bottom: 30px;
+            animation: slideInRight 1s ease 0.2s both;
+        }
+
+        .cover-author {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            font-weight: 300;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        /* Glass cards */
+        .glass-card {
+            background: rgba(22, 38, 58, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            color: #e0e7ff;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .decision-box {
+            background: rgba(249, 115, 22, 0.15);
+            border: 2px solid #f97316;
+            border-radius: 50px;
+            padding: 20px 30px;
+            display: inline-block;
+            margin: 10px;
+            animation: float 3s ease-in-out infinite;
+            text-align: center;
+        }
+
+        .decision-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #f97316;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .decision-label {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 900px;
+        }
+
+        .checklist {
+            text-align: left;
+            max-width: 650px;
+        }
+
+        .checklist-item {
+            padding: 12px;
+            margin: 8px 0;
+            border-left: 3px solid #f97316;
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .checklist-item::before {
+            content: '✓';
+            font-weight: 800;
+            color: #f97316;
+            font-size: 1.3rem;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            text-align: center;
+            color: #f97316;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #e0e7ff;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .warning-badge {
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+            font-weight: 600;
+            color: #ef4444;
+            position: relative;
+        }
+
+        .warning-badge::before {
+            content: '⚠';
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+
+        .floating-card {
+            background: rgba(22, 38, 58, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 280px;
+            animation: float 4s ease-in-out infinite;
+            text-align: center;
+        }
+
+        .floating-card:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .floating-card:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        .floating-card:nth-child(4) {
+            animation-delay: 1.5s;
+        }
+
+        .floating-card:nth-child(5) {
+            animation-delay: 2s;
+        }
+
+        .content-wrapper {
+            max-width: 1100px;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .flex-center {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .step-card {
+            background: rgba(22, 38, 58, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 320px;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #f97316;
+            color: #0b1520;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .icon-large {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .method-label {
+            display: inline-block;
+            background: rgba(249, 115, 22, 0.2);
+            border: 1px solid #f97316;
+            border-radius: 50px;
+            padding: 10px 20px;
+            margin: 5px;
+            color: #f97316;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .method-label.gold {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .method-label.silver {
+            background: rgba(148, 163, 184, 0.2);
+            border-color: #cbd5e1;
+            color: #cbd5e1;
+        }
+
+        .method-label.no {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .ostomy-type {
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+        }
+
+        .ostomy-type strong {
+            color: #f97316;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+
+    <!-- Slide 1: Cover -->
+    <div class="slide cover-slide">
+        <div class="particles" id="particles1"></div>
+        <div class="cover-title anim left">Nutrición Enteral</div>
+        <div class="cover-subtitle anim right">y Dispositivos de Alimentación</div>
+        <div class="cover-author anim up">ENF3015 UDP 2025</div>
+    </div>
+
+    <!-- Slide 2: Alteración Nutrición -->
+    <div class="slide">
+        <div class="particles" id="particles2"></div>
+        <div class="content-wrapper">
+            <h2>Alteración de la Nutrición</h2>
+            <div class="comparison-grid">
+                <div class="glass-card anim left">
+                    <h3>DESNUTRICIÓN</h3>
+                    <p><strong>Ingesta insuficiente</strong> para cubrir necesidades</p>
+                    <p style="margin-top: 15px; color: #f97316;">Pérdida peso, masa muscular, fatiga, debilidad inmune</p>
+                </div>
+                <div class="glass-card anim right">
+                    <h3>SOBRENUTRICIÓN/OBESIDAD</h3>
+                    <p><strong>Ingesta excesiva</strong> de calorías</p>
+                    <p style="margin-top: 15px; color: #f97316;">Mayor riesgo cardiovascular, metabolismo alterado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Valoración Nutricional -->
+    <div class="slide">
+        <div class="particles" id="particles3"></div>
+        <div class="content-wrapper">
+            <h2>Valoración Nutricional Integral</h2>
+            <div class="assessment-grid">
+                <div class="glass-card anim left">
+                    <h3>Antropometría</h3>
+                    <p>IMC, Pliegue Tricipital, Circunferencia</p>
+                </div>
+                <div class="glass-card anim up">
+                    <h3>Bioquímica</h3>
+                    <p>Albúmina, Prealbúmina, Hemoglobina</p>
+                </div>
+                <div class="glass-card anim up">
+                    <h3>Clínica</h3>
+                    <p>Historia, Examen físico, Síntomas</p>
+                </div>
+                <div class="glass-card anim right">
+                    <h3>Dietética</h3>
+                    <p>Ingesta 24 hrs, Preferencias, Alergias</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Enteral vs Parenteral -->
+    <div class="slide">
+        <div class="particles" id="particles4"></div>
+        <div class="content-wrapper anim up">
+            <h2>Decisión: Nutrición Enteral vs Parenteral</h2>
+            <div class="glass-card">
+                <p style="font-size: 1.2rem; margin-bottom: 30px; text-align: center; color: #f97316;">¿TRACTO GASTROINTESTINAL FUNCIONAL?</p>
+                <div class="flex-center" style="gap: 60px;">
+                    <div style="text-align: center;">
+                        <p style="font-size: 1.3rem; font-weight: 700; color: #10b981; margin-bottom: 15px;">SÍ</p>
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; border-radius: 12px; padding: 20px;">
+                            <p style="color: #10b981; font-weight: 600;">ENTERAL</p>
+                            <p style="font-size: 0.95rem; margin-top: 10px;">Más fisiológica<br>Más económica<br>Menos complicaciones</p>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <p style="font-size: 1.3rem; font-weight: 700; color: #ef4444; margin-bottom: 15px;">NO</p>
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 20px;">
+                            <p style="color: #ef4444; font-weight: 600;">PARENTERAL</p>
+                            <p style="font-size: 0.95rem; margin-top: 10px;">Tracto GI no funcional<br>Bypass intestinal<br>Mayor riesgo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Sonda Nasogástrica -->
+    <div class="slide">
+        <div class="particles" id="particles5"></div>
+        <div class="content-wrapper">
+            <h2>Sonda Nasogástrica (SNG)</h2>
+            <div class="glass-card anim up">
+                <h3 style="margin-bottom: 20px;">Indicaciones</h3>
+                <div class="checklist">
+                    <div class="checklist-item">Imposibilidad de deglutir</div>
+                    <div class="checklist-item">Alimentación a corto plazo</div>
+                    <div class="checklist-item">Descompresión gástrica</div>
+                </div>
+                <h3 style="margin-top: 30px; margin-bottom: 20px;">Técnica</h3>
+                <p><strong>1.</strong> Medir: nariz-oreja-apéndice xifoides</p>
+                <p><strong>2.</strong> Verificar posición: aspirado gástrico pH &lt; 5 O Radiografía</p>
+                <p><strong>3.</strong> Fijar sonda y marcar longitud de referencia</p>
+                <p><strong>4.</strong> Higiene nasal diaria</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Verificación SNG -->
+    <div class="slide">
+        <div class="particles" id="particles6"></div>
+        <div class="content-wrapper">
+            <h2>Verificación de Posición SNG</h2>
+            <div class="flex-center">
+                <div class="method-label gold">
+                    🥇 RADIOGRAFÍA<br>
+                    Gold Standard
+                </div>
+                <div class="method-label silver">
+                    🥈 Aspirado + pH &lt; 5<br>
+                    Recomendado
+                </div>
+                <div class="method-label no">
+                    ❌ Auscultación<br>
+                    NO como único método
+                </div>
+            </div>
+            <p style="margin-top: 40px; text-align: center; max-width: 700px; font-weight: 600; color: #f97316;">IMPORTANTE: Nunca usar sólo el método del aire (auscultación). Siempre combinar con otro método.</p>
+        </div>
+    </div>
+
+    <!-- Slide 7: Administración Enteral -->
+    <div class="slide">
+        <div class="particles" id="particles7"></div>
+        <div class="content-wrapper">
+            <h2>Modos de Administración Enteral</h2>
+            <div class="flex-center">
+                <div class="floating-card anim left">
+                    <h3>CONTINUA</h3>
+                    <p>Bomba infusora</p>
+                    <p style="font-size: 0.95rem; margin-top: 10px; color: #10b981;">✓ Menor riesgo aspiración</p>
+                </div>
+                <div class="floating-card anim up">
+                    <h3>INTERMITENTE</h3>
+                    <p>Bolos 4-6 veces/día</p>
+                    <p style="font-size: 0.95rem; margin-top: 10px; color: #fbbf24;">⚡ Más fisiológica</p>
+                </div>
+                <div class="floating-card anim right">
+                    <h3>CÍCLICA</h3>
+                    <p>Nocturna</p>
+                    <p style="font-size: 0.95rem; margin-top: 10px; color: #38bdf8;">✓ Movilidad diurna</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Complicaciones Enteral -->
+    <div class="slide">
+        <div class="particles" id="particles8"></div>
+        <div class="content-wrapper">
+            <h2>Complicaciones de Nutrición Enteral</h2>
+            <div class="card-grid">
+                <div class="glass-card anim left">
+                    <h3>GI</h3>
+                    <p><strong>Diarrea, vómitos, distensión abdominal</strong></p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Intolerancia osmótica</p>
+                </div>
+                <div class="glass-card anim up">
+                    <h3>Mecánicas</h3>
+                    <p><strong>Obstrucción, desplazamiento, kinked</strong></p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Presencia + movilización</p>
+                </div>
+                <div class="glass-card anim up">
+                    <h3>Metabólicas</h3>
+                    <p><strong>Hiperglucemia, electrolitos alterados</strong></p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Monitorización diaria</p>
+                </div>
+                <div class="glass-card anim right">
+                    <h3>Infecciosas</h3>
+                    <p><strong>Neumonía aspirativa, sinusitis</strong></p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Elevación cabecera 30-45°</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Gastrostomía -->
+    <div class="slide">
+        <div class="particles" id="particles9"></div>
+        <div class="content-wrapper">
+            <h2>Gastrostomía (PEG)</h2>
+            <div class="comparison-grid">
+                <div class="glass-card anim left">
+                    <h3>Indicaciones</h3>
+                    <p><strong>Disfagia neurológica</strong> (ACV, Parkinson)</p>
+                    <p><strong>Cáncer</strong> cabeza/cuello/esófago</p>
+                    <p><strong>Nutrición prolongada</strong> (&gt; 4 semanas)</p>
+                </div>
+                <div class="glass-card anim right">
+                    <h3>Cuidados</h3>
+                    <p>✓ Proteger sitio de estoma</p>
+                    <p>✓ Verificar posición antes alimentar</p>
+                    <p>✓ Higiene del sitio</p>
+                    <p>✓ Vigilar integridad</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Ostomías -->
+    <div class="slide">
+        <div class="particles" id="particles10"></div>
+        <div class="content-wrapper">
+            <h2>Dispositivos Intestinales - Ostomías</h2>
+            <div class="flex-center">
+                <div class="floating-card anim left">
+                    <span class="icon-large">🔴</span>
+                    <h3>COLOSTOMÍA</h3>
+                    <p>Colon. Heces pastosas</p>
+                </div>
+                <div class="floating-card anim up">
+                    <span class="icon-large">🟡</span>
+                    <h3>ILEOSTOMÍA</h3>
+                    <p>Íleon. Heces líquidas, irritantes</p>
+                </div>
+                <div class="floating-card anim right">
+                    <span class="icon-large">🟢</span>
+                    <h3>YEYUNOSTOMÍA</h3>
+                    <p>Yeyuno. Alimentación</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Cuidados Ostomía -->
+    <div class="slide">
+        <div class="particles" id="particles11"></div>
+        <div class="content-wrapper">
+            <h2>Cuidados de la Ostomía</h2>
+            <div class="glass-card anim up">
+                <div class="checklist">
+                    <div class="checklist-item">Lavar estoma con agua y jabón neutro</div>
+                    <div class="checklist-item">Secar sin frotar (toques suaves)</div>
+                    <div class="checklist-item">Bolsa/parche ajustado al diámetro estoma</div>
+                    <div class="checklist-item">Vaciar bolsa cuando 1/3 llena</div>
+                    <div class="checklist-item">Cambio cada 5-7 días (ileostomía)</div>
+                    <div class="checklist-item">Vigilar piel periestomal (irritación, dermatitis)</div>
+                    <div class="checklist-item">Educar sobre adaptación psicológica</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: Complicaciones Ostomía -->
+    <div class="slide">
+        <div class="particles" id="particles12"></div>
+        <div class="content-wrapper">
+            <h2>Complicaciones de la Ostomía</h2>
+            <div class="card-grid">
+                <div class="warning-badge anim left">Edema estoma (primeras semanas)</div>
+                <div class="warning-badge anim up">Necrosis (isquemia tisular)</div>
+                <div class="warning-badge anim up">Retracción estoma</div>
+                <div class="warning-badge anim up">Prolapso intestinal</div>
+                <div class="warning-badge anim up">Dermatitis periestomal</div>
+                <div class="warning-badge anim right">Aspectos psicológicos (imagen corporal)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 13: ROL ENFERMERÍA -->
+    <div class="slide">
+        <div class="particles" id="particles13"></div>
+        <div class="content-wrapper">
+            <h2>ROL de Enfermería en Nutrición</h2>
+            <div class="flex-center">
+                <div class="floating-card anim left">
+                    <span class="icon-large">📊</span>
+                    <h3>Valoración Nutricional</h3>
+                    <p>Integral, riesgo desnutrición</p>
+                </div>
+                <div class="floating-card anim up">
+                    <span class="icon-large">✓</span>
+                    <h3>Verificar Dispositivos</h3>
+                    <p>Posición, integridad, fijación</p>
+                </div>
+                <div class="floating-card anim up">
+                    <span class="icon-large">🛡️</span>
+                    <h3>Técnica Estéril</h3>
+                    <p>Cambios de sonda/bolsa</p>
+                </div>
+                <div class="floating-card anim up">
+                    <span class="icon-large">📈</span>
+                    <h3>Monitorizar Tolerancia</h3>
+                    <p>GI, vitales, balance hidromineral</p>
+                </div>
+                <div class="floating-card anim right">
+                    <span class="icon-large">📚</span>
+                    <h3>Educar</h3>
+                    <p>Paciente y familia. Autocuidado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-dots" id="navDots"></div>
+
+    <script>
+        const slideCount = 13;
+        let currentSlide = 0;
+
+        // Generate particles
+        function generateParticles(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDuration = (2 + Math.random() * 2) + 's';
+                particle.style.animationDelay = Math.random() * 1 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Generate navigation dots
+        function generateNavDots() {
+            const navDots = document.getElementById('navDots');
+            for (let i = 0; i < slideCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => {
+                    window.scrollTo({
+                        top: window.innerHeight * i,
+                        behavior: 'smooth'
+                    });
+                };
+                navDots.appendChild(dot);
+            }
+        }
+
+        // Initialize animations
+        function initAnimations() {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.anim').forEach(el => observer.observe(el));
+        }
+
+        // Update progress and nav dots
+        function updateProgress() {
+            const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+            document.querySelector('.progress-bar').style.width = scrollPercent + '%';
+
+            const currentSlideNum = Math.round(window.scrollY / window.innerHeight);
+            document.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlideNum);
+            });
+        }
+
+        // Keyboard navigation
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown' || e.key === ' ') {
+                window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+                window.scrollBy({ top: -window.innerHeight, behavior: 'smooth' });
+                e.preventDefault();
+            }
+        });
+
+        // Initialize
+        for (let i = 1; i <= slideCount; i++) {
+            generateParticles('particles' + i);
+        }
+        generateNavDots();
+        initAnimations();
+        window.addEventListener('scroll', updateProgress);
+        updateProgress();
+    </script>
+</body>
+</html>

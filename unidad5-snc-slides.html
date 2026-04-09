@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farmacología del Sistema Nervioso — ENF3013 UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ======================================================
+   VIEWPORT FITTING: MANDATORY BASE STYLES
+   ====================================================== */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 100%;
+  overflow: hidden;
+  padding: var(--slide-padding);
+}
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+
+  /* Paleta médica-clínica: dark teal + slate */
+  --bg-dark:    #0b1520;
+  --bg-mid:     #111e2e;
+  --bg-card:    #16263a;
+  --teal:       #00c9a7;
+  --teal-dim:   #00917a;
+  --cyan:       #38bdf8;
+  --amber:      #fbbf24;
+  --red-warn:   #f87171;
+  --green-ok:   #4ade80;
+  --text-main:  #e8f1fb;
+  --text-muted: #7a9ab8;
+  --border:     rgba(0, 201, 167, 0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-main);
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-size: var(--body-size);
+}
+
+/* ── Typography ────────────────────────────────────────── */
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+
+/* ── Background layers ─────────────────────────────────── */
+.bg-gradient {
+  background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%);
+}
+.grid-overlay::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.glow-circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: .3;
+}
+
+/* ── Nav dots ──────────────────────────────────────────── */
+#nav-dots {
+  position: fixed;
+  right: clamp(12px, 2vw, 28px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  cursor: pointer;
+  transition: all .25s;
+}
+.dot.active {
+  background: var(--teal);
+  width: 7px; height: 14px;
+  border-radius: 4px;
+}
+.dot:hover { background: var(--cyan); }
+
+/* ── Progress bar ──────────────────────────────────────── */
+#progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal), var(--cyan));
+  transition: width .3s ease;
+  z-index: 200;
+}
+
+/* ── Slide counter ─────────────────────────────────────── */
+#slide-counter {
+  position: fixed;
+  bottom: clamp(12px, 2vh, 24px);
+  right: clamp(16px, 2.5vw, 32px);
+  font-family: var(--font-mono);
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  z-index: 100;
+}
+
+/* ── Keyboard hint ─────────────────────────────────────── */
+#kbd-hint {
+  position: fixed;
+  bottom: clamp(12px, 2vh, 24px);
+  left: clamp(16px, 2.5vw, 32px);
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  z-index: 100;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.kbd {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: .75em;
+}
+
+/* ── Reveal animation ──────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .55s ease, transform .55s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+.reveal-delay-5 { transition-delay: .5s; }
+.reveal-delay-6 { transition-delay: .6s; }
+
+/* ── Tags / badges ─────────────────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: var(--small-size);
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+
+/* ── Cards ─────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: clamp(8px, 1.5vw, 16px);
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+}
+.card-grid {
+  display: grid;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+.card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* ── Accent line ───────────────────────────────────────── */
+.accent-line {
+  width: clamp(40px, 6vw, 80px);
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal), var(--cyan));
+  border-radius: 2px;
+  margin-bottom: var(--content-gap);
+}
+
+/* ── Table ─────────────────────────────────────────────── */
+.clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--small-size);
+}
+.clinical-table th {
+  background: rgba(0,201,167,.12);
+  color: var(--teal);
+  padding: clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 14px);
+  text-align: left;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--small-size);
+}
+.clinical-table td {
+  padding: clamp(4px, 1vw, 9px) clamp(6px, 1.5vw, 14px);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  vertical-align: top;
+  line-height: 1.45;
+}
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+
+/* ── Bullet list ───────────────────────────────────────── */
+.bullet-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.35rem, 1vh, 0.7rem);
+}
+.bullet-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.bullet-list li::before {
+  content: '▸';
+  color: var(--teal);
+  flex-shrink: 0;
+  margin-top: .1em;
+}
+
+/* ── Mechanism box ─────────────────────────────────────── */
+.mech-box {
+  border-left: 3px solid var(--teal);
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 1.5vw, 18px);
+  background: rgba(0,201,167,.06);
+  border-radius: 0 8px 8px 0;
+}
+.mech-box .mech-title {
+  font-size: var(--small-size);
+  font-weight: 700;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 4px;
+}
+
+/* ── Warning band ──────────────────────────────────────── */
+.warn-band {
+  background: rgba(248,113,113,.08);
+  border: 1px solid rgba(248,113,113,.25);
+  border-radius: 8px;
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 1.5vw, 18px);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+
+/* ── Section number ────────────────────────────────────── */
+.section-num {
+  font-family: var(--font-mono);
+  font-size: clamp(3rem, 12vw, 9rem);
+  font-weight: 700;
+  color: rgba(0,201,167,.08);
+  position: absolute;
+  right: var(--slide-padding);
+  bottom: clamp(1rem, 4vh, 3rem);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Responsive adjustments ────────────────────────────── */
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(0.75rem, 3vw, 2rem);
+    --content-gap: clamp(0.35rem, 1.5vw, 0.85rem);
+    --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+    --h2-size: clamp(1rem, 3vw, 1.75rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-padding: clamp(0.5rem, 2.5vw, 1.2rem);
+    --content-gap: clamp(0.25rem, 1vw, 0.6rem);
+    --title-size: clamp(1.1rem, 4vw, 1.8rem);
+    --body-size: clamp(0.65rem, 1.2vw, 0.88rem);
+  }
+  #nav-dots, #kbd-hint, .section-num { display: none; }
+}
+@media (max-height: 500px) {
+  :root {
+    --slide-padding: clamp(0.4rem, 2vw, 0.9rem);
+    --title-size: clamp(1rem, 3.5vw, 1.4rem);
+    --h2-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    --body-size: clamp(0.62rem, 1vw, 0.8rem);
+  }
+}
+@media (max-width: 600px) {
+  :root { --title-size: clamp(1.25rem, 7vw, 2.2rem); }
+  .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.2s !important;
+  }
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div id="progress"></div>
+
+<!-- Nav dots -->
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+
+<!-- Slide counter -->
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+
+<!-- Keyboard hint -->
+<div id="kbd-hint">
+  <span class="kbd">↑↓</span>
+  <span class="kbd">← →</span>
+  <span style="margin-left:4px">navegar</span>
+</div>
+
+<main>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 1 — PORTADA
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-1">
+    <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.12"></div>
+    <div class="glow-circle" style="width:400px;height:400px;background:var(--cyan);bottom:-100px;left:-50px;opacity:.1"></div>
+    <div class="slide-content" style="justify-content:center;">
+      <div style="max-width:min(90vw,820px);">
+        <div class="reveal" style="margin-bottom:var(--content-gap);">
+          <span class="tag tag-teal">ENF3013 · Farmacología</span>
+        </div>
+        <h1 class="reveal reveal-delay-1" style="color:var(--text-main); margin-bottom:var(--content-gap);">
+          Farmacología del<br><span style="color:var(--teal);">Sistema Nervioso</span>
+        </h1>
+        <p class="reveal reveal-delay-2" style="color:var(--text-muted); max-width:560px; margin-bottom:var(--content-gap);">
+          SNV · Benzodiacepinas · Antidepresivos · Antipsicóticos · Antiparkinson · Alzheimer
+        </p>
+        <div class="reveal reveal-delay-3" style="display:flex; gap:clamp(12px,2vw,24px); flex-wrap:wrap; align-items:center;">
+          <div style="font-size:var(--small-size); color:var(--text-muted);">
+            <strong style="color:var(--text-main);">Enfermería 2° año</strong><br>
+            Universidad Diego Portales · 2026
+          </div>
+          <div style="width:1px; height:32px; background:var(--border);"></div>
+          <div style="font-size:var(--small-size); color:var(--text-muted);">
+            12 diapositivas<br>
+            <span style="color:var(--teal);">↓ para avanzar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">01</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 2 — SISTEMA NERVIOSO VEGETATIVO
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-2">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-100px;left:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Sistema Nervioso Vegetativo (SNV)</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <p class="mech-title mono" style="font-size:var(--small-size); color:var(--teal); font-weight:700; margin-bottom:8px; letter-spacing:.8px;">SIMPÁTICO</p>
+          <p style="font-size:var(--body-size); margin-bottom:6px;"><strong>Neurotransmisor:</strong> Noradrenalina (NA)</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Receptores α1 (vasoconstricción)</li>
+            <li>Receptores α2 (feedback negativo)</li>
+            <li>Receptores β1 (corazón)</li>
+            <li>Receptores β2 (broncos, vasos)</li>
+          </ul>
+          <div class="tag tag-teal" style="margin-top:10px;">Fight or flight</div>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <p class="mech-title mono" style="font-size:var(--small-size); color:var(--amber); font-weight:700; margin-bottom:8px; letter-spacing:.8px;">PARASIMPÁTICO</p>
+          <p style="font-size:var(--body-size); margin-bottom:6px;"><strong>Neurotransmisor:</strong> Acetilcolina (ACh)</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Receptores Nicotínicos (N) — efectores esqueléticos</li>
+            <li>Receptores Muscarínicos (M):
+              <ul class="bullet-list" style="margin-left:12px; margin-top:4px;">
+                <li>M1 (secretión)</li>
+                <li>M2-M3 (cardíaco, broncos)</li>
+              </ul>
+            </li>
+          </ul>
+          <div class="tag tag-amber" style="margin-top:10px;">Rest and digest</div>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Importancia clínica</p>
+        <p>Los fármacos que modulan SNV son fundamentales en UCI, anestesia y manejo de crisis hipertensivas. El equilibrio simpático-parasimpático determina el estado hemodinámico.</p>
+      </div>
+    </div>
+    <div class="section-num">02</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 3 — SIMPATICOMIMÉTICOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-3">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Simpaticomiméticos (Adrenérgicos)</h2>
+      <div class="card-grid card-grid-2" style="gap:clamp(0.5rem,1.5vw,1rem);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(0,201,167,.35);">
+          <h3 style="color:var(--teal); font-size:var(--h3-size); margin-bottom:6px;">Adrenalina (Epinefrina)</h3>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Estimula α + β</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Presión arterial: ↑ sistólica, ↓ diastólica (inotrópico+cronotrópico)</li>
+            <li>Anafilaxia: 0.5 mg IM</li>
+            <li>Paro cardiorrespiratorio: 1 mg IV cada 3-5 min</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3" style="border-color:rgba(56,189,248,.35);">
+          <h3 style="color:var(--cyan); font-size:var(--h3-size); margin-bottom:6px;">Noradrenalina</h3>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Estimula α1 >> β1</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Vasoconstricción pura → shock séptico</li>
+            <li>No dilata vías aéreas (a diferencia de adrenalina)</li>
+            <li>IV continua 0.05-0.5 mcg/kg/min</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-4" style="border-color:rgba(251,191,36,.35);">
+          <h3 style="color:var(--amber); font-size:var(--h3-size); margin-bottom:6px;">Dopamina</h3>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Efecto dosis-dependiente</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Baja: efecto dopaminérgico → diuresis</li>
+            <li>Media: inotropismo (β1)</li>
+            <li>Alta: vasoconstricción (α)</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-5" style="border-color:rgba(248,113,113,.35);">
+          <h3 style="color:var(--red-warn); font-size:var(--h3-size); margin-bottom:6px;">Dobutamina</h3>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Selectiva β1</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Inotrópico puro (↑ contractilidad sin vasoconstricción)</li>
+            <li>Insuficiencia cardíaca descompensada</li>
+            <li>Choque cardiogénico</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">03</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 4 — ANTICOLINÉRGICOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-4">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);bottom:-150px;right:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:var(--content-gap);">
+        <div class="accent-line reveal" style="margin-bottom:0; flex-shrink:0;"></div>
+        <h2 class="reveal reveal-delay-1">Anticolinérgicos (Antagonistas muscarínicos)</h2>
+      </div>
+      <div class="reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+        <table class="clinical-table">
+          <thead>
+            <tr>
+              <th>Fármaco</th>
+              <th>Mecanismo</th>
+              <th>Usos clínicos</th>
+              <th>Efectos adversos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Atropina</strong></td>
+              <td>Bloquea M (todos)</td>
+              <td>Bradicardia, antídoto organofosforados</td>
+              <td>Sequedad boca, visión borrosa, retención urinaria</td>
+            </tr>
+            <tr>
+              <td><strong>Bromuro de ipratropio</strong></td>
+              <td>Inhalado — bloquea M3</td>
+              <td>EPOC, broncoespasmo</td>
+              <td>Boca seca (local)</td>
+            </tr>
+            <tr>
+              <td><strong>Escopolamina (Hioscina)</strong></td>
+              <td>M1 y M2, cruza BHE</td>
+              <td>Cinetosis, sedación preoperatoria</td>
+              <td>Somnolencia, desorientación, retención urinaria</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn-band reveal reveal-delay-3">
+        <span class="warn-icon">⚠️</span>
+        <p><strong>Íleo paralítico:</strong> Dosis excesivas bloquean ACh en sistema digestivo → íleo (no evacuaciones). Vigilar abdomen distendido. Usar metoclopramida con precaución.</p>
+      </div>
+    </div>
+    <div class="section-num">04</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 5 — BENZODIACEPINAS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-5">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Benzodiacepinas</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <h3 style="color:var(--cyan); margin-bottom:var(--element-gap);">🧠 Mecanismo GABA-A</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Diazepam · Lorazepam · Midazolam</p>
+          <ul class="bullet-list" style="font-size:var(--body-size);">
+            <li>Potencian receptor GABA-A → ↑ inhibición neuronal</li>
+            <li>Ansiolíticas, sedantes, miorrelajantes, anticonvulsivantes</li>
+            <li>Lorazepam: corta vida media, IM rápido (UCI)</li>
+            <li>Midazolam: inducción anestésica, sedación pediátrica</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--amber); margin-bottom:var(--element-gap);">⚠️ Dependencia y Abstinencia</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Síndrome de abstinencia grave</p>
+          <ul class="bullet-list" style="font-size:var(--body-size);">
+            <li>Insomnio, temblor, sudoración, ansiedad</li>
+            <li>Convulsiones (si uso prolongado > 2-4 semanas)</li>
+            <li>NUNCA suspender abruptamente</li>
+            <li>Destete lento (reducir 10% cada 1-2 semanas)</li>
+          </ul>
+          <div class="warn-band" style="margin-top:10px; padding:6px 10px;">
+            <span class="warn-icon" style="font-size:1em;">⚠️</span>
+            <p style="font-size:var(--small-size);"><strong>Depresión SNC + alcohol = riesgo letal.</strong> Vigilar depresión respiratoria.</p>
+          </div>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Flumazenil — Antídoto</p>
+        <p>Antagonista competitivo GABA-A. Revierte depresión respiratoria (0.2-0.5 mg IV). Riesgo: convulsiones en pacientes dependientes o toxicidad tricíclicos concurrente.</p>
+      </div>
+    </div>
+    <div class="section-num">05</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 6 — ANESTÉSICOS E HIPNÓTICOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-6">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Anestésicos e Hipnóticos en UCI</h2>
+      <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--teal); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Propofol</p>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Inducción + sedación UCI</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Hipnótico rápido (IV bolus 1-2 mg/kg)</li>
+            <li>Hipotensión, apnea, bradicardia</li>
+            <li>Síndrome infusión propofol: depresión miocárdica grave</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--red-warn); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Ketamina</p>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Disociativo anestésico</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Antagonista NMDA</li>
+            <li>Mantiene reflejos protectores</li>
+            <li>Alucinaciones post-operatorias</li>
+            <li>Emergencia pediátrica común</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-4">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--amber); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Dexmedetomidina</p>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;">Agonista α2 selectivo</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Sedación reversible sin depresión respiratoria</li>
+            <li>UCI: delirio post-operatorio ↓</li>
+            <li>Inicio 1 mcg/kg infusión 10 min</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-5">
+        <p class="mech-title">Vigilancia anestésica</p>
+        <p>Monitorizar PAM, FC, SpO2, capnografía en infusión propofol. Tener bolsa-mascarilla disponible. Dexmedetomidina causa bradicardia — vigilar FC.</p>
+      </div>
+    </div>
+    <div class="section-num">06</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 7 — ANTIDEPRESIVOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-7">
+    <div class="glow-circle" style="width:450px;height:450px;background:var(--red-warn);top:-100px;right:-80px;opacity:.08"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal" style="background:linear-gradient(90deg,var(--red-warn),var(--amber));"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Antidepresivos</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--teal); margin-bottom:var(--element-gap);">ISRS (Primera línea)</h3>
+          <ul class="bullet-list reveal reveal-delay-3">
+            <li><strong>Fluoxetina, Sertralina, Paroxetina</strong></li>
+            <li>Inhiben recaptación serotonina (5-HT)</li>
+            <li>Menos efectos adversos que ADT</li>
+            <li>Latencia: 2-4 semanas para efecto terapéutico</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--amber); margin-bottom:var(--element-gap);">IRSN (Venlafaxina)</h3>
+          <ul class="bullet-list reveal reveal-delay-3">
+            <li>Inhiben recaptación serotonina + NA</li>
+            <li>Mayor eficacia en depresión moderada-grave</li>
+            <li>Hipertensión dosis-dependiente</li>
+            <li>Vigilar PAM especialmente en >225 mg/día</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card-grid card-grid-2 reveal reveal-delay-4">
+        <div class="mech-box">
+          <p class="mech-title">Antidepresivos Tricíclicos (ADT)</p>
+          <p>Amitriptilina, nortriptilina. Inhiben recaptación 5-HT+NA. Efectos anticolinérgicos: retención urinaria, estreñimiento, taquicardia. Cardiotóxicos en sobredosis.</p>
+        </div>
+        <div class="warn-band" style="background:rgba(248,113,113,.08); border-color:rgba(248,113,113,.3);">
+          <span style="color:var(--red-warn); font-size:1.2em; flex-shrink:0;">⚠️</span>
+          <p style="font-size:var(--small-size);"><strong>Síndrome serotoninérgico:</strong> fiebre, rigidez muscular, hiperreflexia. Riesgo: ISRS + tramadol/IMAO. Suspender ISRS si se prescribe IMAO (esperar 5 semanas fluoxetina).</p>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">07</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 8 — ANTIPSICÓTICOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-8">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Antipsicóticos</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <h3 style="color:var(--red-warn); margin-bottom:var(--element-gap);">Típicos (Bloqueadores D2)</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Haloperidol · Clorpromazina</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Bloquean receptores dopamina D2</li>
+            <li>Síntomas extrapiramidales (EPS):
+              <ul class="bullet-list" style="margin-left:12px; margin-top:4px;">
+                <li>Distonía aguda (rigidez muscular)</li>
+                <li>Acatisia (inquietud), parkinsonismo</li>
+                <li>Discinesia tardía (irreversible)</li>
+              </ul>
+            </li>
+            <li>Antídoto: difenhidramina o benztropina IM</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--cyan); margin-bottom:var(--element-gap);">Atípicos (Segunda generación)</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Clozapina · Risperidona · Quetiapina</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Bloquean D2 + 5-HT2A (mejor tolerancia)</li>
+            <li>Menos EPS que típicos</li>
+            <li>Clozapina: agranulocitosis (monitorizar WBC)</li>
+            <li>Síndrome neuroléptico maligno: fiebre, rigidez, CK ↑↑↑ (raro pero mortal)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Hiperprolactinemia</p>
+        <p>Bloqueo D2 en hipotálamo → aumento prolactina. Síntomas: ginecomastia, disfunción eréctil, amenorrea. Ponderar cambio a atípicos.</p>
+      </div>
+    </div>
+    <div class="section-num">08</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 9 — ANTIPARKINSON
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-9">
+    <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);bottom:-200px;left:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:var(--content-gap);">
+        <div class="accent-line reveal" style="margin-bottom:0;"></div>
+        <div>
+          <h2 class="reveal reveal-delay-1">Fármacos Antiparkinson</h2>
+          <p class="reveal reveal-delay-2" style="color:var(--text-muted); font-size:var(--small-size);">Restaurar balance dopamina-acetilcolina</p>
+        </div>
+      </div>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(0,201,167,.35);">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--teal); margin-bottom:8px;">Levodopa (L-DOPA)</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Precursor dopamina que cruza BHE</li>
+            <li>Siempre con carbidopa (inhibidor AADC) para ↓ toxicidad periférica</li>
+            <li>Fluctuaciones motoras ("on/off") con el tiempo</li>
+            <li>Discinesias involuntarias crónicas</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3" style="border-color:rgba(56,189,248,.35);">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--cyan); margin-bottom:8px;">Agonistas dopaminérgicos</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Bromocriptina, pramipexol, ropinirol</li>
+            <li>Estimulan receptores dopamina directamente</li>
+            <li>Síndrome de control de impulsos (juego patológico)</li>
+            <li>Edema periférico, alucinaciones</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-4" style="border-color:rgba(251,191,36,.35);">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--amber); margin-bottom:8px;">Inhibidores MAO-B</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Selegilina, rasagilina</li>
+            <li>Previenen degradación dopamina</li>
+            <li>Posible neuro-protección</li>
+            <li>Efecto adrenérgico leve (no requiere restricción tiramina)</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-5">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--red-warn); margin-bottom:8px;">Anticolinérgicos (Benztropina)</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Bloquean ACh para rebalancear dopamina</li>
+            <li>Útil para distonía aguda (EPS)</li>
+            <li>Poco efecto en temblor/bradicinesia</li>
+            <li>Efectos anticolinérgicos molestos</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">09</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 10 — ALZHEIMER
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-10">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Fármacos para Alzheimer</h2>
+      <div class="reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+        <table class="clinical-table">
+          <thead>
+            <tr>
+              <th>Clase</th>
+              <th>Ejemplos</th>
+              <th>Mecanismo</th>
+              <th>Efecto clínico</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-teal" style="font-size:.75em;">Inhibidores AChE</span></td>
+              <td>Donepezilo, Rivastigmina, Galantamina</td>
+              <td>Bloquean enzima acetilcolinesterasa → ↑ ACh</td>
+              <td>Enlentece progresión leve-moderada 6-12 meses</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-cyan" style="font-size:.75em;">Antagonista NMDA</span></td>
+              <td>Memantina</td>
+              <td>Bloquea receptor NMDA (excitotoxicidad)</td>
+              <td>Combina con inhibidores AChE en moderado-grave</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-amber" style="font-size:.75em;">Anti-amiloide (nuevos)</span></td>
+              <td>Aducanumab (IV), Lecanemab (IV)</td>
+              <td>Anticuerpos monoclonales contra β-amiloide</td>
+              <td>Modifica enfermedad en etapas tempranas — requiere PET amiloide</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn-band reveal reveal-delay-3">
+        <span class="warn-icon">⚠️</span>
+        <p><strong>Efectos GI:</strong> Náuseas, vómitos, diarrea. Tomar durante comida. Bradicardia con inhibidores AChE (vigilar FC en cardíacos).</p>
+      </div>
+    </div>
+    <div class="section-num">10</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 11 — ANTICONVULSIVANTES
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-11">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-100px;right:-100px;opacity:.12"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Anticonvulsivantes (Antiepilépticos)</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--teal); margin-bottom:var(--element-gap);">Clásicos (Ventana terapéutica estrecha)</h3>
+          <ul class="bullet-list reveal reveal-delay-3">
+            <li><strong>Fenitoína:</strong> bloquea Na+ → monitorizar niveles plasmáticos (10-20 mcg/mL)</li>
+            <li><strong>Ácido valproico:</strong> ↑ GABA, hepatotóxico, teratogénico → monitorizar LFT</li>
+            <li><strong>Carbamazepina:</strong> inductor CYP450 → ↑ interacciones</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--amber); margin-bottom:var(--element-gap);">Nuevos (Ventana terapéutica amplia)</h3>
+          <ul class="bullet-list reveal reveal-delay-3">
+            <li><strong>Levetiracetam:</strong> mecanismo desconocido, sin interacciones, rápido</li>
+            <li><strong>Gabapentina:</strong> análogo GABA, neuropatía diabética también</li>
+            <li><strong>Pregabalina:</strong> similar gabapentina, dolor neuropático</li>
+            <li>Menores efectos secundarios y toxicidad</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Monitorización crítica</p>
+        <p>Fenitoína y valproato requieren niveles séricos regulares (ventana terapéutica). Toxicidad: ataxia, visión borrosa, sedación. Vigilar interacciones (fenitoína inductor potente).</p>
+      </div>
+    </div>
+    <div class="section-num">11</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 12 — RESUMEN
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-12">
+    <div class="glow-circle" style="width:700px;height:700px;background:var(--teal);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.07"></div>
+    <div class="slide-content" style="align-items:center; text-align:center;">
+      <div class="reveal" style="margin-bottom:var(--content-gap);">
+        <span class="tag tag-teal">Resumen Enfermería</span>
+      </div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap); max-width:700px;">
+        Vigilancia del sistema nervioso
+      </h2>
+      <div style="max-width:min(90vw,700px); text-align:left;">
+        <ul class="bullet-list reveal reveal-delay-2">
+          <li><strong style="color:var(--teal);">SNV:</strong> evaluar signos vitales (PA, FC) — fármacos adrenérgicos pueden causar hipertensión/taquicardia</li>
+          <li><strong style="color:var(--cyan);">Benzodiacepinas:</strong> vigilar sedación excesiva, depresión respiratoria, síndrome de abstinencia si destete abrupto</li>
+          <li><strong style="color:var(--amber);">Antidepresivos:</strong> esperar 2-4 semanas efecto, síndrome serotoninérgico, vigilancia QTc con tricíclicos</li>
+          <li><strong style="color:var(--red-warn);">Antipsicóticos:</strong> síntomas extrapiramidales (distonía, acatisia), hiperprolactinemia, síndrome neuroléptico maligno</li>
+          <li><strong style="color:var(--green-ok);">Anticonvulsivantes + Alzheimer:</strong> adherencia (depende eficacia), monitorización de niveles, educación al paciente sobre efectos adversos</li>
+        </ul>
+      </div>
+      <div class="reveal reveal-delay-3" style="margin-top:var(--content-gap); display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <span class="tag tag-teal">Unidad V — SNC</span>
+        <span class="tag tag-cyan">UDP 2026</span>
+        <span class="tag" style="background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.15);">Consulta Rápida ENF</span>
+      </div>
+    </div>
+    <div class="section-num">12</div>
+  </section>
+
+</main>
+
+<script>
+// ====================================================
+// Presentation Controller — keyboard, wheel, touch
+// ====================================================
+const slides = Array.from(document.querySelectorAll('.slide'));
+const navDotsContainer = document.getElementById('nav-dots');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('slide-counter');
+let current = 0;
+let scrolling = false;
+
+// Build nav dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', `Ir a diapositiva ${i + 1}`);
+  dot.addEventListener('click', () => goTo(i));
+  navDotsContainer.appendChild(dot);
+});
+
+function updateUI(idx) {
+  current = idx;
+  // Update dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+  // Update progress bar
+  const pct = ((idx + 1) / slides.length) * 100;
+  progress.style.width = pct + '%';
+  // Update counter
+  counter.textContent = `${idx + 1} / ${slides.length}`;
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateUI(idx);
+}
+
+function goNext() { if (current < slides.length - 1) goTo(current + 1); }
+function goPrev() { if (current > 0) goTo(current - 1); }
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) {
+    e.preventDefault(); goNext();
+  } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+    e.preventDefault(); goPrev();
+  } else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+
+// Wheel navigation (debounced)
+document.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (scrolling) return;
+  scrolling = true;
+  if (e.deltaY > 30) goNext();
+  else if (e.deltaY < -30) goPrev();
+  setTimeout(() => { scrolling = false; }, 700);
+}, { passive: false });
+
+// Touch navigation
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (dy > 50) goNext();
+  else if (dy < -50) goPrev();
+});
+
+// IntersectionObserver: reveal animations + current slide tracking
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Trigger reveals in this slide
+      entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      // Update nav
+      const idx = slides.indexOf(entry.target);
+      if (idx !== -1) updateUI(idx);
+    }
+  });
+}, { threshold: 0.6 });
+
+slides.forEach(s => revealObserver.observe(s));
+
+// Init
+updateUI(0);
+slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>

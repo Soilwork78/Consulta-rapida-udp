@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antiinfecciosos, Alergias y Vía Aérea — ENF3013 UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ======================================================
+   VIEWPORT FITTING: MANDATORY BASE STYLES
+   ====================================================== */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 100%;
+  overflow: hidden;
+  padding: var(--slide-padding);
+}
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+
+  /* Paleta médica-clínica: dark teal + slate */
+  --bg-dark:    #0b1520;
+  --bg-mid:     #111e2e;
+  --bg-card:    #16263a;
+  --teal:       #00c9a7;
+  --teal-dim:   #00917a;
+  --cyan:       #38bdf8;
+  --amber:      #fbbf24;
+  --red-warn:   #f87171;
+  --green-ok:   #4ade80;
+  --text-main:  #e8f1fb;
+  --text-muted: #7a9ab8;
+  --border:     rgba(0, 201, 167, 0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-main);
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-size: var(--body-size);
+}
+
+/* ── Typography ────────────────────────────────────────── */
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+
+/* ── Background layers ─────────────────────────────────── */
+.bg-gradient {
+  background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%);
+}
+.grid-overlay::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.glow-circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: .3;
+}
+
+/* ── Nav dots ──────────────────────────────────────────── */
+#nav-dots {
+  position: fixed;
+  right: clamp(12px, 2vw, 28px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  cursor: pointer;
+  transition: all .25s;
+}
+.dot.active {
+  background: var(--teal);
+  width: 7px; height: 14px;
+  border-radius: 4px;
+}
+.dot:hover { background: var(--cyan); }
+
+/* ── Progress bar ──────────────────────────────────────── */
+#progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal), var(--cyan));
+  transition: width .3s ease;
+  z-index: 200;
+}
+
+/* ── Slide counter ─────────────────────────────────────── */
+#slide-counter {
+  position: fixed;
+  bottom: clamp(12px, 2vh, 24px);
+  right: clamp(16px, 2.5vw, 32px);
+  font-family: var(--font-mono);
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  z-index: 100;
+}
+
+/* ── Keyboard hint ─────────────────────────────────────── */
+#kbd-hint {
+  position: fixed;
+  bottom: clamp(12px, 2vh, 24px);
+  left: clamp(16px, 2.5vw, 32px);
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  z-index: 100;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.kbd {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: .75em;
+}
+
+/* ── Reveal animation ──────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .55s ease, transform .55s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+.reveal-delay-5 { transition-delay: .5s; }
+.reveal-delay-6 { transition-delay: .6s; }
+
+/* ── Tags / badges ─────────────────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: var(--small-size);
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+
+/* ── Cards ─────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: clamp(8px, 1.5vw, 16px);
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+}
+.card-grid {
+  display: grid;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+.card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* ── Accent line ───────────────────────────────────────── */
+.accent-line {
+  width: clamp(40px, 6vw, 80px);
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal), var(--cyan));
+  border-radius: 2px;
+  margin-bottom: var(--content-gap);
+}
+
+/* ── Table ─────────────────────────────────────────────── */
+.clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--small-size);
+}
+.clinical-table th {
+  background: rgba(0,201,167,.12);
+  color: var(--teal);
+  padding: clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 14px);
+  text-align: left;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--small-size);
+}
+.clinical-table td {
+  padding: clamp(4px, 1vw, 9px) clamp(6px, 1.5vw, 14px);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  vertical-align: top;
+  line-height: 1.45;
+}
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+
+/* ── Bullet list ───────────────────────────────────────── */
+.bullet-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.35rem, 1vh, 0.7rem);
+}
+.bullet-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.bullet-list li::before {
+  content: '▸';
+  color: var(--teal);
+  flex-shrink: 0;
+  margin-top: .1em;
+}
+
+/* ── Mechanism box ─────────────────────────────────────── */
+.mech-box {
+  border-left: 3px solid var(--teal);
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 1.5vw, 18px);
+  background: rgba(0,201,167,.06);
+  border-radius: 0 8px 8px 0;
+}
+.mech-box .mech-title {
+  font-size: var(--small-size);
+  font-weight: 700;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 4px;
+}
+
+/* ── Warning band ──────────────────────────────────────── */
+.warn-band {
+  background: rgba(248,113,113,.08);
+  border: 1px solid rgba(248,113,113,.25);
+  border-radius: 8px;
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 1.5vw, 18px);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+
+/* ── Section number ────────────────────────────────────── */
+.section-num {
+  font-family: var(--font-mono);
+  font-size: clamp(3rem, 12vw, 9rem);
+  font-weight: 700;
+  color: rgba(0,201,167,.08);
+  position: absolute;
+  right: var(--slide-padding);
+  bottom: clamp(1rem, 4vh, 3rem);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Responsive adjustments ────────────────────────────── */
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(0.75rem, 3vw, 2rem);
+    --content-gap: clamp(0.35rem, 1.5vw, 0.85rem);
+    --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+    --h2-size: clamp(1rem, 3vw, 1.75rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-padding: clamp(0.5rem, 2.5vw, 1.2rem);
+    --content-gap: clamp(0.25rem, 1vw, 0.6rem);
+    --title-size: clamp(1.1rem, 4vw, 1.8rem);
+    --body-size: clamp(0.65rem, 1.2vw, 0.88rem);
+  }
+  #nav-dots, #kbd-hint, .section-num { display: none; }
+}
+@media (max-height: 500px) {
+  :root {
+    --slide-padding: clamp(0.4rem, 2vw, 0.9rem);
+    --title-size: clamp(1rem, 3.5vw, 1.4rem);
+    --h2-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    --body-size: clamp(0.62rem, 1vw, 0.8rem);
+  }
+}
+@media (max-width: 600px) {
+  :root { --title-size: clamp(1.25rem, 7vw, 2.2rem); }
+  .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.2s !important;
+  }
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div id="progress"></div>
+
+<!-- Nav dots -->
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+
+<!-- Slide counter -->
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+
+<!-- Keyboard hint -->
+<div id="kbd-hint">
+  <span class="kbd">↑↓</span>
+  <span class="kbd">← →</span>
+  <span style="margin-left:4px">navegar</span>
+</div>
+
+<main>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 1 — PORTADA
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-1">
+    <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.12"></div>
+    <div class="glow-circle" style="width:400px;height:400px;background:var(--cyan);bottom:-100px;left:-50px;opacity:.1"></div>
+    <div class="slide-content" style="justify-content:center;">
+      <div style="max-width:min(90vw,820px);">
+        <div class="reveal" style="margin-bottom:var(--content-gap);">
+          <span class="tag tag-teal">ENF3013 · Farmacología</span>
+        </div>
+        <h1 class="reveal reveal-delay-1" style="color:var(--text-main); margin-bottom:var(--content-gap);">
+          Antiinfecciosos,<br><span style="color:var(--teal);">Alergias y Vía Aérea</span>
+        </h1>
+        <p class="reveal reveal-delay-2" style="color:var(--text-muted); max-width:560px; margin-bottom:var(--content-gap);">
+          Antibióticos avanzados · Antifúngicos · Antivirales · Reacción alérgica · Manejo de anafilaxia
+        </p>
+        <div class="reveal reveal-delay-3" style="display:flex; gap:clamp(12px,2vw,24px); flex-wrap:wrap; align-items:center;">
+          <div style="font-size:var(--small-size); color:var(--text-muted);">
+            <strong style="color:var(--text-main);">Enfermería 2° año</strong><br>
+            Universidad Diego Portales · 2026
+          </div>
+          <div style="width:1px; height:32px; background:var(--border);"></div>
+          <div style="font-size:var(--small-size); color:var(--text-muted);">
+            12 diapositivas<br>
+            <span style="color:var(--teal);">↓ para avanzar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">01</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 2 — QUINOLONAS, MACRÓLIDOS, GLICOPÉPTIDOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-2">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-100px;left:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Quinolonas, Macrólidos y Glicopéptidos</h2>
+      <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(251,191,36,.35);">
+          <h3 style="color:var(--amber); font-size:var(--h3-size); margin-bottom:8px;">Quinolonas</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Ciprofloxacino, Levofloxacino</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Mecanismo: inhibición ADN-girasa</li>
+            <li>Espectro: Gram(-), Pseudomonas</li>
+            <li>Vía: IV/oral biodisponibilidad equivalente</li>
+            <li>Uso: ITU complicada, infecciones respiratorias</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3" style="border-color:rgba(56,189,248,.35);">
+          <h3 style="color:var(--cyan); font-size:var(--h3-size); margin-bottom:8px;">Macrólidos</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Azitromicina, Claritromicina</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Mecanismo: bacteriostático, ribosoma 50S</li>
+            <li>Espectro: gérmenes atípicos (Legionella)</li>
+            <li>Vía: oral preferente, buena absorción</li>
+            <li>Uso: NAC ambulatoria, exacerbación EPOC</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-4" style="border-color:rgba(248,113,113,.35);">
+          <h3 style="color:var(--red-warn); font-size:var(--h3-size); margin-bottom:8px;">Glicopéptidos</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Vancomicina, Teicoplanina</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Mecanismo: bactericida, pared celular</li>
+            <li>Espectro: MRSA y Gram(+) multirresistentes</li>
+            <li>Vía: IV exclusiva (excepto oral para C. difficile)</li>
+            <li>Uso: sepsis, meningitis por MRSA</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-5">
+        <p class="mech-title">Monitoreo crítico de vancomicina</p>
+        <p>Nefrotóxica: monitorizar creatinina. Ototóxica: vigilar audición. Requiere niveles plasmáticos objetivo (Cmin 15-20 mg/L). Infusión lenta 60 min.</p>
+      </div>
+    </div>
+    <div class="section-num">02</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 3 — METRONIDAZOL Y ANAEROBIOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-3">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Metronidazol y Nitroimidazoles</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <h3 style="color:var(--amber); margin-bottom:var(--element-gap);">Metronidazol</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Mecanismo:</strong> bactericida → daño ADN</li>
+            <li><strong>Espectro:</strong> anaerobios, protozoos</li>
+            <li><strong>Indicaciones:</strong> Giardia, Trichomonas, C. difficile</li>
+            <li><strong>Vía:</strong> oral, IV, vaginal</li>
+            <li><strong>Dosis:</strong> 500 mg c/8h oral</li>
+          </ul>
+          <div class="warn-band" style="margin-top:10px; padding:6px 10px;">
+            <span class="warn-icon" style="font-size:1em;">⚠️</span>
+            <p style="font-size:var(--small-size);"><strong>Efecto antabuse:</strong> prohibido alcohol durante tratamiento y 48h post.</p>
+          </div>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--teal); margin-bottom:var(--element-gap);">Cobertura anaeróbica</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Combinación frecuente en infecciones abdominales</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Esquema:</strong> β-lactámico + metronidazol</li>
+            <li>Ejemplo: Ceftriaxona + Metronidazol (peritonitis)</li>
+            <li>Sinergia: cubre aerobios + anaerobios</li>
+            <li><strong>Clindamicina:</strong> alternativa (riesgo C. difficile)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Vigilancia de C. difficile</p>
+        <p>Uso prolongado de metronidazol o clindamicina puede seleccionar C. difficile. Vigilar diarrea acuosa profusa durante/post-tratamiento. Reportar inmediatamente.</p>
+      </div>
+    </div>
+    <div class="section-num">03</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 4 — RESISTENCIA BACTERIANA
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-4">
+    <div class="glow-circle" style="width:450px;height:450px;background:var(--red-warn);top:-100px;right:-80px;opacity:.08"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal" style="background:linear-gradient(90deg,var(--red-warn),var(--amber));"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Resistencia Bacteriana — Epidemiología Clínica</h2>
+      <div class="reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+        <table class="clinical-table">
+          <thead>
+            <tr>
+              <th>Bacteria multirresistente</th>
+              <th>Mecanismo</th>
+              <th>Opción terapéutica</th>
+              <th>Prevalencia Chile</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--red-warn);">MRSA</strong></td>
+              <td>PBP2a alterada (meticilina-resistencia)</td>
+              <td>Vancomicina, Linezolid, Daftomicina</td>
+              <td>Nosocomial prevalente</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--red-warn);">BLEE</strong></td>
+              <td>β-lactamasa de espectro extendido</td>
+              <td>Carbapenems (meropenem, ertapenem)</td>
+              <td>E. coli, Klebsiella</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--red-warn);">Carbapenemasa</strong></td>
+              <td>Destruye carbapenems (KPC, MBL)</td>
+              <td>Opciones limitadas: colistina, tigeciclina</td>
+              <td>Amenaza crítica UCI</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--amber);">Pseudomonas MDR</strong></td>
+              <td>Múltiples mecanismos, eflujo</td>
+              <td>Piperacilina-tazobactam, ceftazidima</td>
+              <td>Hospitalizados prolongados</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn-band reveal reveal-delay-3">
+        <span style="color:var(--red-warn); font-size:1.2em; flex-shrink:0;">🚨</span>
+        <p><strong>Impacto enfermería:</strong> Hemocultivos ANTES del antibiótico · Aislamiento de contacto para MRSA/enterobacterias · Educación sobre higiene de manos · Reportar resultado de cultivo al equipo para descalada.</p>
+      </div>
+    </div>
+    <div class="section-num">04</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 5 — ANTIFÚNGICOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-5">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Antifúngicos: Azoles y Equinocandinas</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(56,189,248,.35);">
+          <h3 style="color:var(--cyan); margin-bottom:8px;">Azoles (Imidazoles, Triazoles)</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;"><strong>Fluconazol, Voriconazol, Itraconazol</strong></p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Mecanismo: inhibición síntesis ergosterol</li>
+            <li>Espectro: Candida, Aspergillus, Cryptococcus</li>
+            <li>Vía: oral/IV (fluconazol biodisponibilidad ~90%)</li>
+            <li>Uso: candidiasis sistémica, aspergilosis invasiva</li>
+            <li>Monitoreo: hepatotoxicidad, interacciones CYP3A4</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--amber); margin-bottom:8px;">Equinocandinas</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;"><strong>Caspofungina, Micafungina, Anidulafungina</strong></p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Mecanismo: inhibición glucano pared fúngica</li>
+            <li>Espectro: Candida resistente, Aspergillus</li>
+            <li>Vía: IV exclusiva (no absorción oral)</li>
+            <li>Uso: Candida invasiva, paciente crítico/UCI</li>
+            <li>Ventaja: menos interacciones, bien toleradas</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Anfotericina B (referencia)</p>
+        <p>Agente potente pero muy tóxico (nefro, cardio, neuro). Reservada para infecciones sistémicas graves y Cryptococcus meningitis. Requiere monitoreo intenso.</p>
+      </div>
+    </div>
+    <div class="section-num">05</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 6 — ANTIVIRALES
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-6">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);bottom:-150px;right:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Antivirales: Herpes, Influenza y Retrovirus</h2>
+      <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <h3 style="color:var(--teal); font-size:var(--h3-size); margin-bottom:8px;">Aciclovir / Valaciclovir</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Herpes simple, varicela, zóster</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Mecanismo: inhibición ADN-polimerasa viral</li>
+            <li>Vía: IV (infecciones graves), oral (leve-moderada)</li>
+            <li>Dosis: ajuste renal obligatorio</li>
+            <li>Toxicidad: neurotoxicidad en IRC severa</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--amber); font-size:var(--h3-size); margin-bottom:8px;">Oseltamivir (Tamiflu)</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Influenza A/B, pandemia COVID-alt</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Mecanismo: inhibidor neuraminidasa</li>
+            <li>Vía: oral preferente</li>
+            <li>Eficacia: mayor si <48h síntomas inicio</li>
+            <li>Dosis: ajuste renal en eGFR <30</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-4">
+          <h3 style="color:var(--cyan); font-size:var(--h3-size); margin-bottom:8px;">Antivirales VIH</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;">Inhibidores transcriptasa, proteasa (conceptos)</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Combinación: TARV triple o más</li>
+            <li>Objetivo: indetectable = intransmisible</li>
+            <li>Adherencia crítica (resistencia)</li>
+            <li>Efecto adverso: lipodistrofia, neuropatía</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">06</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 7 — ANTIPARASITARIOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-7">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Antiparasitarios</h2>
+      <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--amber); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Metronidazol</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Parásitos:</strong> Giardia, Trichomonas</li>
+            <li><strong>Dosis:</strong> 250 mg c/8h (7-10 días)</li>
+            <li><strong>Vía:</strong> oral</li>
+            <li>Sabor metálico, intolerancia alcohólica</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--teal); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Albendazol</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Parásitos:</strong> helmintos, Ascaris, Trichuris</li>
+            <li><strong>Dosis:</strong> 400 mg c/12h (3 días)</li>
+            <li><strong>Vía:</strong> oral</li>
+            <li>Tomar con alimentos (mejor absorción)</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-4">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--cyan); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Ivermectina</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Parásitos:</strong> oncocercosis, sarna</li>
+            <li><strong>Dosis:</strong> 150-200 mcg/kg dosis única</li>
+            <li><strong>Vía:</strong> oral</li>
+            <li>Efecto antiinflamatorio adicional</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-5">
+        <p class="mech-title">Considerar tratamiento compañeros/convivientes</p>
+        <p>Parásitos intestinales pueden transmitirse a familia. En giardia, ascariasis: tratar contactos cercanos. Educación sobre higiene personal y de manos.</p>
+      </div>
+    </div>
+    <div class="section-num">07</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 8 — FISIOPATOLOGÍA REACCIÓN ALÉRGICA
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-8">
+    <div class="glow-circle" style="width:600px;height:600px;background:var(--red-warn);top:-100px;left:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal" style="background:linear-gradient(90deg,var(--red-warn),var(--amber));"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Reacción Alérgica: Fisiopatología</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(248,113,113,.35);">
+          <h3 style="color:var(--red-warn); margin-bottom:8px;">Mecanismo IgE-mediado</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Sensibilización:</strong> exposición 1ª del antígeno</li>
+            <li><strong>Degranulación mastocitos:</strong> liberación de histamina</li>
+            <li><strong>Mediadores:</strong> histamina, leucotrienos, prostaglandinas</li>
+            <li><strong>Síntomas:</strong> urticaria, angioedema, broncoespasmo</li>
+            <li><strong>Tiempo:</strong> minutos a horas post-exposición</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--amber); margin-bottom:8px;">Histamina y sus efectos</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>H1 (piel, airway):</strong> prurito, broncoespasmo</li>
+            <li><strong>H2 (GI, cora):</strong> ácido gástrico, hipotensión</li>
+            <li><strong>Síntomas sistémicos:</strong> angioedema labios/lengua</li>
+            <li><strong>Hipovolemia:</strong> extravasación plasmática (shock)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Diferencial alergia vs IRAE (reacción no alérgica)</p>
+        <p>Alergia: repetible a dosis baja, IgE-mediada. IRAE (ej. flushing con vancomicina rápida): relacionado a velocidad infusión, no alérgica. Manejo diferente.</p>
+      </div>
+    </div>
+    <div class="section-num">08</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 9 — ANTIHISTAMÍNICOS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-9">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Antihistamínicos H1: Tratamiento de Alergias</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <h3 style="color:var(--amber); margin-bottom:8px;">1ª Generación (Sedantes)</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;"><strong>Difenhidramina, Prometazina</strong></p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Cruzan BHE → sedación, somnolencia</li>
+            <li>Rápido inicio (30-60 min)</li>
+            <li>Duracion: 4-6 h</li>
+            <li>Efectos anticolinérgicos: sequedad, retención orina</li>
+            <li>Uso: urgencias anafilaxia, reacciones severas</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--teal); margin-bottom:8px;">2ª Generación (No sedantes)</h3>
+          <p style="color:var(--text-muted); font-size:var(--small-size); margin-bottom:8px;"><strong>Loratadina, Cetirizina, Desloratadina</strong></p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>NO cruzan BHE (selectivos receptores periféricos)</li>
+            <li>Inicio lento (1-2 h)</li>
+            <li>Duración: 12-24 h</li>
+            <li>Mejor tolerancia (menos anticolinérgicos)</li>
+            <li>Uso: alergias crónicas, rinitis alérgica</li>
+          </ul>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-4" style="margin-bottom:var(--content-gap);">
+        <table class="clinical-table">
+          <thead>
+            <tr><th>Fármaco</th><th>Dosis</th><th>Vía</th><th>Uso clínico</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Loratadina</strong></td>
+              <td>10 mg c/24h</td>
+              <td>Oral</td>
+              <td>Alergia crónica, urticaria</td>
+            </tr>
+            <tr>
+              <td><strong>Cetirizina</strong></td>
+              <td>10 mg c/24h</td>
+              <td>Oral/IV</td>
+              <td>Rinitis alérgica, urticaria</td>
+            </tr>
+            <tr>
+              <td><strong>Difenhidramina</strong></td>
+              <td>25-50 mg c/6-8h IM/IV</td>
+              <td>IM/IV oral</td>
+              <td>Anafilaxia, reacción severa</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section-num">09</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 10 — BRONCODILATADORES Y CORTICOIDES
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-10">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Broncodilatadores y Corticoides Inhalados</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(0,201,167,.35);">
+          <h3 style="color:var(--teal); margin-bottom:8px;">β2-agonistas (Salbutamol)</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Mecanismo:</strong> estimulación receptores β2</li>
+            <li><strong>Efecto:</strong> relajación músculo liso bronquial</li>
+            <li><strong>Vía:</strong> inhalada (inhalador presurizado)</li>
+            <li><strong>Inicio:</strong> 5-15 minutos</li>
+            <li><strong>Uso:</strong> alivio rápido broncoespasmo agudo</li>
+            <li><strong>Monitoreo:</strong> taquicardia, temblor fino</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--amber); margin-bottom:8px;">Corticoides inhalados (Fluticasona)</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Mecanismo:</strong> antiinflamatorio local</li>
+            <li><strong>Efecto:</strong> reducción inflamación vías aéreas</li>
+            <li><strong>Vía:</strong> inhalatoria (depósito local)</li>
+            <li><strong>Inicio:</strong> 2-4 semanas efecto máximo</li>
+            <li><strong>Uso:</strong> mantenimiento asma persistente</li>
+            <li><strong>Ventaja:</strong> mínima absorción sistémica</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Técnica inhalada es crítica</p>
+        <p>Enfermera debe educar: sincronización inspiración-activación, sostener 10 seg apnea, 1 min espera entre puffs. Inhalador mal usado = baja eficacia. Enjuague boca post-fluticasona.</p>
+      </div>
+    </div>
+    <div class="section-num">10</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 11 — ANAFILAXIA: PROTOCOLO MANEJO
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-11">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--red-warn);top:-100px;right:-100px;opacity:.12"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal" style="background:linear-gradient(90deg,var(--red-warn),var(--amber));"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Anafilaxia: Protocolo de Manejo</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(248,113,113,.35);">
+          <h3 style="color:var(--red-warn); margin-bottom:8px;">Signos clínicos</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Pródromo: rubor, prurito, urticaria</li>
+            <li>Angioedema: labios, lengua, garganta</li>
+            <li>Broncoespasmo: sibilancias, disnea</li>
+            <li>Cardiovascular: hipotensión, shock</li>
+            <li>Tiempo: primeros 15-30 minutos</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--amber); margin-bottom:8px;">Manejo inmediato</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>1. ADRENALINA IM 0.5 mg</strong> (muslo antero-lateral)</li>
+            <li>2. Acuesta paciente, eleva piernas</li>
+            <li>3. O2 6-8 L/min si disponible</li>
+            <li>4. IV acceso, suero fisiológico</li>
+            <li>5. Antihist + corticoides IV</li>
+            <li>6. Llamar médico/UCI inmediatamente</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn-band reveal reveal-delay-4">
+        <span class="warn-icon">🚨</span>
+        <p><strong>Regla enfermería:</strong> Adrenalina es 1ª línea, NO esperar a médico. Tener disponible en carrito de paro cercano. Monitorear PA, FC, O2 post-reacción. Observación mínimo 4-6 horas (reacción bifásica posible).</p>
+      </div>
+    </div>
+    <div class="section-num">11</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 12 — RESUMEN / CIERRE
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-12">
+    <div class="glow-circle" style="width:700px;height:700px;background:var(--teal);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.07"></div>
+    <div class="slide-content" style="align-items:center; text-align:center;">
+      <div class="reveal" style="margin-bottom:var(--content-gap);">
+        <span class="tag tag-teal">Resumen</span>
+      </div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap); max-width:700px;">
+        5 criterios clave de enfermería
+      </h2>
+      <div style="max-width:min(90vw,700px); text-align:left;">
+        <ul class="bullet-list reveal reveal-delay-2">
+          <li><strong style="color:var(--teal);">Antibióticos avanzados:</strong> conocer espectro, vía, toxicidad. Vancomicina requiere monitoreo renal + niveles. Fluoroquinolonas alto riesgo QTc.</li>
+          <li><strong style="color:var(--cyan);">Resistencia bacteriana es realidad:</strong> MRSA, BLEE, carbapenemasa. Hemocultivos antes del ATB. Descalada al resultado. Control de brotes en UCI.</li>
+          <li><strong style="color:var(--amber);">Antifúngicos, antivirales y antiparasitarios:</strong> cada uno un mecanismo diferente. Ajuste renal/hepático obligatorio en muchos.</li>
+          <li><strong style="color:var(--red-warn);">Anafilaxia es emergencia:</strong> adrenalina IM 0.5 mg es 1ª línea, sin esperar. Conocer signos precoces y actuar rápido salva vidas.</li>
+          <li><strong style="color:var(--green-ok);">Educación y vigilancia permanente:</strong> técnica inhalatoria, reportar RAM, observación post-reacción alérgica, higiene manos en multirresistencia.</li>
+        </ul>
+      </div>
+      <div class="reveal reveal-delay-3" style="margin-top:var(--content-gap); display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <span class="tag tag-teal">ENF3013</span>
+        <span class="tag tag-cyan">Unidad II</span>
+        <span class="tag" style="background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.15);">Consulta Rápida ENF</span>
+      </div>
+    </div>
+    <div class="section-num">12</div>
+  </section>
+
+</main>
+
+<script>
+// ====================================================
+// Presentation Controller — keyboard, wheel, touch
+// ====================================================
+const slides = Array.from(document.querySelectorAll('.slide'));
+const navDotsContainer = document.getElementById('nav-dots');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('slide-counter');
+let current = 0;
+let scrolling = false;
+
+// Build nav dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', `Ir a diapositiva ${i + 1}`);
+  dot.addEventListener('click', () => goTo(i));
+  navDotsContainer.appendChild(dot);
+});
+
+function updateUI(idx) {
+  current = idx;
+  // Update dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+  // Update progress bar
+  const pct = ((idx + 1) / slides.length) * 100;
+  progress.style.width = pct + '%';
+  // Update counter
+  counter.textContent = `${idx + 1} / ${slides.length}`;
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateUI(idx);
+}
+
+function goNext() { if (current < slides.length - 1) goTo(current + 1); }
+function goPrev() { if (current > 0) goTo(current - 1); }
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) {
+    e.preventDefault(); goNext();
+  } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+    e.preventDefault(); goPrev();
+  } else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+
+// Wheel navigation (debounced)
+document.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (scrolling) return;
+  scrolling = true;
+  if (e.deltaY > 30) goNext();
+  else if (e.deltaY < -30) goPrev();
+  setTimeout(() => { scrolling = false; }, 700);
+}, { passive: false });
+
+// Touch navigation
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (dy > 50) goNext();
+  else if (dy < -50) goPrev();
+});
+
+// IntersectionObserver: reveal animations + current slide tracking
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Trigger reveals in this slide
+      entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      // Update nav
+      const idx = slides.indexOf(entry.target);
+      if (idx !== -1) updateUI(idx);
+    }
+  });
+}, { threshold: 0.6 });
+
+slides.forEach(s => revealObserver.observe(s));
+
+// Init
+updateUI(0);
+slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>

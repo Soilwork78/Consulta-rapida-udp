@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fisiopatología Cardiovascular — Unidad 3 UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+.slide { width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; scroll-snap-align: start; display: flex; flex-direction: column; position: relative; }
+.slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; max-height: 100%; overflow: hidden; padding: var(--slide-padding); }
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+  --bg-dark: #0b1520; --bg-mid: #111e2e; --bg-card: #16263a;
+  --teal: #00c9a7; --teal-dim: #00917a; --cyan: #38bdf8;
+  --amber: #fbbf24; --red-warn: #f87171; --green-ok: #4ade80;
+  --text-main: #e8f1fb; --text-muted: #7a9ab8;
+  --border: rgba(0,201,167,0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-main); background: var(--bg-dark); color: var(--text-main); font-size: var(--body-size); }
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+.bg-gradient { background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%); }
+.grid-overlay::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+.glow-circle { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; opacity: .3; }
+#nav-dots { position: fixed; right: clamp(12px,2vw,28px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.2); cursor: pointer; transition: all .25s; border: none; }
+.dot.active { background: var(--teal); width: 7px; height: 14px; border-radius: 4px; }
+.dot:hover { background: var(--cyan); }
+#progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--teal), var(--cyan)); transition: width .3s ease; z-index: 200; }
+#slide-counter { position: fixed; bottom: clamp(12px,2vh,24px); right: clamp(16px,2.5vw,32px); font-family: var(--font-mono); font-size: var(--small-size); color: var(--text-muted); z-index: 100; }
+#kbd-hint { position: fixed; bottom: clamp(12px,2vh,24px); left: clamp(16px,2.5vw,32px); font-size: var(--small-size); color: var(--text-muted); z-index: 100; display: flex; gap: 8px; align-items: center; }
+.kbd { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: .75em; }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .55s ease, transform .55s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; } .reveal-delay-2 { transition-delay: .2s; } .reveal-delay-3 { transition-delay: .3s; } .reveal-delay-4 { transition-delay: .4s; } .reveal-delay-5 { transition-delay: .5s; } .reveal-delay-6 { transition-delay: .6s; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: var(--small-size); font-weight: 600; letter-spacing: .5px; }
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 16px; font-size: var(--small-size); font-weight: 600; background: rgba(0,201,167,.1); color: var(--teal); border: 1px solid rgba(0,201,167,.25); }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: clamp(8px,1.5vw,16px); padding: clamp(0.75rem,2vw,1.5rem); }
+.card-grid { display: grid; gap: clamp(0.5rem,1.5vw,1rem); }
+.card-grid-2 { grid-template-columns: repeat(2,1fr); }
+.card-grid-3 { grid-template-columns: repeat(3,1fr); }
+.card-grid-4 { grid-template-columns: repeat(4,1fr); }
+.accent-line { width: clamp(40px,6vw,80px); height: 3px; background: linear-gradient(90deg, var(--teal), var(--cyan)); border-radius: 2px; margin-bottom: var(--content-gap); }
+.clinical-table { width: 100%; border-collapse: collapse; font-size: var(--small-size); }
+.clinical-table th { background: rgba(0,201,167,.12); color: var(--teal); padding: clamp(4px,1vw,10px) clamp(6px,1.5vw,14px); text-align: left; font-weight: 700; border-bottom: 1px solid var(--border); font-size: var(--small-size); }
+.clinical-table td { padding: clamp(4px,1vw,9px) clamp(6px,1.5vw,14px); border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; line-height: 1.45; }
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+.bullet-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.35rem,1vh,0.7rem); }
+.bullet-list li { display: flex; align-items: flex-start; gap: 10px; }
+.bullet-list li::before { content: '▸'; color: var(--teal); flex-shrink: 0; margin-top: .1em; }
+.numbered-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.35rem,1vh,0.7rem); counter-reset: item; padding-left: 0; }
+.numbered-list li { display: flex; align-items: flex-start; gap: 10px; counter-increment: item; }
+.numbered-list li::before { content: counter(item); color: var(--teal); flex-shrink: 0; font-weight: 700; min-width: 20px; }
+.mech-box { border-left: 3px solid var(--teal); padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); background: rgba(0,201,167,.06); border-radius: 0 8px 8px 0; }
+.mech-box .mech-title { font-size: var(--small-size); font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.warn-band { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 8px; padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); display: flex; align-items: flex-start; gap: 10px; }
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+.section-num { font-family: var(--font-mono); font-size: clamp(3rem,12vw,9rem); font-weight: 700; color: rgba(0,201,167,.08); position: absolute; right: var(--slide-padding); bottom: clamp(1rem,4vh,3rem); line-height: 1; pointer-events: none; user-select: none; }
+@media (max-height:700px) { :root { --slide-padding: clamp(0.75rem,3vw,2rem); --content-gap: clamp(0.35rem,1.5vw,0.85rem); --title-size: clamp(1.25rem,4.5vw,2.5rem); --h2-size: clamp(1rem,3vw,1.75rem); } }
+@media (max-height:600px) { :root { --slide-padding: clamp(0.5rem,2.5vw,1.2rem); --content-gap: clamp(0.25rem,1vw,0.6rem); --title-size: clamp(1.1rem,4vw,1.8rem); --body-size: clamp(0.65rem,1.2vw,0.88rem); } #nav-dots, #kbd-hint, .section-num { display: none; } }
+@media (max-height:500px) { :root { --slide-padding: clamp(0.4rem,2vw,0.9rem); --title-size: clamp(1rem,3.5vw,1.4rem); --h2-size: clamp(0.9rem,2.5vw,1.2rem); --body-size: clamp(0.62rem,1vw,0.8rem); } }
+@media (max-width:600px) { :root { --title-size: clamp(1.25rem,7vw,2.2rem); } .card-grid-2, .card-grid-3, .card-grid-4 { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } html { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+<div id="kbd-hint"><span class="kbd">↑↓</span><span class="kbd">← →</span><span style="margin-left:4px">navegar</span></div>
+
+<main>
+
+<!-- SLIDE 1 — PORTADA -->
+<section class="slide bg-gradient grid-overlay" id="slide-1">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--red-warn);top:-200px;right:-100px;opacity:.12"></div>
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--amber);bottom:-100px;left:-50px;opacity:.07"></div>
+  <div class="slide-content" style="justify-content:center;">
+    <div style="max-width:min(90vw,820px);">
+      <div class="reveal" style="margin-bottom:var(--content-gap);"><span class="tag tag-teal">Fisiopatología 2° Año Enfermería · UDP</span></div>
+      <h1 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Fisiopatología<br><span style="color:var(--teal);">Cardiovascular</span></h1>
+      <p class="reveal reveal-delay-2" style="color:var(--text-muted);max-width:600px;margin-bottom:var(--content-gap);">Unidad 3 · Insuficiencia Cardíaca · Shock · Ateromatosis · HTA · IAM</p>
+      <div class="reveal reveal-delay-3" style="display:flex;gap:clamp(8px,1.5vw,16px);flex-wrap:wrap;align-items:center;">
+        <span class="chip">5 sesiones</span>
+        <span class="chip">12 slides</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">1</div>
+</section>
+
+<!-- SLIDE 2 — Insuficiencia Cardíaca: Mecanismo -->
+<section class="slide bg-gradient grid-overlay" id="slide-2">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Insuficiencia Cardíaca: Fisiopatología</h2>
+    <div class="mech-box reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <p class="mech-title">Cascada de la IC</p>
+      <p>Injuria miocardio → ↓GC → activación SNS + SRAA → vasoconstricción + retención Na⁺/H₂O → ↑precarga/postcarga → remodelado ventricular (dilatación/hipertrofia excéntrica) → progresión IC.</p>
+    </div>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">IC CON FEVIr (FE &lt;40%)</p>
+        <ul class="bullet-list">
+          <li>Disfunción sistólica</li>
+          <li>Dilatación VE</li>
+          <li>GC↓</li>
+          <li>Congestión pulmonar y sistémica</li>
+          <li>Causas: IAM, miocardiopatía, miocarditis</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">IC CON FEVIp (FE ≥50%)</p>
+        <ul class="bullet-list">
+          <li>Disfunción diastólica</li>
+          <li>Músculo rígido</li>
+          <li>Llenado ↓</li>
+          <li>Disnea de esfuerzo</li>
+          <li>Causas: HTA, hipertrofia, isquemia</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">2</div>
+</section>
+
+<!-- SLIDE 3 — Clasificación NYHA y Manejo IC -->
+<section class="slide bg-gradient grid-overlay" id="slide-3">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--cyan);bottom:-150px;right:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Clasificación NYHA y Tratamiento IC</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <thead>
+        <tr><th>Clase</th><th>Limitación</th><th>Síntomas</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>I</strong></td><td>Sin limitación</td><td>Actividad ordinaria sin síntomas</td></tr>
+        <tr><td><strong>II</strong></td><td>Leve</td><td>Síntomas con actividad moderada</td></tr>
+        <tr><td><strong>III</strong></td><td>Marcada</td><td>Síntomas con actividad mínima</td></tr>
+        <tr><td><strong>IV</strong></td><td>Severa</td><td>Síntomas en reposo</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">PILARES IC-FEVIr</p>
+        <ul class="bullet-list">
+          <li>IECA/ARA-II (↓mortalidad)</li>
+          <li>β-bloqueadores (carvedilol/bisoprolol)</li>
+          <li>Antagonistas aldosterona (espironolactona)</li>
+          <li>ARNI (sacubitril/valsartán)</li>
+          <li>SGLT2i (dapagliflozina)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">IC DESCOMPENSADA</p>
+        <ul class="bullet-list">
+          <li>Diuréticos IV (furosemida)</li>
+          <li>Inotrópicos (dobutamina)</li>
+          <li>VMNI (CPAP)</li>
+          <li>Posición Fowler</li>
+          <li>Restricción hídrica 1.5L/día</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">3</div>
+</section>
+
+<!-- SLIDE 4 — Shock: Clasificación y Fisiopatología -->
+<section class="slide bg-gradient grid-overlay" id="slide-4">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--red-warn);top:-100px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Shock: 4 Tipos y Fisiopatología</h2>
+    <div class="card-grid card-grid-4" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">HIPOVOLÉMICO</p>
+        <p style="font-size:var(--small-size);margin-bottom:8px;">↓Volumen → ↓GC</p>
+        <ul class="bullet-list">
+          <li>Hemorragia/deshidratación</li>
+          <li>Taquicardia</li>
+          <li>PVC baja</li>
+          <li>Vasoconstricción</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">CARDIOGÉNICO</p>
+        <p style="font-size:var(--small-size);margin-bottom:8px;">↓Contractilidad → ↓GC</p>
+        <ul class="bullet-list">
+          <li>IAM masivo</li>
+          <li>Arritmia grave</li>
+          <li>PVC alta</li>
+          <li>Estertores</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">DISTRIBUTIVO</p>
+        <p style="font-size:var(--small-size);margin-bottom:8px;">Vasodilatación masiva</p>
+        <ul class="bullet-list">
+          <li>NO↑ (séptico)</li>
+          <li>↓RVP</li>
+          <li>Distribución inadecuada</li>
+          <li>Piel caliente</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--red-warn);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">OBSTRUCTIVO</p>
+        <p style="font-size:var(--small-size);margin-bottom:8px;">Obstáculo al flujo</p>
+        <ul class="bullet-list">
+          <li>Neumotórax tensión</li>
+          <li>TEP masivo</li>
+          <li>Taponamiento cardíaco</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-3">
+      <span class="warn-icon">⚠</span>
+      <div><strong>Shock séptico:</strong> sepsis + vasopresores para PAM≥65 + lactato>2 mmol/L sin hipovolemia (Sepsis-3, 2016).</div>
+    </div>
+  </div>
+  <div class="section-num">4</div>
+</section>
+
+<!-- SLIDE 5 — Bundles del Shock Séptico -->
+<section class="slide bg-gradient grid-overlay" id="slide-5">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--green-ok);top:-150px;left:-120px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Manejo Shock Séptico — Hour-1 Bundle</h2>
+    <ul class="numbered-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <li><strong>Hemocultivos ×2</strong> (antes ATB) + Lactato sérico</li>
+      <li><strong>Antibióticos IV</strong> de amplio espectro (sin demora)</li>
+      <li><strong>Cristaloides 30 mL/kg</strong> si hipotensión o lactato ≥4 mmol/L</li>
+      <li><strong>Vasopresores</strong> si PAM &lt;65 mmHg pese a reposición → <strong>Norepinefrina 1° elección</strong></li>
+      <li><strong>Reevaluación hemodinámica</strong> (dinámicos: PLR, VPP)</li>
+    </ul>
+    <div class="mech-box reveal reveal-delay-3" style="margin-bottom:var(--content-gap);">
+      <p class="mech-title">Scoring Sepsis</p>
+      <p><strong>SOFA score ≥2</strong> = disfunción orgánica. <strong>qSOFA:</strong> FR≥22 + Glasgow&lt;15 + PAS≤100 → ≥2 = screening sepsis fuera UCI.</p>
+    </div>
+  </div>
+  <div class="section-num">5</div>
+</section>
+
+<!-- SLIDE 6 — Ateromatosis: Patogenia -->
+<section class="slide bg-gradient grid-overlay" id="slide-6">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--teal);bottom:-100px;right:-60px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Ateromatosis: Patogenia de la Placa</h2>
+    <ul class="numbered-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);font-size:clamp(0.75rem,1.4vw,0.98rem);">
+      <li><strong>Disfunción endotelial:</strong> HTA, DM, tabaco, dislipidemia → ↓NO → adhesión leucocitos</li>
+      <li><strong>Entrada LDL:</strong> LDL oxidado (oxLDL) → captación por macrófagos → células espumosas</li>
+      <li><strong>Estría lipídica:</strong> Acumulación lípidos + foam cells</li>
+      <li><strong>Placa fibrosa:</strong> Migración CML → cápsula fibrosa sobre núcleo lipídico</li>
+      <li><strong>Placa vulnerable:</strong> Cápsula delgada + núcleo grande → ruptura → trombo → SCA</li>
+    </ul>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">FACTORES DE RIESGO</p>
+        <p style="font-size:var(--small-size);font-weight:600;margin-bottom:4px;">Modificables:</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>HTA, DM, tabaco</li>
+          <li>Dislipidemia, obesidad</li>
+          <li>Sedentarismo</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">ESTABILIZACIÓN</p>
+        <ul class="bullet-list">
+          <li>Estatinas: ↓LDL + efecto antiinflamatorio</li>
+          <li>PCSK9i (evolocumab)</li>
+          <li>AAS</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">6</div>
+</section>
+
+<!-- SLIDE 7 — HTA: SRAA y Daño Órgano Blanco -->
+<section class="slide bg-gradient grid-overlay" id="slide-7">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--amber);bottom:-200px;left:-150px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">HTA: SRAA y Daño Órgano Blanco</h2>
+    <div class="mech-box reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <p class="mech-title">Cascada SRAA</p>
+      <p>Renina (riñón isquémico/SNS) → Angiotensinógeno → Ang I → ECA → Ang II → <strong>Vasoconstricción + Aldosterona</strong> → Na⁺ retenido → ↑Volemia → ↑PA.</p>
+    </div>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">DAÑO ÓRGANO BLANCO</p>
+        <ul class="bullet-list">
+          <li>Cerebro: AIT/AVE hemorrágico</li>
+          <li>Corazón: HVI → IC diastólica → FA</li>
+          <li>Riñón: nefroangioesclerosis → ERC</li>
+          <li>Retina: retinopatía K-W</li>
+          <li>Aorta: disección</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--red-warn);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">CRISIS HIPERTENSIVA</p>
+        <ul class="bullet-list">
+          <li><strong>Urgencia:</strong> PA>180/120 sin DOB → VO</li>
+          <li><strong>Emergencia:</strong> con DOB → IV titratable</li>
+          <li>Opciones: captopril, labetalol, nitroprusiato</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">7</div>
+</section>
+
+<!-- SLIDE 8 — HTA: Clasificación JNC y Tratamiento -->
+<section class="slide bg-gradient grid-overlay" id="slide-8">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--cyan);top:-100px;left:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">HTA: Clasificación y Tratamiento</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <thead>
+        <tr><th>Categoría</th><th>PA sistólica</th><th>PA diastólica</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Normal</strong></td><td>&lt;120</td><td>&lt;80</td></tr>
+        <tr><td><strong>Elevada</strong></td><td>120-129</td><td>&lt;80</td></tr>
+        <tr><td><strong>HTA Estadio 1</strong></td><td>130-139</td><td>80-89</td></tr>
+        <tr><td><strong>HTA Estadio 2</strong></td><td>≥140</td><td>≥90</td></tr>
+        <tr><td><strong>Crisis</strong></td><td>>180</td><td>>120</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">1ª LÍNEA</p>
+        <p style="font-size:var(--small-size);font-weight:600;margin-bottom:4px;">Sin comorbilidades:</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Tiazidas (clortalidona)</li>
+          <li>IECA/ARA-II</li>
+          <li>BCC (amlodipino)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">COMORBILIDADES</p>
+        <ul class="bullet-list">
+          <li>DM: IECA/ARA-II (nefroprotección)</li>
+          <li>IC: IECA + BB + espironolactona</li>
+          <li>Post-IAM: BB + IECA</li>
+          <li>Angina: BB/BCC</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">8</div>
+</section>
+
+<!-- SLIDE 9 — IAM: Fisiopatología -->
+<section class="slide bg-gradient grid-overlay" id="slide-9">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--red-warn);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">IAM: Rotura de Placa y Oclusión</h2>
+    <ul class="numbered-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);font-size:clamp(0.75rem,1.4vw,0.98rem);">
+      <li><strong>Placa vulnerable:</strong> cápsula delgada + núcleo lipídico grande + inflamación</li>
+      <li><strong>Ruptura/erosión:</strong> exposición colágeno → adhesión plaquetaria</li>
+      <li><strong>Agregación plaquetaria:</strong> TXA2, ADP → trombo blanco → oclusión</li>
+      <li><strong>Oclusión coronaria:</strong> isquemia → lesión → necrosis (si >20-30 min)</li>
+      <li><strong>Frente de necrosis:</strong> subendocardio → transmural (IAMCEST)</li>
+    </ul>
+    <div class="mech-box reveal reveal-delay-3">
+      <p class="mech-title">Zonas de lesión</p>
+      <p><strong>Necrosis (irreversible)</strong> → Zona de lesión → <strong>Isquemia (recuperable con reperfusión)</strong>. Tiempo = miocardio.</p>
+    </div>
+  </div>
+  <div class="section-num">9</div>
+</section>
+
+<!-- SLIDE 10 — IAM: Diagnóstico y Manejo -->
+<section class="slide bg-gradient grid-overlay" id="slide-10">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--green-ok);bottom:-150px;right:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">IAM: Diagnóstico y Manejo IAMCEST</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">DIAGNÓSTICO</p>
+        <p style="font-size:var(--small-size);font-weight:600;margin-bottom:4px;">Clínica:</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Dolor precordial >20min</li>
+          <li>Irradiación brazo/mandíbula</li>
+          <li>Diaforesis, disnea</li>
+        </ul>
+        <p style="font-size:var(--small-size);font-weight:600;margin-top:8px;">ECG:</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>BCRI nuevo</li>
+          <li>SDST≥1mm ×2 derivaciones</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MANEJO REPERFUSIÓN</p>
+        <ul class="bullet-list">
+          <li><strong>ICP primaria &lt;90min</strong> (ideal)</li>
+          <li><strong>Fibrinólisis &lt;120min</strong> si no ICP</li>
+          <li><strong>MONA:</strong> Morfina, O₂ (SpO₂&lt;90%), Nitratos, AAS 300mg</li>
+          <li>P2Y12: ticagrelor/clopidogrel</li>
+          <li>Troponina: ↑ 3h, pico 12-24h</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-3">
+      <span class="warn-icon">⚠</span>
+      <div><strong>Regla general:</strong> tiempo = miocardio. Cada minuto de demora = 1.000 células muertas.</div>
+    </div>
+  </div>
+  <div class="section-num">10</div>
+</section>
+
+<!-- SLIDE 11 — Rol de Enfermería -->
+<section class="slide bg-gradient grid-overlay" id="slide-11">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--cyan);top:-100px;right:-60px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Rol de Enfermería — Sistema Cardiovascular</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">IC Y MONITORIZACIÓN</p>
+        <ul class="bullet-list">
+          <li>Peso diario (↑>1kg/día → alerta)</li>
+          <li>Balance hídrico estricto</li>
+          <li>Restricción sal 2g/día</li>
+          <li>FC/ritmo (FA frecuente)</li>
+          <li>SpO₂, posición Fowler 45°</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">SHOCK</p>
+        <ul class="bullet-list">
+          <li>SOFA/qSOFA</li>
+          <li>Acceso venoso 2 vías gruesas</li>
+          <li>Monitorización invasiva (PVC/PA)</li>
+          <li>Balance horario</li>
+          <li>TA cada 15min, diuresis >0.5ml/kg/h</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">IAM</p>
+        <ul class="bullet-list">
+          <li>12 derivaciones inmediato</li>
+          <li>TIMI/GRACE score</li>
+          <li>Prep. ICP (rasurado, consentimiento)</li>
+          <li>Posición semi-Fowler</li>
+          <li>Ansiedad del paciente/familia</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--green-ok);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">HTA</p>
+        <ul class="bullet-list">
+          <li>Toma PA correcta</li>
+          <li>Adherencia medicación</li>
+          <li>Dieta DASH</li>
+          <li>Restricción sodio</li>
+          <li>Actividad física</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">11</div>
+</section>
+
+<!-- SLIDE 12 — RESUMEN -->
+<section class="slide bg-gradient grid-overlay" id="slide-12">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--red-warn);top:-200px;left:-150px;opacity:.1"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Resumen — Fisiopatología Cardiovascular</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="font-size:clamp(0.7rem,1.3vw,0.95rem);">
+      <li><strong>IC-FEVIr (&lt;40%):</strong> sistólica. <strong>IC-FEVIp (≥50%):</strong> diastólica. NYHA I-IV</li>
+      <li><strong>Pilares IC-FEVIr:</strong> IECA/ARA-II + BB + espironolactona + SGLT2i</li>
+      <li><strong>Shock:</strong> Hipovolémico (↓vol) / Cardiogénico (↓contractilidad) / Distributivo (↓RVP) / Obstructivo</li>
+      <li><strong>Hour-1 bundle:</strong> cultivos→ATB→fluidos→vasopresores→reevaluación. <strong>Norepinefrina 1ª elección</strong></li>
+      <li><strong>Ateromatosis:</strong> LDL oxidado → foam cells → placa → ruptura → SCA</li>
+      <li><strong>SRAA:</strong> Renina→Ang II→vasoconstricción + aldosterona→↑volemia→HTA</li>
+      <li><strong>HTA DOB:</strong> Cerebro/corazón/riñón/retina/aorta. <strong>Emergencia = con DOB</strong></li>
+      <li><strong>IAM:</strong> tiempo-miocardio. <strong>ICP&lt;90min</strong>. Troponinas pico 12-24h. AAS + P2Y12</li>
+    </ul>
+  </div>
+  <div class="section-num">12</div>
+</section>
+
+</main>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const navDots = document.getElementById('nav-dots');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('slide-counter');
+let currentSlide = 0;
+let scrolling = false;
+
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', `Slide ${i + 1}`);
+  dot.addEventListener('click', () => goTo(i));
+  navDots.appendChild(dot);
+});
+
+function updateUI(idx) {
+  currentSlide = idx;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  progress.style.width = ((idx + 1) / slides.length) * 100 + '%';
+  counter.textContent = (idx + 1) + ' / ' + slides.length;
+  const target = slides[idx];
+  const offsetTop = target.offsetTop;
+  window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+}
+
+function goNext() { if (currentSlide < slides.length - 1) updateUI(currentSlide + 1); }
+function goPrev() { if (currentSlide > 0) updateUI(currentSlide - 1); }
+function goTo(i) { if (i >= 0 && i < slides.length) updateUI(i); }
+
+document.addEventListener('keydown', (e) => {
+  if (['ArrowDown','ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); goNext(); }
+  else if (['ArrowUp','ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); goPrev(); }
+  else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+document.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (scrolling) return;
+  scrolling = true;
+  if (e.deltaY > 30) goNext();
+  else if (e.deltaY < -30) goPrev();
+  setTimeout(() => { scrolling = false; }, 700);
+}, { passive: false });
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (dy > 50) goNext();
+  else if (dy < -50) goPrev();
+});
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      const idx = slides.indexOf(entry.target);
+      if (idx !== -1) updateUI(idx);
+    }
+  });
+}, { threshold: 0.6 });
+slides.forEach(s => revealObserver.observe(s));
+updateUI(0);
+slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>

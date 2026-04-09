@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuidados Post Mortem | UDP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b1520;
+            --bg-mid: #111e2e;
+            --bg-card: #16263a;
+            --teal: #00c9a7;
+            --cyan: #38bdf8;
+            --amber: #fbbf24;
+            --slate: #94a3b8;
+            --accent: #94a3b8;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0f1a 0%, #0d1620 50%, #0a0f1a 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--slate) 0%, var(--cyan) 50%, var(--teal) 100%);
+            width: 0%;
+            z-index: 999;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 20px rgba(148, 163, 184, 0.5);
+        }
+
+        .particles-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(148, 163, 184, 0.3), rgba(56, 189, 248, 0.05));
+            pointer-events: none;
+        }
+
+        @keyframes particle-drift {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.1); }
+            66% { transform: translate(-15px, 25px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .particle {
+            animation: particle-drift linear infinite;
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(148, 163, 184, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dot.active {
+            background: var(--slate);
+            width: 14px;
+            height: 14px;
+            box-shadow: 0 0 15px var(--slate);
+            border-color: var(--slate);
+        }
+
+        .dot:hover {
+            background: var(--slate);
+            transform: scale(1.2);
+        }
+
+        .glass {
+            background: rgba(22, 38, 58, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        @keyframes soft-glow {
+            0%, 100% {
+                text-shadow: 0 0 10px rgba(148, 163, 184, 0.3), 0 0 20px rgba(148, 163, 184, 0.1);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(148, 163, 184, 0.5), 0 0 40px rgba(148, 163, 184, 0.3);
+            }
+        }
+
+        .revealed {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .revealed.slide-in-left {
+            animation: slideInLeft 0.8s ease-out forwards;
+        }
+
+        .revealed.slide-in-right {
+            animation: slideInRight 0.8s ease-out forwards;
+        }
+
+        .cover-slide {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.6));
+        }
+
+        .cover-title {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: soft-glow 4s ease-in-out infinite;
+            color: var(--slate);
+            opacity: 0;
+            animation: slideInDown 0.8s ease-out forwards;
+            letter-spacing: 1px;
+        }
+
+        .cover-subtitle {
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            color: var(--cyan);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.3s forwards;
+        }
+
+        .cover-course {
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            color: #64748b;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.5s forwards;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            color: var(--slate);
+            margin-bottom: 2rem;
+            animation: soft-glow 4s ease-in-out infinite;
+            text-align: center;
+            opacity: 0;
+        }
+
+        .emotive-quote {
+            font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+            font-weight: 600;
+            color: var(--cyan);
+            text-align: center;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease-out forwards;
+            font-style: italic;
+            max-width: 900px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .card {
+            glass;
+            padding: 2rem;
+            text-align: center;
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            transform: perspective(800px) rotateX(2deg);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: perspective(800px) rotateX(0deg) translateY(-5px);
+            border-color: rgba(148, 163, 184, 0.3);
+        }
+
+        .card-title {
+            font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+            font-weight: 700;
+            color: var(--slate);
+            margin-bottom: 1rem;
+        }
+
+        .card-content {
+            font-size: clamp(0.85rem, 1.4vw, 0.95rem);
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .numbered-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .numbered-card {
+            glass;
+            padding: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            opacity: 0;
+            animation: slideInLeft 0.8s ease-out;
+            border-left: 4px solid var(--slate);
+        }
+
+        .number-circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--slate), var(--cyan));
+            color: var(--bg-dark);
+            font-weight: 800;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .card-text {
+            font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+            color: #cbd5e1;
+            text-align: left;
+        }
+
+        .success-card {
+            glass;
+            padding: 1.5rem;
+            text-align: center;
+            opacity: 0;
+            animation: slideInLeft 0.8s ease-out;
+            border-left: 4px solid var(--teal);
+            font-weight: 600;
+            color: var(--teal);
+            margin: 0.8rem 0;
+            font-size: clamp(0.9rem, 1.4vw, 1rem);
+        }
+
+        .improvement-card {
+            glass;
+            padding: 1.5rem;
+            text-align: center;
+            opacity: 0;
+            animation: slideInRight 0.8s ease-out;
+            border-left: 4px solid var(--amber);
+            font-weight: 600;
+            color: var(--amber);
+            margin: 0.8rem 0;
+            font-size: clamp(0.9rem, 1.4vw, 1rem);
+        }
+
+        .two-panel {
+            display: flex;
+            gap: 2rem;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .panel {
+            glass;
+            padding: 2.5rem;
+            flex: 1;
+            min-width: 300px;
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+        }
+
+        .panel-title {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 700;
+            color: var(--slate);
+            margin-bottom: 1.5rem;
+        }
+
+        .panel-content {
+            font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+            color: #cbd5e1;
+            line-height: 1.7;
+            text-align: left;
+        }
+
+        .strategy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .strategy-badge {
+            glass;
+            padding: 1.5rem;
+            text-align: center;
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            font-weight: 600;
+            color: var(--teal);
+            font-size: clamp(0.85rem, 1.3vw, 0.95rem);
+            transition: all 0.3s ease;
+        }
+
+        .strategy-badge:hover {
+            transform: translateY(-5px);
+            border-color: var(--slate);
+            box-shadow: 0 10px 30px rgba(148, 163, 184, 0.15);
+        }
+
+        .closing-container {
+            text-align: center;
+            max-width: 900px;
+            opacity: 0;
+        }
+
+        .closing-quote {
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            font-weight: 600;
+            color: var(--slate);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            animation: soft-glow 4s ease-in-out infinite;
+        }
+
+        .stagger-1 { animation-delay: 0.2s; }
+        .stagger-2 { animation-delay: 0.4s; }
+        .stagger-3 { animation-delay: 0.6s; }
+        .stagger-4 { animation-delay: 0.8s; }
+        .stagger-5 { animation-delay: 1s; }
+        .stagger-6 { animation-delay: 1.2s; }
+
+        @media (max-width: 768px) {
+            .nav-dots {
+                right: 1rem;
+                gap: 1rem;
+            }
+
+            .slide {
+                padding: 1rem;
+            }
+
+            .two-panel {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+    <div class="particles-bg" id="particlesBg"></div>
+    <div class="nav-dots" id="navDots"></div>
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover-slide">
+        <div class="slide-content">
+            <h1 class="cover-title">Cuidados de Enfermería Post Mortem</h1>
+            <p class="cover-subtitle">Dignidad, Compasión y Profesionalismo</p>
+            <p class="cover-course">ENF3015 · UDP 2025</p>
+            <p style="margin-top: 3rem; font-size: clamp(1rem, 2vw, 1.3rem); color: #64748b; font-style: italic; opacity: 0; animation: fadeInUp 0.8s ease-out 0.6s forwards;">"Curar a veces, aliviar frecuentemente, consolar siempre"</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 2: INITIAL REFLECTION -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Reflexión Inicial</h2>
+            <p class="emotive-quote">Frente a la cercanía de la muerte...</p>
+            <p class="emotive-quote" style="animation-delay: 0.3s;">¿Qué nos pasa como profesionales en formación?</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 3: EXPECTED END -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Cuando el Final es Esperable</h2>
+            <div class="cards-grid">
+                <div class="card stagger-1">
+                    <div class="card-title">📋 Anticipar</div>
+                    <div class="card-content">Anticipar el proceso de muerte natural</div>
+                </div>
+                <div class="card stagger-2">
+                    <div class="card-title">💬 Comunicar</div>
+                    <div class="card-content">Comunicación clara con familia</div>
+                </div>
+                <div class="card stagger-3">
+                    <div class="card-title">❤️ Cuidado</div>
+                    <div class="card-content">Continuidad del cuidado digno</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 4: KEY RECOMMENDATIONS -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Recomendaciones Clave Post Mortem</h2>
+            <div class="numbered-cards">
+                <div class="numbered-card stagger-1">
+                    <div class="number-circle">1</div>
+                    <div class="card-text">Preservar dignidad del paciente y la familia</div>
+                </div>
+                <div class="numbered-card stagger-2">
+                    <div class="number-circle">2</div>
+                    <div class="card-text">Cuidado respetuoso del cuerpo</div>
+                </div>
+                <div class="numbered-card stagger-3">
+                    <div class="number-circle">3</div>
+                    <div class="card-text">Apoyo emocional a la familia</div>
+                </div>
+                <div class="numbered-card stagger-4">
+                    <div class="number-circle">4</div>
+                    <div class="card-text">Documentación completa en sistema</div>
+                </div>
+                <div class="numbered-card stagger-5">
+                    <div class="number-circle">5</div>
+                    <div class="card-text">Seguimiento de protocolo institucional</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 5: NURSING ACTION TIMELINE -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Actuación de Enfermería ante la Muerte</h2>
+            <div class="numbered-cards">
+                <div class="numbered-card stagger-1">
+                    <div class="card-text">🔍 <strong>Constatar fallecimiento</strong> - Ausencia de signos vitales</div>
+                </div>
+                <div class="numbered-card stagger-2">
+                    <div class="card-text">📞 <strong>Avisar al médico</strong> - Comunicación inmediata</div>
+                </div>
+                <div class="numbered-card stagger-3">
+                    <div class="card-text">🧼 <strong>Preparar cuerpo</strong> - Higiene, posición, limpieza</div>
+                </div>
+                <div class="numbered-card stagger-4">
+                    <div class="card-text">👨‍👩‍👧 <strong>Notificar familia</strong> - Con sensibilidad y apoyo</div>
+                </div>
+                <div class="numbered-card stagger-5">
+                    <div class="card-text">📋 <strong>Documentar</strong> - Registro completo en historia</div>
+                </div>
+                <div class="numbered-card stagger-6">
+                    <div class="card-text">🏥 <strong>Derivar</strong> - A morgue/funeraria según protocolo</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 6: WHAT WE DO WELL -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">¿Qué Hacemos Bien?</h2>
+            <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 800px;">
+                <div class="success-card stagger-1">✓ Respeto hacia el cuerpo y la familia</div>
+                <div class="success-card stagger-2">✓ Cuidado de la higiene y presentación</div>
+                <div class="success-card stagger-3">✓ Apoyo emocional compasivo</div>
+                <div class="success-card stagger-4">✓ Privacidad y dignidad aseguradas</div>
+                <div class="success-card stagger-5">✓ Documentación clara y precisa</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 7: WHAT WE CAN IMPROVE -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">¿Qué Podemos Mejorar?</h2>
+            <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 800px;">
+                <div class="improvement-card stagger-1">⚡ Comunicación más clara y oportuna con la familia</div>
+                <div class="improvement-card stagger-2">⚡ Apoyo psicológico estructurado a allegados</div>
+                <div class="improvement-card stagger-3">⚡ Manejo del propio duelo del equipo de salud</div>
+                <div class="improvement-card stagger-4">⚡ Rituales de cierre más significativos</div>
+                <div class="improvement-card stagger-5">⚡ Seguimiento post-mortem con familia</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 8: PALLIATIVE CARE -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Cuidados Paliativos y Enfermería</h2>
+            <div class="panel stagger-1" style="max-width: 800px; opacity: 0; animation: fadeInUp 0.8s ease-out forwards;">
+                <div class="panel-title" style="text-align: center;">Definición</div>
+                <div class="panel-content" style="text-align: center; margin-bottom: 2rem;">
+                    Enfoque que mejora la calidad de vida de pacientes y familias ante enfermedades terminales
+                </div>
+            </div>
+            <div class="cards-grid" style="margin-top: 1rem;">
+                <div class="card stagger-2">
+                    <div class="card-title">🛑 Control de Síntomas</div>
+                    <div class="card-content">Manejo del dolor, náuseas, disnea</div>
+                </div>
+                <div class="card stagger-3">
+                    <div class="card-title">💙 Apoyo Emocional</div>
+                    <div class="card-content">Acompañamiento psicológico continuo</div>
+                </div>
+                <div class="card stagger-4">
+                    <div class="card-title">🤝 Confort</div>
+                    <div class="card-content">Hasta el final con dignidad</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 9: VICARIOUS TRAUMA -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Trauma Vicario</h2>
+            <div class="panel stagger-1" style="max-width: 800px; opacity: 0; animation: fadeInUp 0.8s ease-out forwards;">
+                <div class="panel-title" style="text-align: center; color: var(--amber); font-size: 1.2rem;">Transformación negativa del profesional por exposición repetida al sufrimiento ajeno</div>
+                <div class="panel-content" style="margin-top: 1.5rem;">
+                    <strong style="color: var(--slate);">Signos de alerta:</strong><br>
+                    • Pérdida progresiva de empatía<br>
+                    • Sueños perturbadores o insomnio<br>
+                    • Hipervigilancia y ansiedad<br>
+                    • Desapego emocional del trabajo<br>
+                    • Irritabilidad con equipo y familia
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 10: ILLNESS AS OPPORTUNITY -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">La Enfermedad como Oportunidad</h2>
+            <p class="emotive-quote" style="margin-bottom: 2rem;">"La enfermedad como oportunidad de mejorar la calidad de vida y cerrar ciclos"</p>
+            <div class="two-panel">
+                <div class="card stagger-1" style="opacity: 0; animation: slideInLeft 0.8s ease-out forwards;">
+                    <div class="card-title" style="color: var(--amber);">🔄 CRISIS</div>
+                    <div class="card-content">Cambio radical, ruptura, incertidumbre</div>
+                </div>
+                <div class="card stagger-2" style="opacity: 0; animation: slideInRight 0.8s ease-out forwards;">
+                    <div class="card-title" style="color: var(--teal);">🌱 OPORTUNIDAD</div>
+                    <div class="card-content">Crecimiento, reconstrucción, significado</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 11: SELF-CARE STRATEGIES -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Autocuidado para Evitar Trauma Vicario</h2>
+            <div class="strategy-grid">
+                <div class="strategy-badge stagger-1">🎯 Supervisión Clínica</div>
+                <div class="strategy-badge stagger-2">🚧 Límites Terapéuticos</div>
+                <div class="strategy-badge stagger-3">🤝 Red de Apoyo</div>
+                <div class="strategy-badge stagger-4">🎨 Actividades Recreativas</div>
+                <div class="strategy-badge stagger-5">🧘 Mindfulness</div>
+                <div class="strategy-badge stagger-6">💬 Debriefing Grupal</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 12: CLOSING -->
+    <section class="slide">
+        <div class="slide-content closing-container">
+            <p class="closing-quote stagger-1">Cuidar a quienes mueren es honrar la vida que tuvieron</p>
+            <p class="closing-quote stagger-2" style="font-size: clamp(1rem, 2vw, 1.4rem); color: var(--teal); margin-bottom: 2rem;">La compasión y el profesionalismo van de la mano</p>
+            <div style="opacity: 0; animation: fadeInUp 0.8s ease-out 0.8s forwards; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; width: 100%; max-width: 800px; margin-top: 2rem;">
+                <div class="card" style="opacity: 1;">
+                    <div class="card-title">Honrar</div>
+                    <div class="card-content">El proceso de morir</div>
+                </div>
+                <div class="card" style="opacity: 1;">
+                    <div class="card-title">Acompañar</div>
+                    <div class="card-content">A pacientes y familias</div>
+                </div>
+                <div class="card" style="opacity: 1;">
+                    <div class="card-title">Cuidarnos</div>
+                    <div class="card-content">A nosotros mismos</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function createParticles() {
+            const bg = document.getElementById('particlesBg');
+            const particleCount = 15;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 60 + 10) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                bg.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+
+        const navDots = document.getElementById('navDots');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.querySelector('.progress-bar').style.width = progress + '%';
+
+            document.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function revealElements() {
+            const elements = slides[currentSlide].querySelectorAll('[class*="card"], [class*="panel"], [class*="quote"], [class*="badge"], [class*="text"], [class*="title"], [class*="numbered"], [class*="grid"], [class*="success"], [class*="improvement"]');
+            elements.forEach((el, i) => {
+                setTimeout(() => {
+                    el.classList.add('revealed');
+                }, i * 80);
+            });
+        }
+
+        function goToSlide(n) {
+            currentSlide = Math.max(0, Math.min(n, totalSlides - 1));
+            window.scrollTo({ top: currentSlide * window.innerHeight, behavior: 'smooth' });
+            updateProgress();
+            revealElements();
+        }
+
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const slideIndex = Array.from(slides).indexOf(entry.target);
+                    currentSlide = slideIndex;
+                    updateProgress();
+                    revealElements();
+                }
+            });
+        }, observerOptions);
+
+        slides.forEach(slide => observer.observe(slide));
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') goToSlide(currentSlide + 1);
+            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
+        });
+
+        let scrollTimeout;
+        document.addEventListener('wheel', (e) => {
+            if (scrollTimeout) return;
+            scrollTimeout = setTimeout(() => {
+                if (e.deltaY > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+                scrollTimeout = null;
+            }, 500);
+        }, { passive: true });
+
+        let touchStart = 0;
+        document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientY; });
+        document.addEventListener('touchend', (e) => {
+            const touchEnd = e.changedTouches[0].clientY;
+            if (touchStart - touchEnd > 50) goToSlide(currentSlide + 1);
+            if (touchEnd - touchStart > 50) goToSlide(currentSlide - 1);
+        });
+
+        updateProgress();
+        revealElements();
+    </script>
+</body>
+</html>

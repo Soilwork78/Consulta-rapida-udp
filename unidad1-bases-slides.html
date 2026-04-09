@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bases de la Farmacología — ENF3013 UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ======================================================
+   VIEWPORT FITTING: MANDATORY BASE STYLES
+   ====================================================== */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 100%;
+  overflow: hidden;
+  padding: var(--slide-padding);
+}
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+
+  /* Paleta médica-clínica: dark teal + slate */
+  --bg-dark:    #0b1520;
+  --bg-mid:     #111e2e;
+  --bg-card:    #16263a;
+  --teal:       #00c9a7;
+  --teal-dim:   #00917a;
+  --cyan:       #38bdf8;
+  --amber:      #fbbf24;
+  --red-warn:   #f87171;
+  --green-ok:   #4ade80;
+  --text-main:  #e8f1fb;
+  --text-muted: #7a9ab8;
+  --border:     rgba(0, 201, 167, 0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-main);
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-size: var(--body-size);
+}
+
+/* ── Typography ────────────────────────────────────────── */
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+
+/* ── Background layers ─────────────────────────────────── */
+.bg-gradient {
+  background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%);
+}
+.grid-overlay::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.glow-circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: .3;
+}
+
+/* ── Nav dots ──────────────────────────────────────────── */
+#nav-dots {
+  position: fixed;
+  right: clamp(12px, 2vw, 28px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  cursor: pointer;
+  transition: all .25s;
+}
+.dot.active {
+  background: var(--teal);
+  width: 7px; height: 14px;
+  border-radius: 4px;
+}
+.dot:hover { background: var(--cyan); }
+
+/* ── Progress bar ──────────────────────────────────────── */
+#progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal), var(--cyan));
+  transition: width .3s ease;
+  z-index: 200;
+}
+
+/* ── Slide counter ─────────────────────────────────────── */
+#slide-counter {
+  position: fixed;
+  bottom: clamp(12px, 2vh, 24px);
+  right: clamp(16px, 2.5vw, 32px);
+  font-family: var(--font-mono);
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  z-index: 100;
+}
+
+/* ── Keyboard hint ─────────────────────────────────────── */
+#kbd-hint {
+  position: fixed;
+  bottom: clamp(12px, 2vh, 24px);
+  left: clamp(16px, 2.5vw, 32px);
+  font-size: var(--small-size);
+  color: var(--text-muted);
+  z-index: 100;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.kbd {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: .75em;
+}
+
+/* ── Reveal animation ──────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .55s ease, transform .55s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+.reveal-delay-4 { transition-delay: .4s; }
+.reveal-delay-5 { transition-delay: .5s; }
+.reveal-delay-6 { transition-delay: .6s; }
+
+/* ── Tags / badges ─────────────────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: var(--small-size);
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+
+/* ── Cards ─────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: clamp(8px, 1.5vw, 16px);
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+}
+.card-grid {
+  display: grid;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+.card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* ── Accent line ───────────────────────────────────────── */
+.accent-line {
+  width: clamp(40px, 6vw, 80px);
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal), var(--cyan));
+  border-radius: 2px;
+  margin-bottom: var(--content-gap);
+}
+
+/* ── Table ─────────────────────────────────────────────── */
+.clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--small-size);
+}
+.clinical-table th {
+  background: rgba(0,201,167,.12);
+  color: var(--teal);
+  padding: clamp(4px, 1vw, 10px) clamp(6px, 1.5vw, 14px);
+  text-align: left;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--small-size);
+}
+.clinical-table td {
+  padding: clamp(4px, 1vw, 9px) clamp(6px, 1.5vw, 14px);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  vertical-align: top;
+  line-height: 1.45;
+}
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+
+/* ── Bullet list ───────────────────────────────────────── */
+.bullet-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.35rem, 1vh, 0.7rem);
+}
+.bullet-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.bullet-list li::before {
+  content: '▸';
+  color: var(--teal);
+  flex-shrink: 0;
+  margin-top: .1em;
+}
+
+/* ── Mechanism box ─────────────────────────────────────── */
+.mech-box {
+  border-left: 3px solid var(--teal);
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 1.5vw, 18px);
+  background: rgba(0,201,167,.06);
+  border-radius: 0 8px 8px 0;
+}
+.mech-box .mech-title {
+  font-size: var(--small-size);
+  font-weight: 700;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 4px;
+}
+
+/* ── Warning band ──────────────────────────────────────── */
+.warn-band {
+  background: rgba(248,113,113,.08);
+  border: 1px solid rgba(248,113,113,.25);
+  border-radius: 8px;
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 1.5vw, 18px);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+
+/* ── Section number ────────────────────────────────────── */
+.section-num {
+  font-family: var(--font-mono);
+  font-size: clamp(3rem, 12vw, 9rem);
+  font-weight: 700;
+  color: rgba(0,201,167,.08);
+  position: absolute;
+  right: var(--slide-padding);
+  bottom: clamp(1rem, 4vh, 3rem);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Responsive adjustments ────────────────────────────── */
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(0.75rem, 3vw, 2rem);
+    --content-gap: clamp(0.35rem, 1.5vw, 0.85rem);
+    --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+    --h2-size: clamp(1rem, 3vw, 1.75rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-padding: clamp(0.5rem, 2.5vw, 1.2rem);
+    --content-gap: clamp(0.25rem, 1vw, 0.6rem);
+    --title-size: clamp(1.1rem, 4vw, 1.8rem);
+    --body-size: clamp(0.65rem, 1.2vw, 0.88rem);
+  }
+  #nav-dots, #kbd-hint, .section-num { display: none; }
+}
+@media (max-height: 500px) {
+  :root {
+    --slide-padding: clamp(0.4rem, 2vw, 0.9rem);
+    --title-size: clamp(1rem, 3.5vw, 1.4rem);
+    --h2-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    --body-size: clamp(0.62rem, 1vw, 0.8rem);
+  }
+}
+@media (max-width: 600px) {
+  :root { --title-size: clamp(1.25rem, 7vw, 2.2rem); }
+  .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.2s !important;
+  }
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div id="progress"></div>
+
+<!-- Nav dots -->
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+
+<!-- Slide counter -->
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+
+<!-- Keyboard hint -->
+<div id="kbd-hint">
+  <span class="kbd">↑↓</span>
+  <span class="kbd">← →</span>
+  <span style="margin-left:4px">navegar</span>
+</div>
+
+<main>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 1 — PORTADA
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-1">
+    <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.12"></div>
+    <div class="glow-circle" style="width:400px;height:400px;background:var(--cyan);bottom:-100px;left:-50px;opacity:.1"></div>
+    <div class="slide-content" style="justify-content:center;">
+      <div style="max-width:min(90vw,820px);">
+        <div class="reveal" style="margin-bottom:var(--content-gap);">
+          <span class="tag tag-teal">ENF3013 · Farmacología</span>
+        </div>
+        <h1 class="reveal reveal-delay-1" style="color:var(--text-main); margin-bottom:var(--content-gap);">
+          Bases de la<br><span style="color:var(--teal);">Farmacología</span>
+        </h1>
+        <p class="reveal reveal-delay-2" style="color:var(--text-muted); max-width:560px; margin-bottom:var(--content-gap);">
+          ADME · Farmacodinamia · Ventana terapéutica · RAM · Interacciones medicamentosas
+        </p>
+        <div class="reveal reveal-delay-3" style="display:flex; gap:clamp(12px,2vw,24px); flex-wrap:wrap; align-items:center;">
+          <div style="font-size:var(--small-size); color:var(--text-muted);">
+            <strong style="color:var(--text-main);">Enfermería 2° año</strong><br>
+            Universidad Diego Portales · 2026
+          </div>
+          <div style="width:1px; height:32px; background:var(--border);"></div>
+          <div style="font-size:var(--small-size); color:var(--text-muted);">
+            12 diapositivas<br>
+            <span style="color:var(--teal);">↓ para avanzar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">01</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 2 — ROL DE ENFERMERÍA EN FARM
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-2">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-100px;left:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Rol de Enfermería en Farmacoterapia</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <p class="mech-title mono" style="font-size:var(--small-size); color:var(--teal); font-weight:700; margin-bottom:8px; letter-spacing:.8px;">5 CORRECTOS</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Paciente correcto (nombre, RUN)</li>
+            <li>Fármaco correcto (verificar etiqueta)</li>
+            <li>Dosis correcta (según indicación médica)</li>
+            <li>Vía correcta (IV, IM, oral, SC)</li>
+            <li>Hora correcta (respetar intervalos)</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <p class="mech-title mono" style="font-size:var(--small-size); color:var(--amber); font-weight:700; margin-bottom:8px; letter-spacing:.8px;">3 VERIFICACIONES EXTRA</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Alergias previas y reacciones adversas</li>
+            <li>Vigencia del fármaco (fecha caducidad)</li>
+            <li>Integridad del envase (etiqueta clara, sin daños)</li>
+          </ul>
+          <div class="tag tag-teal" style="margin-top:10px;">Responsabilidad legal</div>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Monitorización y educación</p>
+        <p>Vigilancia de efectos adversos · Educación del paciente sobre el tratamiento · Reporte de RAM al equipo · Registro en ficha clínica</p>
+      </div>
+    </div>
+    <div class="section-num">02</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 3 — VÍAS DE ADMINISTRACIÓN
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-3">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Vías de Administración y Biodisponibilidad</h2>
+      <div class="reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+        <table class="clinical-table">
+          <thead>
+            <tr>
+              <th>Vía</th>
+              <th>Ejemplos</th>
+              <th>Biodisponibilidad</th>
+              <th>Ventajas / Desventajas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Oral</strong></td>
+              <td>Comprimidos, cápsulas, suspensión</td>
+              <td>Variable (20-80%)</td>
+              <td>Cómoda · Sometida a primer paso hepático</td>
+            </tr>
+            <tr>
+              <td><strong>IV</strong></td>
+              <td>Bolo, infusión continua</td>
+              <td>100% (inmediata)</td>
+              <td>Máximo efecto · Requiere vía venosa</td>
+            </tr>
+            <tr>
+              <td><strong>IM</strong></td>
+              <td>Inyección intramuscular</td>
+              <td>80-100%</td>
+              <td>Rápida absorción · Dolor local</td>
+            </tr>
+            <tr>
+              <td><strong>SC</strong></td>
+              <td>Insulina, heparina, vacunas</td>
+              <td>60-90%</td>
+              <td>Lenta absorción · Menor dolor</td>
+            </tr>
+            <tr>
+              <td><strong>Tópica</strong></td>
+              <td>Pomadas, cremas, parches</td>
+              <td>Variable</td>
+              <td>Efecto local · Absorción sistémica posible</td>
+            </tr>
+            <tr>
+              <td><strong>Inhalatoria</strong></td>
+              <td>Broncodilatadores, corticoides</td>
+              <td>70-90%</td>
+              <td>Rápida · Efecto respiratorio directo</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mech-box reveal reveal-delay-3">
+        <p class="mech-title">Primer paso hepático</p>
+        <p>Fármacos orales se absorben en intestino y van al hígado antes de circulación sistémica: metabolismo reduce la cantidad que llega al resto del cuerpo. Por eso IV tiene más efecto con dosis menor.</p>
+      </div>
+    </div>
+    <div class="section-num">03</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 4 — ABSORCIÓN Y DISTRIBUCIÓN
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-4">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);bottom:-150px;right:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:var(--content-gap);">
+        <div class="accent-line reveal" style="margin-bottom:0; flex-shrink:0;"></div>
+        <h2 class="reveal reveal-delay-1">ADME: Absorción y Distribución</h2>
+      </div>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(0,201,167,.35);">
+          <h3 style="color:var(--teal); font-size:var(--h3-size); margin-bottom:8px;">Absorción</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Paso del fármaco desde el sitio de administración a sangre</li>
+            <li>Oral: intestino delgado (superficie amplia)</li>
+            <li>Factores: pH gástrico, alimentos, motilidad</li>
+            <li>Forma farmacéutica importa: comprimidos vs solución</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3" style="border-color:rgba(56,189,248,.35);">
+          <h3 style="color:var(--cyan); font-size:var(--h3-size); margin-bottom:8px;">Distribución</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Transporte a través de plasma a órganos blanco</li>
+            <li>Unión a proteínas plasmáticas (albúmina)</li>
+            <li>Lipofilia: cruza membranas más fácilmente</li>
+            <li>Barrera hematoencefálica: algunos no pasan al SNC</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Volumen de distribución (Vd)</p>
+        <p>Parámetro teórico que indica cómo se dispersa el fármaco. Vd alto = se distribuye a tejidos (lipofílicos). Vd bajo = concentrado en plasma (hidrofílicos).</p>
+      </div>
+    </div>
+    <div class="section-num">04</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 5 — METABOLISMO Y EXCRECIÓN
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-5">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Metabolismo y Excreción</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <h3 style="color:var(--amber); margin-bottom:var(--element-gap);">🧬 Metabolismo</h3>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;"><strong>Biotransformación en el hígado</strong></p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Fase I: oxidación, reducción, hidrólisis (CYP450)</li>
+            <li>Fase II: conjugación (glucuronidación, sulfatación)</li>
+            <li>Resultado: metabolito más hidrofílico para excreción</li>
+            <li>Fármacos hepatotóxicos: vigilar enzimas hepáticas</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--cyan); margin-bottom:var(--element-gap);">🔄 Excreción</h3>
+          <p style="font-size:var(--small-size); color:var(--text-muted); margin-bottom:8px;"><strong>Vías principales</strong></p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li>Renal (riñón): mayoría de fármacos</li>
+            <li>Hepática (bilis): fármacos grandes, lipofílicos</li>
+            <li>Pulmonar: volátiles (anestésicos)</li>
+            <li>IRC: acumulación → toxicidad (ajuste dosis)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card-grid card-grid-2 reveal reveal-delay-4" style="gap:clamp(0.5rem,1.5vw,1rem);">
+        <div class="mech-box">
+          <p class="mech-title">Clearance (depuración)</p>
+          <p>Volumen de plasma del que se elimina completamente el fármaco por unidad de tiempo. Refleja eficiencia de eliminación.</p>
+        </div>
+        <div class="mech-box" style="border-color:var(--amber);">
+          <p class="mech-title" style="color:var(--amber);">Semivida (t½)</p>
+          <p>Tiempo que tarda el fármaco en reducir su concentración a la mitad. Define intervalo entre dosis.</p>
+        </div>
+      </div>
+    </div>
+    <div class="section-num">05</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 6 — PARÁMETROS PK CLAVE
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-6">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Parámetros Farmacocinéticos Clave</h2>
+      <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--teal); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Semivida (t½)</p>
+          <p style="font-size:var(--body-size); margin-bottom:8px;">Tiempo para ↓ concentración a 50%</p>
+          <p style="color:var(--text-muted); font-size:var(--small-size);">Define intervalo de dosificación. Corta (horas) = dosis frecuentes. Larga (días) = dosis únicas.</p>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--cyan); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Biodisponibilidad</p>
+          <p style="font-size:var(--body-size); margin-bottom:8px;">% de dosis que llega a circulación sistémica</p>
+          <p style="color:var(--text-muted); font-size:var(--small-size);">IV = 100% · Oral variable · Afectada por primer paso hepático.</p>
+        </div>
+        <div class="card reveal reveal-delay-4">
+          <p style="font-size:var(--small-size); font-weight:700; color:var(--amber); margin-bottom:6px; text-transform:uppercase; letter-spacing:.7px;">Volumen Distribución</p>
+          <p style="font-size:var(--body-size); margin-bottom:8px;">Vd: dispersión teórica en tejidos</p>
+          <p style="color:var(--text-muted); font-size:var(--small-size);">Alto = se va a tejidos. Bajo = circulación plasmática.</p>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-5">
+        <p class="mech-title">Estado estacionario</p>
+        <p>Después de 4-5 semividas, se alcanza equilibrio entre entrada y eliminación. Concentraciones se estabilizan. En ese punto, dosis administrada = dosis eliminada.</p>
+      </div>
+    </div>
+    <div class="section-num">06</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 7 — FARMACODINAMIA
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-7">
+    <div class="glow-circle" style="width:450px;height:450px;background:var(--teal);top:-100px;right:-80px;opacity:.08"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Farmacodinamia: Receptores y Mecanismos</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--teal); margin-bottom:var(--element-gap);">Tipos de interacción</h3>
+          <ul class="bullet-list reveal reveal-delay-3" style="font-size:var(--small-size);">
+            <li><strong>Agonista:</strong> se une + activa receptor → efecto</li>
+            <li><strong>Antagonista:</strong> se une pero NO activa → bloquea</li>
+            <li><strong>Agonista parcial:</strong> efecto intermedio</li>
+            <li><strong>Antagonista competitivo:</strong> se puede desplazar con dosis alta</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--amber); margin-bottom:var(--element-gap);">Relación dosis-respuesta</h3>
+          <ul class="bullet-list reveal reveal-delay-3" style="font-size:var(--small-size);">
+            <li><strong>Umbral:</strong> dosis mínima para efecto</li>
+            <li><strong>Rango terapeútico:</strong> dosis segura y efectiva</li>
+            <li><strong>Meseta:</strong> a partir de dosis X, no hay más efecto</li>
+            <li><strong>Índice terapeútico:</strong> rango entre efecto y toxicidad</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Sensibilidad individual</p>
+        <p>Genética, edad, sexo, comorbilidades afectan respuesta. Por eso dosis "estándar" es guía, no regla fija.</p>
+      </div>
+    </div>
+    <div class="section-num">07</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 8 — VENTANA TERAPÉUTICA
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-8">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Ventana Terapéutica e Índice Estrecho</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(0,201,167,.35);">
+          <h3 style="color:var(--teal); margin-bottom:8px;">Ventana terapéutica</h3>
+          <p style="font-size:var(--small-size);">Rango de concentraciones entre:</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Mínimo efectivo (MEC):</strong> efecto terapéutico</li>
+            <li><strong>Máximo tolerable (MTC):</strong> toxicidad</li>
+          </ul>
+          <p style="color:var(--text-muted); margin-top:8px; font-size:var(--small-size);">Buena ventana = margen amplio para ajuste.</p>
+        </div>
+        <div class="card reveal reveal-delay-3" style="border-color:rgba(248,113,113,.35);">
+          <h3 style="color:var(--red-warn); margin-bottom:8px;">Índice terapeútico estrecho</h3>
+          <p style="font-size:var(--small-size);">MTC muy cercano a MEC = peligro</p>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Digoxina:</strong> insuf. cardíaca · monitorizar niveles</li>
+            <li><strong>Warfarina:</strong> anticoagulante · INR control</li>
+            <li><strong>Fenitoína:</strong> anticonvulsivante · niveles plasmáticos</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn-band reveal reveal-delay-4">
+        <span class="warn-icon">⚠️</span>
+        <p><strong>Importancia enfermería:</strong> En fármacos de índice estrecho, pequeños errores en dosis o timing pueden causar ineficacia o toxicidad severa. Vigilancia y monitoreo especializado son críticos.</p>
+      </div>
+    </div>
+    <div class="section-num">08</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 9 — REACCIONES ADVERSAS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-9">
+    <div class="glow-circle" style="width:600px;height:600px;background:var(--red-warn);bottom:-200px;left:-100px;opacity:.1"></div>
+    <div class="slide-content">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:var(--content-gap);">
+        <div class="accent-line reveal" style="margin-bottom:0; background:linear-gradient(90deg,var(--red-warn),var(--amber));"></div>
+        <h2 class="reveal reveal-delay-1">Reacciones Adversas a Medicamentos (RAM)</h2>
+      </div>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--amber); margin-bottom:var(--element-gap);">Clasificación por tipo</h3>
+          <ul class="bullet-list reveal reveal-delay-3" style="font-size:var(--small-size);">
+            <li><strong>Tipo A:</strong> previsibles, dosis-dependientes (sobredosis)</li>
+            <li><strong>Tipo B:</strong> impredecibles, idiosincráticas (alergia)</li>
+            <li><strong>Tipo C:</strong> por exposición prolongada (HTA crónica)</li>
+            <li><strong>Tipo D:</strong> tardías (teratogenia, carcinogenia)</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="reveal reveal-delay-2" style="color:var(--red-warn); margin-bottom:var(--element-gap);">Factores de riesgo</h3>
+          <ul class="bullet-list reveal reveal-delay-3" style="font-size:var(--small-size);">
+            <li>Edad avanzada (farmacocinética alterada)</li>
+            <li>Insuficiencia renal o hepática</li>
+            <li>Polifarmacia (interacciones)</li>
+            <li>Factores genéticos (metabolizadores lentos)</li>
+            <li>Alergias previas documentadas</li>
+          </ul>
+        </div>
+      </div>
+      <div class="mech-box reveal reveal-delay-4">
+        <p class="mech-title">Rol de enfermería ante RAM</p>
+        <p>Vigilancia permanente · Reporte inmediato al médico · Tomar nota de: qué fármaco, cuándo, síntomas · Tarjeta amarilla (Farmacovigilancia) en casos graves.</p>
+      </div>
+    </div>
+    <div class="section-num">09</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 10 — INTERACCIONES MEDICAMENTOSAS
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-10">
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Interacciones Medicamentosas</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2" style="border-color:rgba(0,201,167,.35);">
+          <h3 style="color:var(--teal); font-size:var(--h3-size); margin-bottom:8px;">Mecanismos farmacocinéticos</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Absorción:</strong> alimentos retrasan oral</li>
+            <li><strong>Metabolismo:</strong> CYP450 inhibición/inducción</li>
+            <li><strong>Unión proteica:</strong> desplazamiento compite</li>
+            <li><strong>Excreción:</strong> competencia renal</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3" style="border-color:rgba(248,113,113,.35);">
+          <h3 style="color:var(--red-warn); font-size:var(--h3-size); margin-bottom:8px;">Mecanismos farmacodinámicos</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Sinergia:</strong> efecto combinado > suma</li>
+            <li><strong>Antagonismo:</strong> se anulan mutuamente</li>
+            <li><strong>Aditivo:</strong> 1+1=2</li>
+            <li>Ejemplo: 2 depresores SNC = somnolencia extrema</li>
+          </ul>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-4" style="margin-bottom:var(--content-gap);">
+        <table class="clinical-table">
+          <thead>
+            <tr><th>Fármaco 1</th><th>Fármaco 2</th><th>Interacción</th><th>Riesgo</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>IECA</strong></td>
+              <td>Diuréticos K-ahorradores</td>
+              <td>↑ potasio sérico</td>
+              <td><span class="tag tag-red" style="font-size:.7em;">ALTO</span></td>
+            </tr>
+            <tr>
+              <td><strong>Warfarina</strong></td>
+              <td>AINEs</td>
+              <td>↑ sangrado</td>
+              <td><span class="tag tag-red" style="font-size:.7em;">ALTO</span></td>
+            </tr>
+            <tr>
+              <td><strong>Estatinas</strong></td>
+              <td>Fibrato</td>
+              <td>↑ riesgo miopatía</td>
+              <td><span class="tag tag-amber" style="font-size:.7em;">MODERADO</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section-num">10</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 11 — FARMACOVIGILANCIA Y GRUPOS RIESGO
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-11">
+    <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-100px;right:-100px;opacity:.12"></div>
+    <div class="slide-content">
+      <div class="accent-line reveal"></div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Farmacovigilancia y Grupos de Riesgo</h2>
+      <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+        <div class="card reveal reveal-delay-2">
+          <h3 style="color:var(--teal); margin-bottom:8px;">Sistema de Farmacovigilancia</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Tarjeta Amarilla:</strong> reporte de RAM graves</li>
+            <li>ISP (Instituto Sanitario de Productos)</li>
+            <li>Registro de: fecha, fármaco, síntomas, desenlace</li>
+            <li>Confidencialidad protegida</li>
+            <li>Base para retirada de fármacos del mercado</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-3">
+          <h3 style="color:var(--amber); margin-bottom:8px;">Poblaciones especiales</h3>
+          <ul class="bullet-list" style="font-size:var(--small-size);">
+            <li><strong>Embarazadas:</strong> teratogenicidad · categoría FDA</li>
+            <li><strong>Lactancia:</strong> paso a leche materna</li>
+            <li><strong>Adultos mayores:</strong> farmacocinética lenta</li>
+            <li><strong>Insuficiencia renal:</strong> ajuste dosis renal</li>
+            <li><strong>Insuficiencia hepática:</strong> metabolismo reducido</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn-band reveal reveal-delay-4">
+        <span class="warn-icon">⚠️</span>
+        <p><strong>Rol enfermería en vigilancia:</strong> Observación continua de signos de RAM · Registro detallado · Comunicación con farmacéutico/médico · Participación en programas de seguridad farmacológica.</p>
+      </div>
+    </div>
+    <div class="section-num">11</div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       SLIDE 12 — RESUMEN / CIERRE
+       ════════════════════════════════════════ -->
+  <section class="slide bg-gradient grid-overlay" id="slide-12">
+    <div class="glow-circle" style="width:700px;height:700px;background:var(--teal);top:50%;left:50%;transform:translate(-50%,-50%);opacity:.07"></div>
+    <div class="slide-content" style="align-items:center; text-align:center;">
+      <div class="reveal" style="margin-bottom:var(--content-gap);">
+        <span class="tag tag-teal">Resumen</span>
+      </div>
+      <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap); max-width:700px;">
+        5 ideas clave para enfermería
+      </h2>
+      <div style="max-width:min(90vw,700px); text-align:left;">
+        <ul class="bullet-list reveal reveal-delay-2">
+          <li><strong style="color:var(--teal);">ADME = viaje del fármaco:</strong> absorción → distribución → metabolismo → excreción. Entender este viaje explica efectos y RAM.</li>
+          <li><strong style="color:var(--cyan);">Farmacodinamia = cómo actúa:</strong> receptores, agonistas/antagonistas. Define qué efecto biológico se espera.</li>
+          <li><strong style="color:var(--amber);">Ventana terapeútica = rango seguro:</strong> debajo = ineficaz, arriba = tóxico. Especial cuidado con índice estrecho (digoxina, warfarina).</li>
+          <li><strong style="color:var(--red-warn);">RAM vigilancia es responsabilidad enfermería:</strong> registro, reporte, Tarjeta Amarilla si grave.</li>
+          <li><strong style="color:var(--green-ok);">5 correctos + 3 verificaciones:</strong> base práctica para administración segura y prevención de errores.</li>
+        </ul>
+      </div>
+      <div class="reveal reveal-delay-3" style="margin-top:var(--content-gap); display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <span class="tag tag-teal">ENF3013</span>
+        <span class="tag tag-cyan">Unidad I</span>
+        <span class="tag" style="background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.15);">Consulta Rápida ENF</span>
+      </div>
+    </div>
+    <div class="section-num">12</div>
+  </section>
+
+</main>
+
+<script>
+// ====================================================
+// Presentation Controller — keyboard, wheel, touch
+// ====================================================
+const slides = Array.from(document.querySelectorAll('.slide'));
+const navDotsContainer = document.getElementById('nav-dots');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('slide-counter');
+let current = 0;
+let scrolling = false;
+
+// Build nav dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', `Ir a diapositiva ${i + 1}`);
+  dot.addEventListener('click', () => goTo(i));
+  navDotsContainer.appendChild(dot);
+});
+
+function updateUI(idx) {
+  current = idx;
+  // Update dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+  // Update progress bar
+  const pct = ((idx + 1) / slides.length) * 100;
+  progress.style.width = pct + '%';
+  // Update counter
+  counter.textContent = `${idx + 1} / ${slides.length}`;
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateUI(idx);
+}
+
+function goNext() { if (current < slides.length - 1) goTo(current + 1); }
+function goPrev() { if (current > 0) goTo(current - 1); }
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) {
+    e.preventDefault(); goNext();
+  } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+    e.preventDefault(); goPrev();
+  } else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+
+// Wheel navigation (debounced)
+document.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (scrolling) return;
+  scrolling = true;
+  if (e.deltaY > 30) goNext();
+  else if (e.deltaY < -30) goPrev();
+  setTimeout(() => { scrolling = false; }, 700);
+}, { passive: false });
+
+// Touch navigation
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (dy > 50) goNext();
+  else if (dy < -50) goPrev();
+});
+
+// IntersectionObserver: reveal animations + current slide tracking
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Trigger reveals in this slide
+      entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      // Update nav
+      const idx = slides.indexOf(entry.target);
+      if (idx !== -1) updateUI(idx);
+    }
+  });
+}, { threshold: 0.6 });
+
+slides.forEach(s => revealObserver.observe(s));
+
+// Init
+updateUI(0);
+slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>

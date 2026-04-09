@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fisiopatología Celular y Tisular — Unidad 1 ENF UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+.slide { width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; scroll-snap-align: start; display: flex; flex-direction: column; position: relative; }
+.slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; max-height: 100%; overflow: hidden; padding: var(--slide-padding); }
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+  --bg-dark: #0b1520; --bg-mid: #111e2e; --bg-card: #16263a;
+  --teal: #00c9a7; --teal-dim: #00917a; --cyan: #38bdf8;
+  --amber: #fbbf24; --red-warn: #f87171; --green-ok: #4ade80;
+  --text-main: #e8f1fb; --text-muted: #7a9ab8;
+  --border: rgba(0,201,167,0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-main); background: var(--bg-dark); color: var(--text-main); font-size: var(--body-size); }
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+.bg-gradient { background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%); }
+.grid-overlay::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+.glow-circle { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; opacity: .3; }
+#nav-dots { position: fixed; right: clamp(12px,2vw,28px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.2); cursor: pointer; transition: all .25s; border: none; }
+.dot.active { background: var(--teal); width: 7px; height: 14px; border-radius: 4px; }
+.dot:hover { background: var(--cyan); }
+#progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--teal), var(--cyan)); transition: width .3s ease; z-index: 200; }
+#slide-counter { position: fixed; bottom: clamp(12px,2vh,24px); right: clamp(16px,2.5vw,32px); font-family: var(--font-mono); font-size: var(--small-size); color: var(--text-muted); z-index: 100; }
+#kbd-hint { position: fixed; bottom: clamp(12px,2vh,24px); left: clamp(16px,2.5vw,32px); font-size: var(--small-size); color: var(--text-muted); z-index: 100; display: flex; gap: 8px; align-items: center; }
+.kbd { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: .75em; }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .55s ease, transform .55s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; } .reveal-delay-2 { transition-delay: .2s; } .reveal-delay-3 { transition-delay: .3s; } .reveal-delay-4 { transition-delay: .4s; } .reveal-delay-5 { transition-delay: .5s; } .reveal-delay-6 { transition-delay: .6s; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: var(--small-size); font-weight: 600; letter-spacing: .5px; }
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: clamp(8px,1.5vw,16px); padding: clamp(0.75rem,2vw,1.5rem); }
+.card-grid { display: grid; gap: clamp(0.5rem,1.5vw,1rem); }
+.card-grid-2 { grid-template-columns: repeat(2,1fr); }
+.card-grid-3 { grid-template-columns: repeat(3,1fr); }
+.card-grid-4 { grid-template-columns: repeat(4,1fr); }
+.accent-line { width: clamp(40px,6vw,80px); height: 3px; background: linear-gradient(90deg, var(--teal), var(--cyan)); border-radius: 2px; margin-bottom: var(--content-gap); }
+.clinical-table { width: 100%; border-collapse: collapse; font-size: var(--small-size); }
+.clinical-table th { background: rgba(0,201,167,.12); color: var(--teal); padding: clamp(4px,1vw,10px) clamp(6px,1.5vw,14px); text-align: left; font-weight: 700; border-bottom: 1px solid var(--border); font-size: var(--small-size); }
+.clinical-table td { padding: clamp(4px,1vw,9px) clamp(6px,1.5vw,14px); border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; line-height: 1.45; }
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+.bullet-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.35rem,1vh,0.7rem); }
+.bullet-list li { display: flex; align-items: flex-start; gap: 10px; }
+.bullet-list li::before { content: '▸'; color: var(--teal); flex-shrink: 0; margin-top: .1em; }
+.mech-box { border-left: 3px solid var(--teal); padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); background: rgba(0,201,167,.06); border-radius: 0 8px 8px 0; }
+.mech-box .mech-title { font-size: var(--small-size); font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.warn-band { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 8px; padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); display: flex; align-items: flex-start; gap: 10px; }
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+.section-num { font-family: var(--font-mono); font-size: clamp(3rem,12vw,9rem); font-weight: 700; color: rgba(0,201,167,.08); position: absolute; right: var(--slide-padding); bottom: clamp(1rem,4vh,3rem); line-height: 1; pointer-events: none; user-select: none; }
+@media (max-height:700px) { :root { --slide-padding: clamp(0.75rem,3vw,2rem); --content-gap: clamp(0.35rem,1.5vw,0.85rem); --title-size: clamp(1.25rem,4.5vw,2.5rem); --h2-size: clamp(1rem,3vw,1.75rem); } }
+@media (max-height:600px) { :root { --slide-padding: clamp(0.5rem,2.5vw,1.2rem); --content-gap: clamp(0.25rem,1vw,0.6rem); --title-size: clamp(1.1rem,4vw,1.8rem); --body-size: clamp(0.65rem,1.2vw,0.88rem); } #nav-dots, #kbd-hint, .section-num { display: none; } }
+@media (max-height:500px) { :root { --slide-padding: clamp(0.4rem,2vw,0.9rem); --title-size: clamp(1rem,3.5vw,1.4rem); --h2-size: clamp(0.9rem,2.5vw,1.2rem); --body-size: clamp(0.62rem,1vw,0.8rem); } }
+@media (max-width:600px) { :root { --title-size: clamp(1.25rem,7vw,2.2rem); } .card-grid-2, .card-grid-3, .card-grid-4 { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } html { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+<div id="kbd-hint"><span class="kbd">↑↓</span><span class="kbd">← →</span><span style="margin-left:4px">navegar</span></div>
+
+<main>
+
+<!-- SLIDE 1 — PORTADA -->
+<section class="slide bg-gradient grid-overlay" id="slide-1">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.12"></div>
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--green-ok);bottom:-100px;left:-50px;opacity:.07"></div>
+  <div class="slide-content" style="justify-content:center;">
+    <div style="max-width:min(90vw,820px);">
+      <div class="reveal" style="margin-bottom:var(--content-gap);"><span class="tag tag-teal">Fisiopatología 2° Año · UDP</span></div>
+      <h1 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Fisiopatología<br><span style="color:var(--teal);">Celular y Tisular</span></h1>
+      <p class="reveal reveal-delay-2" style="color:var(--text-muted);max-width:600px;margin-bottom:var(--content-gap);">Unidad 1 · Adaptación · Lesión · Inflamación · Cicatrización</p>
+      <div class="reveal reveal-delay-3" style="display:flex;gap:clamp(12px,2vw,24px);flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:var(--small-size);color:var(--text-muted);">Sesiones</span>
+          <span style="font-weight:700;color:var(--teal);">4 sesiones · 12 slides</span>
+        </div>
+        <div style="width:1px;height:32px;background:var(--border);"></div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <span style="font-size:var(--small-size);color:var(--text-muted);">Contenido</span>
+          <span style="font-weight:700;">Clave para práctica clínica</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">1</div>
+</section>
+
+<!-- SLIDE 2 — ADAPTACIÓN CELULAR -->
+<section class="slide bg-gradient grid-overlay" id="slide-2">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Adaptaciones Celulares</h2>
+    <div class="card-grid card-grid-4" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">ATROFIA</p>
+        <p style="font-size:var(--small-size);line-height:1.5;color:var(--text-muted);">↓ tamaño/número de células</p>
+        <ul class="bullet-list" style="margin-top:8px;font-size:var(--small-size);">
+          <li>Desuso</li>
+          <li>Denervación</li>
+          <li>Isquemia</li>
+          <li>Desnutrición</li>
+          <li>Pérdida hormonal</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">HIPERTROFIA</p>
+        <p style="font-size:var(--small-size);line-height:1.5;color:var(--text-muted);">↑ tamaño celular (no número)</p>
+        <ul class="bullet-list" style="margin-top:8px;font-size:var(--small-size);">
+          <li>Músculo cardíaco</li>
+          <li>Músculo esquelético</li>
+          <li>Respuesta a carga ↑</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">HIPERPLASIA</p>
+        <p style="font-size:var(--small-size);line-height:1.5;color:var(--text-muted);">↑ número de células (mitosis)</p>
+        <ul class="bullet-list" style="margin-top:8px;font-size:var(--small-size);">
+          <li>Endometrio</li>
+          <li>Mama gestante</li>
+          <li>Hiperplasia prostática</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-5">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">METAPLASIA</p>
+        <p style="font-size:var(--small-size);line-height:1.5;color:var(--text-muted);">Cambio de tipo celular</p>
+        <ul class="bullet-list" style="margin-top:8px;font-size:var(--small-size);">
+          <li>Esófago de Barrett</li>
+          <li>Epitelio bronquial fumador</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-6">
+      <span class="warn-icon">⚠</span>
+      <div>
+        <strong style="color:var(--red-warn);">Displasia ≠ Adaptación:</strong> cambio morfológico anormal, puede ser preneoplásico. Indica estímulo crónico persistente.
+      </div>
+    </div>
+  </div>
+  <div class="section-num">2</div>
+</section>
+
+<!-- SLIDE 3 — LESIÓN Y MUERTE CELULAR -->
+<section class="slide bg-gradient grid-overlay" id="slide-3">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--cyan);bottom:-150px;right:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Lesión y Muerte Celular</h2>
+    <div class="mech-box reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <p class="mech-title">Cascada de lesión celular</p>
+      <p style="font-size:var(--small-size);">Depleción ATP → Falla bomba Na⁺/K⁺ → Entrada Na⁺ y H₂O → Tumefacción celular → Si persiste → Ruptura membrana y muerte</p>
+    </div>
+    <table class="clinical-table reveal reveal-delay-3" style="margin-bottom:var(--content-gap);font-size:var(--small-size);">
+      <thead>
+        <tr><th>Característica</th><th>Necrosis</th><th>Apoptosis</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Naturaleza</strong></td><td>Patológica</td><td>Fisiológica o patológica</td></tr>
+        <tr><td><strong>Inflamación</strong></td><td>Presente</td><td>Ausente</td></tr>
+        <tr><td><strong>Membrana</strong></td><td>Ruptura</td><td>Intacta (cuerpos apoptóticos)</td></tr>
+        <tr><td><strong>Patrón</strong></td><td>Licuefacción/coagulación</td><td>Fragmentación ordenada</td></tr>
+      </tbody>
+    </table>
+    <div class="reveal reveal-delay-4">
+      <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">TIPOS DE NECROSIS</p>
+      <ul class="bullet-list" style="font-size:var(--small-size);">
+        <li><strong>Coagulativa:</strong> Isquemia (infarto miocardio)</li>
+        <li><strong>Licuefactiva:</strong> SNC (infartos cerebrales)</li>
+        <li><strong>Caseosa:</strong> Tuberculosis</li>
+        <li><strong>Grasa:</strong> Pancreatitis</li>
+        <li><strong>Gangrenosa:</strong> Isquemia extremidades</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section-num">3</div>
+</section>
+
+<!-- SLIDE 4 — ESTRÉS OXIDATIVO Y ERO -->
+<section class="slide bg-gradient grid-overlay" id="slide-4">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--green-ok);top:-100px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Estrés Oxidativo y ERO</h2>
+    <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">ERO (ESPECIES REACTIVAS)</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>O₂·⁻ (superóxido)</li>
+          <li>H₂O₂ (peróxido)</li>
+          <li>OH· (hidroxilo)</li>
+        </ul>
+        <p style="font-size:var(--small-size);color:var(--text-muted);margin-top:8px;">Fuentes: mitocondria, NADPH oxidasa, xantina oxidasa</p>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MECANISMOS DE DAÑO</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Peroxidación lípidos</li>
+          <li>Oxidación proteínas</li>
+          <li>Daño ADN</li>
+          <li>Apertura poro mitocondrial</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">DEFENSA ANTIOXIDANTE</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>SOD (superóxido dismutasa)</li>
+          <li>Catalasa</li>
+          <li>Glutatión peroxidasa</li>
+          <li>Vitaminas C/E</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mech-box reveal reveal-delay-5">
+      <p class="mech-title">Ciclo de isquemia-reperfusión</p>
+      <p style="font-size:var(--small-size);">Isquemia → Reperfusión → Burst oxidativo masivo → Apoptosis/Necrosis. Clínica: mayor daño en reperfusión que en isquemia inicial.</p>
+    </div>
+  </div>
+  <div class="section-num">4</div>
+</section>
+
+<!-- SLIDE 5 — INFLAMACIÓN AGUDA -->
+<section class="slide bg-gradient grid-overlay" id="slide-5">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--amber);top:-200px;left:-100px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Inflamación Aguda — 5 Signos Cardinales</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);font-size:var(--small-size);">
+      <li><strong>Rubor:</strong> Vasodilatación → ↑ flujo sanguíneo</li>
+      <li><strong>Calor:</strong> Aumento metabolismo local</li>
+      <li><strong>Tumor:</strong> Edema (↑ permeabilidad vascular)</li>
+      <li><strong>Dolor:</strong> Estimulación nociceptores (kininas/prostaglandinas)</li>
+      <li><strong>Pérdida de función:</strong> Por dolor y edema</li>
+    </ul>
+    <div class="mech-box reveal reveal-delay-3" style="margin-bottom:var(--content-gap);">
+      <p class="mech-title">Iniciación inflamación aguda</p>
+      <p style="font-size:var(--small-size);">Daño tisular → Mastocito/macrófago → Histamina/serotonina → Vasodilatación + ↑ permeabilidad → Exudado inflamatorio</p>
+    </div>
+    <div class="card-grid card-grid-2">
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MEDIADORES VASOACTIVOS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Histamina</li>
+          <li>Bradicinina</li>
+          <li>Anafilotoxinas C3a/C5a</li>
+          <li>Leucotrienos (LT)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-5">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MEDIADORES CELULARES</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>PGE₂ (COX-1/2)</li>
+          <li>IL-1, TNF-α, IL-6</li>
+          <li>PAF (factor agregación)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">5</div>
+</section>
+
+<!-- SLIDE 6 — MIGRACIÓN LEUCOCITARIA Y FAGOCITOSIS -->
+<section class="slide bg-gradient grid-overlay" id="slide-6">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--cyan);top:-150px;right:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Migración Leucocitaria y Fagocitosis</h2>
+    <ol class="reveal reveal-delay-2" style="list-style-position:inside;margin-bottom:var(--content-gap);font-size:var(--small-size);display:flex;flex-direction:column;gap:clamp(0.35rem,1vh,0.7rem);">
+      <li style="display:flex;align-items:flex-start;gap:10px;"><span style="flex-shrink:0;margin-top:.05em;"><strong>1.</strong></span> <span><strong>Marginación y rodamiento:</strong> Selectinas P/E</span></li>
+      <li style="display:flex;align-items:flex-start;gap:10px;"><span style="flex-shrink:0;margin-top:.05em;"><strong>2.</strong></span> <span><strong>Adhesión firme:</strong> ICAM-1 / integrinas</span></li>
+      <li style="display:flex;align-items:flex-start;gap:10px;"><span style="flex-shrink:0;margin-top:.05em;"><strong>3.</strong></span> <span><strong>Diapédesis transendotelial:</strong> PECAM-1</span></li>
+      <li style="display:flex;align-items:flex-start;gap:10px;"><span style="flex-shrink:0;margin-top:.05em;"><strong>4.</strong></span> <span><strong>Quimiotaxis:</strong> IL-8, C5a, LTB₄ hacia foco</span></li>
+      <li style="display:flex;align-items:flex-start;gap:10px;"><span style="flex-shrink:0;margin-top:.05em;"><strong>5.</strong></span> <span><strong>Fagocitosis:</strong> Oxidative burst → destrucción</span></li>
+    </ol>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">NEUTRÓFILOS (PMN)</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Primeros en llegar (6–12h)</li>
+          <li>Fagocitosis rápida</li>
+          <li>NETS (trampas extracelulares)</li>
+          <li>Vida corta (~24h en lesión)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MACRÓFAGOS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Llegan después (48–72h)</li>
+          <li>Fagocitosis muy eficiente</li>
+          <li>Presentación antigénica</li>
+          <li>Activación M1 (pro-inf) / M2 (reparación)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">6</div>
+</section>
+
+<!-- SLIDE 7 — INFLAMACIÓN CRÓNICA Y COMPLEMENTO -->
+<section class="slide bg-gradient grid-overlay" id="slide-7">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);bottom:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Inflamación Crónica y Complemento</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);font-size:var(--small-size);">
+      <thead>
+        <tr><th>Aspecto</th><th>Inflamación Aguda</th><th>Inflamación Crónica</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Células dominantes</strong></td><td>PMN (neutrófilos)</td><td>Linfocitos/macrófagos</td></tr>
+        <tr><td><strong>Duración</strong></td><td>Minutos a días</td><td>Semanas a meses</td></tr>
+        <tr><td><strong>Desenlace</strong></td><td>Resolución/absceso/fibrosis</td><td>Fibrosis/destrucción/granuloma</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">VÍA CLÁSICA</p>
+        <p style="font-size:var(--small-size);color:var(--text-muted);line-height:1.6;">IgM/IgG + Ag → C1 → C4 → C2 → C3 → MAC</p>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">VÍA ALTERNA</p>
+        <p style="font-size:var(--small-size);color:var(--text-muted);line-height:1.6;">Superficies microbianas → Factor B/D/P → C3 → MAC</p>
+      </div>
+      <div class="card reveal reveal-delay-5">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">EFECTOS C3a/C5a</p>
+        <p style="font-size:var(--small-size);color:var(--text-muted);line-height:1.6;">Anafilotoxinas: vasodilatación, degranulación mastocitos, quimiotaxis</p>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">7</div>
+</section>
+
+<!-- SLIDE 8 — CICATRIZACIÓN: 5 FASES -->
+<section class="slide bg-gradient grid-overlay" id="slide-8">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--amber);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Cicatrización de Heridas — 5 Fases</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="font-size:var(--small-size);">
+      <li><strong>1. Hemostasia (0–1h):</strong> Vasoconstricción → plaquetas → coágulo fibrina</li>
+      <li><strong>2. Inflamación (1–4 días):</strong> PMN → macrófagos → limpieza de detritus</li>
+      <li><strong>3. Proliferación (4–21 días):</strong> Fibroblastos → colágeno III → tejido de granulación → angiogénesis (VEGF)</li>
+      <li><strong>4. Epitelización:</strong> Queratinocitos migran desde bordes herida</li>
+      <li><strong>5. Remodelación (21 días – 2 años):</strong> Colágeno III → Colágeno I (maduración), contracción cicatriz (miofibroblastos)</li>
+    </ul>
+    <div class="mech-box reveal reveal-delay-3" style="margin-top:var(--content-gap);">
+      <p class="mech-title">Factor crítico</p>
+      <p style="font-size:var(--small-size);">La cicatrización es un equilibrio entre destrucción (inflamación) y construcción (colágeno/angiogénesis). Disrupciones en cualquier fase comprometen el resultado final.</p>
+    </div>
+  </div>
+  <div class="section-num">8</div>
+</section>
+
+<!-- SLIDE 9 — FACTORES QUE ALTERAN CICATRIZACIÓN -->
+<section class="slide bg-gradient grid-overlay" id="slide-9">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--cyan);bottom:-150px;right:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Factores que Alteran la Cicatrización</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">FACTORES SISTÉMICOS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li><strong>DM:</strong> Hiperglucemia → ↓ PMN, ↓ angiogénesis, neuropatía</li>
+          <li><strong>Desnutrición:</strong> Déficit proteínas, Zn, Vit C</li>
+          <li><strong>Corticoides:</strong> ↓ inflamación → ↓ migración PMN</li>
+          <li><strong>Isquemia/hipoxia</strong></li>
+          <li><strong>Inmunosupresión</strong></li>
+          <li><strong>Edad avanzada</strong></li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">FACTORES LOCALES</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li><strong>Infección:</strong> Bacterias &gt;10⁵/g tejido</li>
+          <li><strong>Cuerpos extraños</strong></li>
+          <li><strong>Tensión excesiva</strong> en bordes</li>
+          <li><strong>Hematoma</strong></li>
+          <li><strong>Radiación previa</strong></li>
+          <li><strong>Edema</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-4">
+      <span class="warn-icon">⚠</span>
+      <div>
+        <strong style="color:var(--red-warn);">Diferenciación cicatrices anormales:</strong> Queloide (↑ más allá límites herida) vs Cicatriz hipertrófica (dentro límites). La edad, localización y tensión determinan susceptibilidad.
+      </div>
+    </div>
+  </div>
+  <div class="section-num">9</div>
+</section>
+
+<!-- SLIDE 10 — TIPOS DE CICATRIZACIÓN -->
+<section class="slide bg-gradient grid-overlay" id="slide-10">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--green-ok);top:-200px;right:-100px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Tipos de Cicatrización y Tejido de Granulación</h2>
+    <div class="card-grid card-grid-3" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--green-ok);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">PRIMERA INTENCIÓN</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Bordes afrontados quirúrgicamente</li>
+          <li>Mínima pérdida tisular</li>
+          <li>Cicatriz fina y resistente</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--green-ok);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">SEGUNDA INTENCIÓN</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Herida abierta</li>
+          <li>Gran pérdida tisular</li>
+          <li>Granulación abundante</li>
+          <li>Cicatriz amplia y débil</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--green-ok);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">TERCERA INTENCIÓN</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Herida contaminada</li>
+          <li>Desbridamiento inicial</li>
+          <li>Cierre diferido</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mech-box reveal reveal-delay-5">
+      <p class="mech-title">Tejido de granulación</p>
+      <p style="font-size:var(--small-size);">Composición: fibroblastos + macrófagos + neovasos (VEGF) + colágeno III recién depositado. Aspecto: rojo/granular, friable, sangra fácil. Señal de cicatrización activa y sana.</p>
+    </div>
+  </div>
+  <div class="section-num">10</div>
+</section>
+
+<!-- SLIDE 11 — ROL DE ENFERMERÍA -->
+<section class="slide bg-gradient grid-overlay" id="slide-11">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Rol de Enfermería — Unidad 1</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">EVALUACIÓN LESIONES</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Clasificación úlceras por presión (NPUAP I–IV)</li>
+          <li>Heridas: agudas vs crónicas</li>
+          <li>Fístulas, estomas</li>
+          <li>Valoración lecho (MEASURE, TIME)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MANEJO HERIDAS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Desbridamiento: autolítico, enzimático, quirúrgico</li>
+          <li>Apósitos según lecho: hidrogel, alginatos, hidrocoloides, plata</li>
+          <li>Limpieza, irrigación</li>
+          <li>Drenaje, documentación fotográfica</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-4">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">SIGNOS DE INFECCIÓN LOCAL</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>Eritema perilesional</li>
+          <li>Edema, calor</li>
+          <li>Secreción purulenta</li>
+          <li>Dolor ↑, olor fétido</li>
+          <li>Fiebre (tardía, signos sistémicos)</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-5">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">FACTORES RIESGO SISTÉMICOS</p>
+        <ul class="bullet-list" style="font-size:var(--small-size);">
+          <li>DM, inmunosupresión</li>
+          <li>Malnutrición (MUST, NRS-2002)</li>
+          <li>Edad avanzada</li>
+          <li>Medicamentos: corticoides, AINEs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">11</div>
+</section>
+
+<!-- SLIDE 12 — RESUMEN -->
+<section class="slide bg-gradient grid-overlay" id="slide-12">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);bottom:-200px;left:-100px;opacity:.1"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Resumen — Biología Celular y Tisular</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="font-size:var(--small-size);">
+      <li><strong>Adaptaciones:</strong> Atrofia/Hipertrofia (tamaño) vs Hiperplasia/Metaplasia (tipo/número células)</li>
+      <li><strong>Depleción ATP:</strong> Falla Na⁺/K⁺-ATPasa → Tumefacción → Necrosis si persiste</li>
+      <li><strong>Necrosis vs Apoptosis:</strong> Patológica (inflamación, ruptura) ≠ Ordenada (sin inflamación, membrana intacta)</li>
+      <li><strong>ERO:</strong> Daño lipídico/proteico/ADN, contraataque con antioxidantes (SOD, catalasa, glutatión)</li>
+      <li><strong>5 Signos inflamación:</strong> Rubor, Calor, Tumor, Dolor, Pérdida función</li>
+      <li><strong>Migración leucocitaria:</strong> Marginación → Adhesión (selectinas/integrinas) → Diapédesis → Quimiotaxis → Fagocitosis</li>
+      <li><strong>Cicatrización 5 fases:</strong> Hemostasia → Inflamación → Proliferación → Epitelización → Remodelación</li>
+      <li><strong>Factores alteración:</strong> DM + Corticoides + Desnutrición = principales factores sistémicos</li>
+    </ul>
+    <div class="reveal reveal-delay-3" style="margin-top:var(--content-gap); display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+      <span class="tag tag-teal">Fisiopatología Celular</span>
+      <span class="tag tag-cyan">UDP 2026</span>
+      <span class="tag" style="background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.15);">Consulta Rápida ENF</span>
+    </div>
+  </div>
+  <div class="section-num">12</div>
+</section>
+
+</main>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const navDotsContainer = document.getElementById('nav-dots');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('slide-counter');
+let current = 0;
+let scrolling = false;
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', `Ir a diapositiva ${i + 1}`);
+  dot.addEventListener('click', () => goTo(i));
+  navDotsContainer.appendChild(dot);
+});
+function updateUI(idx) {
+  current = idx;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  progress.style.width = ((idx + 1) / slides.length * 100) + '%';
+  counter.textContent = `${idx + 1} / ${slides.length}`;
+}
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateUI(idx);
+}
+function goNext() { if (current < slides.length - 1) goTo(current + 1); }
+function goPrev() { if (current > 0) goTo(current - 1); }
+document.addEventListener('keydown', (e) => {
+  if (['ArrowDown','ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); goNext(); }
+  else if (['ArrowUp','ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); goPrev(); }
+  else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+document.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (scrolling) return;
+  scrolling = true;
+  if (e.deltaY > 30) goNext();
+  else if (e.deltaY < -30) goPrev();
+  setTimeout(() => { scrolling = false; }, 700);
+}, { passive: false });
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (dy > 50) goNext();
+  else if (dy < -50) goPrev();
+});
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      const idx = slides.indexOf(entry.target);
+      if (idx !== -1) updateUI(idx);
+    }
+  });
+}, { threshold: 0.6 });
+slides.forEach(s => revealObserver.observe(s));
+updateUI(0);
+slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>

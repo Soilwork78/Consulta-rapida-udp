@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alteración de la Eliminación Urinaria y Dispositivos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            font-family: 'Manrope', sans-serif;
+            background: #0b1520;
+            color: #e0e7ff;
+        }
+
+        body {
+            background: #0b1520;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #fbbf24, #f97316, #fbbf24);
+            z-index: 1000;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .slide {
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+            background: #0b1520;
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(251, 191, 36, 0.3);
+            border-radius: 50%;
+            animation: particle-drift linear infinite;
+        }
+
+        @keyframes particle-drift {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(20px, -15px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .anim {
+            opacity: 0;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .anim.revealed {
+            opacity: 1;
+        }
+
+        .anim.left { animation: slideInLeft 0.8s ease forwards; }
+        .anim.right { animation: slideInRight 0.8s ease forwards; }
+        .anim.up { animation: fadeInUp 0.8s ease forwards; }
+        .anim.down { animation: slideInDown 0.8s ease forwards; }
+
+        .nav-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 999;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(251, 191, 36, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dot.active {
+            background: #fbbf24;
+            transform: scale(1.3);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+        }
+
+        /* Slide 1: Cover */
+        .cover-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .cover-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #fbbf24;
+            margin-bottom: 20px;
+            animation: slideInLeft 1s ease;
+            text-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+        }
+
+        .cover-subtitle {
+            font-size: 1.3rem;
+            color: #cbd5e1;
+            margin-bottom: 30px;
+            animation: slideInRight 1s ease 0.2s both;
+        }
+
+        .cover-author {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            font-weight: 300;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        /* Glass cards */
+        .glass-card {
+            background: rgba(22, 38, 58, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            color: #e0e7ff;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .stat-badge {
+            background: rgba(251, 191, 36, 0.15);
+            border: 2px solid #fbbf24;
+            border-radius: 50px;
+            padding: 20px 30px;
+            display: inline-block;
+            margin: 10px;
+            animation: float 3s ease-in-out infinite;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fbbf24;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .flow-item {
+            background: rgba(22, 38, 58, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px;
+            display: inline-block;
+            font-weight: 600;
+            color: #e0e7ff;
+            max-width: 280px;
+            position: relative;
+        }
+
+        .flow-item::before {
+            content: attr(data-step);
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #fbbf24;
+            color: #0b1520;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+
+        .checklist {
+            text-align: left;
+            max-width: 600px;
+        }
+
+        .checklist-item {
+            padding: 12px;
+            margin: 8px 0;
+            border-left: 3px solid #fbbf24;
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .checklist-item::before {
+            content: '✓';
+            font-weight: 800;
+            color: #fbbf24;
+            font-size: 1.3rem;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            text-align: center;
+            color: #fbbf24;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #e0e7ff;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .alert-badge {
+            background: rgba(251, 191, 36, 0.1);
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+            font-weight: 600;
+            color: #fbbf24;
+            position: relative;
+        }
+
+        .alert-badge::before {
+            content: '⚠';
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .floating-card {
+            background: rgba(22, 38, 58, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 280px;
+            animation: float 4s ease-in-out infinite;
+            text-align: center;
+        }
+
+        .floating-card:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .floating-card:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        .floating-card:nth-child(4) {
+            animation-delay: 1.5s;
+        }
+
+        .content-wrapper {
+            max-width: 1100px;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .flex-center {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 700px;
+        }
+
+        .technique-box {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+        }
+
+        .technique-box strong {
+            color: #fbbf24;
+        }
+
+        .icon-large {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+
+    <!-- Slide 1: Cover -->
+    <div class="slide cover-slide">
+        <div class="particles" id="particles1"></div>
+        <div class="cover-title anim left">Alteración de la Eliminación Urinaria</div>
+        <div class="cover-subtitle anim right">y Dispositivos</div>
+        <div class="cover-author anim up">ENF3015 UDP 2025</div>
+    </div>
+
+    <!-- Slide 2: Fisiología Básica -->
+    <div class="slide">
+        <div class="particles" id="particles2"></div>
+        <div class="content-wrapper anim up">
+            <h2>Fisiología Básica del Sistema Urinario</h2>
+            <div class="glass-card" style="text-align: center;">
+                <p style="font-size: 1.3rem; margin-bottom: 20px;">Riñones → Uréteres → Vejiga → Uretra</p>
+                <div class="flex-center">
+                    <div class="stat-badge">
+                        <span class="stat-value">1500-2000</span>
+                        <span class="stat-label">mL/día</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span class="stat-value">0.5</span>
+                        <span class="stat-label">mL/kg/hr mínimo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Alteraciones -->
+    <div class="slide">
+        <div class="particles" id="particles3"></div>
+        <div class="content-wrapper">
+            <h2>Alteraciones de la Eliminación Urinaria</h2>
+            <div class="card-grid">
+                <div class="glass-card anim left">
+                    <h3>POLIURIA</h3>
+                    <p><strong>&gt; 2500 mL/día</strong></p>
+                    <p>Excesiva producción de orina</p>
+                </div>
+                <div class="glass-card anim up">
+                    <h3>OLIGURIA</h3>
+                    <p><strong>100-400 mL/día</strong></p>
+                    <p>Producción reducida (alerta)</p>
+                </div>
+                <div class="glass-card anim up">
+                    <h3>ANURIA</h3>
+                    <p><strong>&lt; 100 mL/día</strong></p>
+                    <p>Ausencia casi completa (crítico)</p>
+                </div>
+                <div class="glass-card anim right">
+                    <h3>RETENCIÓN URINARIA</h3>
+                    <p><strong>Incapacidad para eliminar</strong></p>
+                    <p>Orina retenida en vejiga</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Incontinencia Urinaria -->
+    <div class="slide">
+        <div class="particles" id="particles4"></div>
+        <div class="content-wrapper">
+            <h2>Tipos de Incontinencia Urinaria</h2>
+            <div class="flex-center">
+                <div class="floating-card anim left">
+                    <h3>ESTRÉS</h3>
+                    <p>Al toser, reír o ejercicio</p>
+                </div>
+                <div class="floating-card anim up">
+                    <h3>URGENCIA</h3>
+                    <p>No puede retener cuando urgencia</p>
+                </div>
+                <div class="floating-card anim up">
+                    <h3>MIXTA</h3>
+                    <p>Combinación de estrés + urgencia</p>
+                </div>
+                <div class="floating-card anim right">
+                    <h3>FUNCIONAL</h3>
+                    <p>Barreras físicas o cognitivas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Indicaciones SNG -->
+    <div class="slide">
+        <div class="particles" id="particles5"></div>
+        <div class="content-wrapper">
+            <h2>Indicaciones de Sonda Foley</h2>
+            <div class="glass-card anim up">
+                <div class="checklist">
+                    <div class="checklist-item">Retención urinaria aguda</div>
+                    <div class="checklist-item">Pacientes quirúrgicos</div>
+                    <div class="checklist-item">Control estricto de diuresis</div>
+                    <div class="checklist-item">Obstrucción urinaria</div>
+                    <div class="checklist-item">Úlceras por presión en incontinentes</div>
+                    <div class="checklist-item">Irrigación vesical terapéutica</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Técnica Cateterismo -->
+    <div class="slide">
+        <div class="particles" id="particles6"></div>
+        <div class="content-wrapper">
+            <h2>Cateterismo Vesical - Técnica Aséptica</h2>
+            <div class="flow-diagram">
+                <div class="flow-item anim left" data-step="1">Higiene de manos + guantes estériles</div>
+                <div class="flow-item anim up" data-step="2">Preparar campo estéril</div>
+                <div class="flow-item anim up" data-step="3">Limpiar meato (mujer: arriba-abajo)</div>
+                <div class="flow-item anim up" data-step="4">Lubricar con solución estéril</div>
+                <div class="flow-item anim up" data-step="5">Insertar con técnica aséptica</div>
+                <div class="flow-item anim up" data-step="6">Inflar balón 5-10 mL</div>
+                <div class="flow-item anim right" data-step="7">Conectar a bolsa cerrada</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Cuidados Sonda -->
+    <div class="slide">
+        <div class="particles" id="particles7"></div>
+        <div class="content-wrapper">
+            <h2>Cuidados de la Sonda Foley</h2>
+            <div class="glass-card anim up">
+                <div class="checklist">
+                    <div class="checklist-item">Sistema cerrado SIEMPRE</div>
+                    <div class="checklist-item">Bolsa de drenaje bajo nivel vejiga</div>
+                    <div class="checklist-item">No doblar ni comprimir sonda</div>
+                    <div class="checklist-item">Higiene meato cada 12 hrs</div>
+                    <div class="checklist-item">Registrar diuresis horaria</div>
+                    <div class="checklist-item">Evaluar necesidad de sonda diariamente</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: ITU Asociada a Catéter -->
+    <div class="slide">
+        <div class="particles" id="particles8"></div>
+        <div class="content-wrapper anim up">
+            <h2>ITU Asociada a Catéter (IAAS)</h2>
+            <div class="flex-center">
+                <div class="alert-badge" style="width: 280px;">2ª causa más frecuente de IAAS</div>
+                <div class="alert-badge" style="width: 280px;">Riesgo ↑ 5% por cada día</div>
+                <div class="alert-badge" style="width: 280px;">Síntomas: fiebre, urgencia, disuria</div>
+            </div>
+            <p style="margin-top: 30px; text-align: center; max-width: 600px;">La prevención es fundamental. Retiro precoz de catéter es esencial cuando ya no hay indicación clínica.</p>
+        </div>
+    </div>
+
+    <!-- Slide 9: Tipos de Dispositivos -->
+    <div class="slide">
+        <div class="particles" id="particles9"></div>
+        <div class="content-wrapper">
+            <h2>Tipos de Dispositivos Urinarios</h2>
+            <div class="card-grid">
+                <div class="glass-card anim left">
+                    <h3>Sonda Foley 2 vías</h3>
+                    <p>Drenaje simple. Uso más común.</p>
+                </div>
+                <div class="glass-card anim up">
+                    <h3>Sonda Foley 3 vías</h3>
+                    <p>Drenaje + irrigación. Post-RTUP.</p>
+                </div>
+                <div class="glass-card anim up">
+                    <h3>Catéter Intermitente</h3>
+                    <p>Autocateterismo. Menos complicaciones.</p>
+                </div>
+                <div class="glass-card anim right">
+                    <h3>Colector Masculino + Pañal</h3>
+                    <p>Alternativas no invasivas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Medición Diuresis -->
+    <div class="slide">
+        <div class="particles" id="particles10"></div>
+        <div class="content-wrapper">
+            <h2>Medición de Diuresis</h2>
+            <div class="card-grid">
+                <div class="technique-box anim left">
+                    <strong>Paciente Crítico:</strong>
+                    <p>Registro horario</p>
+                </div>
+                <div class="technique-box anim up">
+                    <strong>Paciente Estable:</strong>
+                    <p>Registro por turno</p>
+                </div>
+                <div class="technique-box anim up">
+                    <strong>Vigilancia:</strong>
+                    <p>Registro 24 hrs</p>
+                </div>
+                <div class="technique-box anim right">
+                    <strong>ALERTA:</strong>
+                    <p style="color: #ef4444;">Diuresis &lt; 0.5 mL/kg/hr = investigar causa</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Irrigación Vesical -->
+    <div class="slide">
+        <div class="particles" id="particles11"></div>
+        <div class="content-wrapper">
+            <h2>Irrigación Vesical</h2>
+            <div class="comparison-grid">
+                <div class="glass-card anim left">
+                    <h3>Continua</h3>
+                    <p><strong>Indicación:</strong> Hematuria post-RTUP, limpieza constante</p>
+                    <p><strong>Dispositivo:</strong> Sonda 3 vías</p>
+                </div>
+                <div class="glass-card anim right">
+                    <h3>Intermitente</h3>
+                    <p><strong>Indicación:</strong> Limpieza periódica de coágulos</p>
+                    <p><strong>Técnica:</strong> Manual o programada</p>
+                </div>
+            </div>
+            <p style="margin-top: 30px; text-align: center;">Soluciones: SSN 0.9%, nunca suero glucosado (irritación)</p>
+        </div>
+    </div>
+
+    <!-- Slide 12: Resumen ROL ENFERMERÍA -->
+    <div class="slide">
+        <div class="particles" id="particles12"></div>
+        <div class="content-wrapper">
+            <h2>ROL de Enfermería en Eliminación Urinaria</h2>
+            <div class="flex-center" style="gap: 15px;">
+                <div class="floating-card anim left">
+                    <span class="icon-large">🛡️</span>
+                    <h3>Prevención IAAS</h3>
+                    <p>Asepsia, retiro precoz</p>
+                </div>
+                <div class="floating-card anim up">
+                    <span class="icon-large">🎯</span>
+                    <h3>Técnica Aséptica</h3>
+                    <p>Cateterismo, cuidados</p>
+                </div>
+                <div class="floating-card anim up">
+                    <span class="icon-large">📊</span>
+                    <h3>Monitorización</h3>
+                    <p>Diuresis, características</p>
+                </div>
+                <div class="floating-card anim up">
+                    <span class="icon-large">📚</span>
+                    <h3>Educación</h3>
+                    <p>Paciente y familia</p>
+                </div>
+                <div class="floating-card anim right">
+                    <span class="icon-large">⚙️</span>
+                    <h3>Gestión Dispositivos</h3>
+                    <p>Mantenimiento, retiro</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-dots" id="navDots"></div>
+
+    <script>
+        const slideCount = 12;
+        let currentSlide = 0;
+
+        // Generate particles
+        function generateParticles(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDuration = (2 + Math.random() * 2) + 's';
+                particle.style.animationDelay = Math.random() * 1 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Generate navigation dots
+        function generateNavDots() {
+            const navDots = document.getElementById('navDots');
+            for (let i = 0; i < slideCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => {
+                    window.scrollTo({
+                        top: window.innerHeight * i,
+                        behavior: 'smooth'
+                    });
+                };
+                navDots.appendChild(dot);
+            }
+        }
+
+        // Initialize animations
+        function initAnimations() {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.anim').forEach(el => observer.observe(el));
+        }
+
+        // Update progress and nav dots
+        function updateProgress() {
+            const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+            document.querySelector('.progress-bar').style.width = scrollPercent + '%';
+
+            const currentSlideNum = Math.round(window.scrollY / window.innerHeight);
+            document.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlideNum);
+            });
+        }
+
+        // Keyboard navigation
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown' || e.key === ' ') {
+                window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+                window.scrollBy({ top: -window.innerHeight, behavior: 'smooth' });
+                e.preventDefault();
+            }
+        });
+
+        // Initialize
+        for (let i = 1; i <= slideCount; i++) {
+            generateParticles('particles' + i);
+        }
+        generateNavDots();
+        initAnimations();
+        window.addEventListener('scroll', updateProgress);
+        updateProgress();
+    </script>
+</body>
+</html>

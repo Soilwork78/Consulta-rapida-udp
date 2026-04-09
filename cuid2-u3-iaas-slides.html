@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAAS · PAPE · Antisépticos y Desinfectantes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #0b1520;
+            color: #e5e7eb;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0b1520 0%, #1a2942 100%);
+        }
+
+        /* PARTICLES */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(245, 158, 11, 0.3);
+            border-radius: 50%;
+            animation: particle-drift linear infinite;
+        }
+
+        /* ANIMATIONS */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes particle-drift {
+            0% {
+                opacity: 0;
+                transform: translate(0, 0);
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty));
+            }
+        }
+
+        /* GLASSMORPHISM */
+        .glass {
+            background: rgba(22, 38, 58, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 16px;
+        }
+
+        /* REVEAL ANIMATION */
+        [data-reveal] {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        [data-reveal].revealed {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        /* NAVIGATION */
+        .nav-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(245, 158, 11, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-dot.active {
+            background: #f59e0b;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+        }
+
+        /* PROGRESS BAR */
+        .progress-bar {
+            position: fixed;
+            top: 3px;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            z-index: 1001;
+            transition: width 0.2s;
+        }
+
+        /* TYPOGRAPHY */
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            font-weight: 600;
+        }
+
+        p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            line-height: 1.6;
+        }
+
+        /* CARDS */
+        .card {
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* STAT BADGE */
+        .stat-badge {
+            display: inline-block;
+            padding: 12px 24px;
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            margin-top: 20px;
+        }
+
+        /* LAYOUT HELPERS */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* CHAIN LINK */
+        .chain-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .chain-link {
+            padding: 20px 30px;
+            background: rgba(245, 158, 11, 0.15);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
+            text-align: center;
+            animation: float 3s ease-in-out;
+        }
+
+        /* CIRCULAR DIAGRAM */
+        .circle-diagram {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            max-width: 90vw;
+        }
+
+        .circle-node {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(245, 158, 11, 0.2);
+            border: 2px solid rgba(245, 158, 11, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 8px;
+        }
+
+        /* ALERT CARD */
+        .alert-card {
+            padding: 20px;
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 4px solid #ef4444;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        /* COMPARISON TABLE */
+        .comparison-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .comparison-cell {
+            padding: 16px;
+            background: rgba(22, 38, 58, 0.8);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 8px;
+            text-align: center;
+            font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+        }
+
+        /* MEDIA QUERIES */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px 20px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-dots {
+                right: 15px;
+            }
+
+            .circle-diagram {
+                width: 280px;
+                height: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide">
+        <div class="particles" id="particles-1"></div>
+        <div class="container">
+            <h1 data-reveal>Infecciones Asociadas a la Atención de Salud</h1>
+            <p style="font-size: clamp(1.2rem, 2.5vw, 1.5rem); margin-top: 40px; text-align: center;" data-reveal>
+                Unidad III: Técnicas de enfermería para control de IAAS
+            </p>
+            <p style="font-size: clamp(1rem, 2vw, 1.2rem); margin-top: 60px; text-align: center; opacity: 0.7;" data-reveal>
+                ENF3015 • UDP 2025
+            </p>
+        </div>
+    </section>
+
+    <!-- SLIDE 2: ¿QUÉ SON LAS IAAS? -->
+    <section class="slide">
+        <div class="particles" id="particles-2"></div>
+        <div class="container">
+            <h2 data-reveal>¿Qué son las IAAS?</h2>
+            <div class="glass" style="padding: 40px; margin: 30px 0; max-width: 800px;" data-reveal>
+                <p style="font-size: clamp(1rem, 2vw, 1.15rem); line-height: 1.8;">
+                    <strong>Infección que no estaba presente ni en período de incubación al momento de la hospitalización.</strong>
+                    <br><br>
+                    Aparece <strong>≥48 horas post-ingreso</strong> o <strong>hasta 30 días post-alta</strong> (o 1 año en casos de implantes).
+                </p>
+            </div>
+            <div class="stat-badge" data-reveal>
+                Aproximadamente 15% de pacientes hospitalizados contraen IAAS
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 3: CADENA EPIDEMIOLÓGICA -->
+    <section class="slide">
+        <div class="particles" id="particles-3"></div>
+        <div class="container">
+            <h2 data-reveal>Cadena Epidemiológica</h2>
+            <div class="chain-container" style="margin-top: 40px;">
+                <div class="chain-link" data-reveal style="animation-delay: 0s;">
+                    Agente<br>infeccioso
+                </div>
+                <div style="color: #f59e0b; font-size: 1.5rem;">→</div>
+                <div class="chain-link" data-reveal style="animation-delay: 0.2s;">
+                    Reservorio
+                </div>
+                <div style="color: #f59e0b; font-size: 1.5rem;">→</div>
+                <div class="chain-link" data-reveal style="animation-delay: 0.4s;">
+                    Puerta de<br>salida
+                </div>
+            </div>
+            <div class="chain-container" style="margin-top: 20px;">
+                <div class="chain-link" data-reveal style="animation-delay: 0.6s;">
+                    Mecanismo de<br>transmisión
+                </div>
+                <div style="color: #f59e0b; font-size: 1.5rem;">→</div>
+                <div class="chain-link" data-reveal style="animation-delay: 0.8s;">
+                    Puerta de<br>entrada
+                </div>
+                <div style="color: #f59e0b; font-size: 1.5rem;">→</div>
+                <div class="chain-link" data-reveal style="animation-delay: 1s;">
+                    Huésped<br>susceptible
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 4: TIPOS DE IAAS -->
+    <section class="slide">
+        <div class="particles" id="particles-4"></div>
+        <div class="container">
+            <h2 data-reveal>Tipos de IAAS más comunes</h2>
+            <div class="grid-4" style="margin-top: 40px;">
+                <div class="card glass" data-reveal style="animation: slideInLeft 0.6s ease;">
+                    <h3 style="color: #fbbf24; margin-bottom: 15px;">🔻 ITU</h3>
+                    <p>Infección del Tracto Urinario asociada a catéter</p>
+                </div>
+                <div class="card glass" data-reveal style="animation: fadeInUp 0.6s ease 0.1s backwards;">
+                    <h3 style="color: #fbbf24; margin-bottom: 15px;">🫁 NAV</h3>
+                    <p>Neumonía Asociada al Ventilador</p>
+                </div>
+                <div class="card glass" data-reveal style="animation: slideInRight 0.6s ease;">
+                    <h3 style="color: #fbbf24; margin-bottom: 15px;">✂️ ISQ</h3>
+                    <p>Infección del Sitio Quirúrgico</p>
+                </div>
+                <div class="card glass" data-reveal style="animation: fadeInUp 0.6s ease 0.2s backwards;">
+                    <h3 style="color: #fbbf24; margin-bottom: 15px;">🩸 CVC</h3>
+                    <p>Bacteriemia Asociada a Catéter Venoso Central</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 5: PRECAUCIONES ESTÁNDAR -->
+    <section class="slide">
+        <div class="particles" id="particles-5"></div>
+        <div class="container">
+            <h2 data-reveal>Precauciones Estándar</h2>
+            <div class="grid-4" style="margin-top: 40px;">
+                <div class="card glass" data-reveal style="animation: float 3s ease-in-out;">
+                    <p style="font-size: 2rem; margin-bottom: 10px;">🧤</p>
+                    <h3>Higiene de Manos</h3>
+                </div>
+                <div class="card glass" data-reveal style="animation: float 3s ease-in-out 0.2s;">
+                    <p style="font-size: 2rem; margin-bottom: 10px;">🥽</p>
+                    <h3>EPP Adecuado</h3>
+                </div>
+                <div class="card glass" data-reveal style="animation: float 3s ease-in-out 0.4s;">
+                    <p style="font-size: 2rem; margin-bottom: 10px;">🗑️</p>
+                    <h3>Manejo de Residuos</h3>
+                </div>
+                <div class="card glass" data-reveal style="animation: float 3s ease-in-out 0.6s;">
+                    <p style="font-size: 2rem; margin-bottom: 10px;">🩹</p>
+                    <h3>Prevención Pinchazos</h3>
+                </div>
+                <div class="card glass" data-reveal style="animation: float 3s ease-in-out 0.8s;">
+                    <p style="font-size: 2rem; margin-bottom: 10px;">🛏️</p>
+                    <h3>Limpieza de Equipos</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 6: HIGIENE DE MANOS OMS -->
+    <section class="slide">
+        <div class="particles" id="particles-6"></div>
+        <div class="container">
+            <h2 data-reveal>Higiene de Manos OMS - 5 Momentos Clave</h2>
+            <div class="circle-diagram" data-reveal style="margin: 40px auto;">
+                <div class="circle-node" style="top: 10%; left: 50%; transform: translateX(-50%);">
+                    <span>1. Antes de tocar al paciente</span>
+                </div>
+                <div class="circle-node" style="top: 35%; right: 5%;">
+                    <span>2. Antes de procedimiento</span>
+                </div>
+                <div class="circle-node" style="bottom: 25%; right: 15%;">
+                    <span>3. Después de exposición a fluidos</span>
+                </div>
+                <div class="circle-node" style="bottom: 10%; left: 50%; transform: translateX(-50%);">
+                    <span>4. Después de tocar al paciente</span>
+                </div>
+                <div class="circle-node" style="top: 35%; left: 5%;">
+                    <span>5. Después de tocar entorno</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 7: PAPE -->
+    <section class="slide">
+        <div class="particles" id="particles-7"></div>
+        <div class="container">
+            <h2 data-reveal>PAPE - Programa de Asistencia al Personal Expuesto</h2>
+            <div class="glass" style="padding: 30px; margin: 30px 0; max-width: 800px;" data-reveal>
+                <h3 style="margin-bottom: 20px;">Protocolo ante exposición a sangre o fluidos corporales</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <div class="card glass">
+                        <h3 style="color: #fbbf24;">1️⃣</h3>
+                        <p>Notificación Inmediata</p>
+                    </div>
+                    <div class="card glass">
+                        <h3 style="color: #fbbf24;">2️⃣</h3>
+                        <p>Evaluación del Riesgo</p>
+                    </div>
+                    <div class="card glass">
+                        <h3 style="color: #fbbf24;">3️⃣</h3>
+                        <p>Seguimiento y Profilaxis</p>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-card" style="margin-top: 20px;" data-reveal>
+                ⚠️ NOTIFICAR DENTRO DE LAS 2 HORAS
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 8: ANTISEPSIA vs DESINFECCIÓN -->
+    <section class="slide">
+        <div class="particles" id="particles-8"></div>
+        <div class="container">
+            <h2 data-reveal>Antisepsia vs Desinfección</h2>
+            <div class="grid-2" style="margin-top: 40px;">
+                <div class="glass" style="padding: 30px;" data-reveal style="animation: slideInLeft 0.6s ease;">
+                    <h3 style="color: #fbbf24; margin-bottom: 20px;">ANTISEPSIA</h3>
+                    <p style="font-size: clamp(1.1rem, 2vw, 1.3rem); font-weight: 600;">
+                        Aplicado en <strong>piel viva, tejidos vivos</strong>
+                    </p>
+                    <p style="margin-top: 15px; opacity: 0.8;">Reduce carga microbiana en superficies vivas</p>
+                </div>
+                <div class="glass" style="padding: 30px;" data-reveal style="animation: slideInRight 0.6s ease;">
+                    <h3 style="color: #fbbf24; margin-bottom: 20px;">DESINFECCIÓN</h3>
+                    <p style="font-size: clamp(1.1rem, 2vw, 1.3rem); font-weight: 600;">
+                        Aplicado en <strong>superficies inertes, instrumentos</strong>
+                    </p>
+                    <p style="margin-top: 15px; opacity: 0.8;">Elimina microorganismos de objetos inanimados</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 9: ALCOHOL 70% -->
+    <section class="slide">
+        <div class="particles" id="particles-9"></div>
+        <div class="container">
+            <h2 data-reveal>Alcohol 70%</h2>
+            <div class="grid-4" style="margin-top: 40px;">
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">⚡ Inmediato</p>
+                    <p>Inicio de acción instantáneo</p>
+                </div>
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">🧬 Desnaturaliza</p>
+                    <p>Desnaturaliza proteínas bacterianas</p>
+                </div>
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">🌐 Amplio Espectro</p>
+                    <p>Activo contra micobacterias</p>
+                </div>
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">❌ Sin Residual</p>
+                    <p>No deja efecto residual</p>
+                </div>
+            </div>
+            <div class="alert-card" style="margin-top: 30px; max-width: 800px; margin-left: auto; margin-right: auto;" data-reveal>
+                ⚠️ No usar en mucosas · Altamente inflamable
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 10: CLORHEXIDINA -->
+    <section class="slide">
+        <div class="particles" id="particles-10"></div>
+        <div class="container">
+            <h2 data-reveal>Clorhexidina</h2>
+            <div class="grid-4" style="margin-top: 40px;">
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">⏱️ 3-5 min</p>
+                    <p>Inicio de acción</p>
+                </div>
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">🛡️ 6 Horas</p>
+                    <p>Efecto residual prolongado</p>
+                </div>
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">📈 Acumulativa</p>
+                    <p>Efecto se acumula con aplicaciones</p>
+                </div>
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">✅ Segura</p>
+                    <p>Baja toxicidad, apta para mucosas</p>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 40px; font-weight: 600;" data-reveal>Amplio espectro: Cocos Gram (+), Gram (-), hongos</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 11: POVIDONA YODADA -->
+    <section class="slide">
+        <div class="particles" id="particles-11"></div>
+        <div class="container">
+            <h2 data-reveal>Povidona Yodada</h2>
+            <div class="grid-4" style="margin-top: 40px;">
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">⏱️ 90 seg</p>
+                    <p>Inicio de acción</p>
+                </div>
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">🌐 Amplio</p>
+                    <p>Amplio espectro antimicrobiano</p>
+                </div>
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">⚠️ Materia Orgánica</p>
+                    <p>Inactivada por sangre/pus</p>
+                </div>
+                <div class="card glass" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">👶 Contraindicado</p>
+                    <p>No usar en neonatos</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 12: DESINFECTANTES -->
+    <section class="slide">
+        <div class="particles" id="particles-12"></div>
+        <div class="container">
+            <h2 data-reveal>Desinfectantes de uso hospitalario</h2>
+            <div class="grid-2" style="margin-top: 40px;">
+                <div class="glass" style="padding: 30px;" data-reveal>
+                    <h3 style="color: #fbbf24; margin-bottom: 15px;">Hipoclorito de Sodio</h3>
+                    <p style="font-weight: 600; margin-bottom: 10px;">Uso:</p>
+                    <p>✓ Superficies y equipos<br>✓ Derrames biológicos<br>✓ Descontaminación general</p>
+                </div>
+                <div class="glass" style="padding: 30px;" data-reveal>
+                    <h3 style="color: #fbbf24; margin-bottom: 15px;">Glutaraldehído 2%</h3>
+                    <p style="font-weight: 600; margin-bottom: 10px;">Uso:</p>
+                    <p>✓ Desinfección de alto nivel<br>✓ Instrumental semicrítico<br>✓ Endoscopios</p>
+                </div>
+                <div class="glass" style="padding: 30px; grid-column: 1/-1;" data-reveal>
+                    <h3 style="color: #fbbf24; margin-bottom: 15px;">Peróxido de Hidrógeno 3%</h3>
+                    <p style="font-weight: 600; margin-bottom: 10px;">Uso:</p>
+                    <p>✓ Heridas limpias o limpias-contaminadas<br>✓ Remoción de materia orgánica</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 13: TRICLOSAN -->
+    <section class="slide">
+        <div class="particles" id="particles-13"></div>
+        <div class="container">
+            <h2 data-reveal>Triclosan 0.5%</h2>
+            <div class="glass" style="padding: 40px; max-width: 800px; margin: 40px auto;" data-reveal>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; text-align: center;">
+                    <div>
+                        <p style="font-size: 1.3rem; font-weight: 700; color: #fbbf24;">⏱️ 30 segundos</p>
+                        <p style="margin-top: 8px;">Tiempo de acción</p>
+                    </div>
+                    <div>
+                        <p style="font-size: 1.3rem; font-weight: 700; color: #fbbf24;">🛡️ 4 Horas</p>
+                        <p style="margin-top: 8px;">Residual prolongado</p>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 30px; padding-top: 30px; border-top: 1px solid rgba(245, 158, 11, 0.2);">
+                    <h3 style="color: #fbbf24; margin-bottom: 10px;">Indicación Principal</h3>
+                    <p style="font-size: 1.1rem;">Lavado clínico de manos en servicios asistenciales</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 14: NIVELES DE DESCONTAMINACIÓN -->
+    <section class="slide">
+        <div class="particles" id="particles-14"></div>
+        <div class="container">
+            <h2 data-reveal>Niveles de Descontaminación</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 40px auto;">
+                <div class="glass" style="padding: 20px; text-align: center;" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #fbbf24;">🔴 ESTERILIZACIÓN</p>
+                </div>
+                <div style="text-align: center; font-weight: 600; opacity: 0.6;">↓</div>
+                <div class="glass" style="padding: 20px; text-align: center;" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700;">Desinfección Alto Nivel</p>
+                </div>
+                <div style="text-align: center; font-weight: 600; opacity: 0.6;">↓</div>
+                <div class="glass" style="padding: 20px; text-align: center;" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700;">Desinfección Nivel Medio</p>
+                </div>
+                <div style="text-align: center; font-weight: 600; opacity: 0.6;">↓</div>
+                <div class="glass" style="padding: 20px; text-align: center;" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700;">Desinfección Bajo Nivel</p>
+                </div>
+                <div style="text-align: center; font-weight: 600; opacity: 0.6;">↓</div>
+                <div class="glass" style="padding: 20px; text-align: center;" data-reveal>
+                    <p style="font-size: 1.2rem; font-weight: 700; color: #94a3b8;">🔵 LIMPIEZA</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 15: RESUMEN CLÍNICO -->
+    <section class="slide">
+        <div class="particles" id="particles-15"></div>
+        <div class="container">
+            <h2 data-reveal>Resumen Comparativo Clínico</h2>
+            <div style="overflow-x: auto; margin-top: 40px;" data-reveal>
+                <div class="comparison-row">
+                    <div class="comparison-cell" style="font-weight: 700; background: rgba(245, 158, 11, 0.2);">Agente</div>
+                    <div class="comparison-cell" style="font-weight: 700; background: rgba(245, 158, 11, 0.2);">Tejido Vivo</div>
+                    <div class="comparison-cell" style="font-weight: 700; background: rgba(245, 158, 11, 0.2);">Superficie</div>
+                    <div class="comparison-cell" style="font-weight: 700; background: rgba(245, 158, 11, 0.2);">Inicio</div>
+                    <div class="comparison-cell" style="font-weight: 700; background: rgba(245, 158, 11, 0.2);">Residual</div>
+                    <div class="comparison-cell" style="font-weight: 700; background: rgba(245, 158, 11, 0.2);">Espectro</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">Alcohol 70%</div>
+                    <div class="comparison-cell">✓</div>
+                    <div class="comparison-cell">✓</div>
+                    <div class="comparison-cell">Inmediato</div>
+                    <div class="comparison-cell">No</div>
+                    <div class="comparison-cell">Amplio</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">Clorhexidina</div>
+                    <div class="comparison-cell">✓</div>
+                    <div class="comparison-cell">✓</div>
+                    <div class="comparison-cell">3-5 min</div>
+                    <div class="comparison-cell">6 hrs</div>
+                    <div class="comparison-cell">Amplio</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">Povidona Yodada</div>
+                    <div class="comparison-cell">✓</div>
+                    <div class="comparison-cell">✓</div>
+                    <div class="comparison-cell">90 seg</div>
+                    <div class="comparison-cell">Medio</div>
+                    <div class="comparison-cell">Amplio</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">Hipoclorito</div>
+                    <div class="comparison-cell">✗</div>
+                    <div class="comparison-cell">✓</div>
+                    <div class="comparison-cell">Rápido</div>
+                    <div class="comparison-cell">Bajo</div>
+                    <div class="comparison-cell">Amplio</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NAVIGATION DOTS -->
+    <div class="nav-dots" id="navDots"></div>
+
+    <script>
+        // GENERATE PARTICLES
+        function generateParticles(containerId, count = 15) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                const randomX = Math.random() * window.innerWidth;
+                const randomY = Math.random() * window.innerHeight * 0.5;
+                const randomTx = (Math.random() - 0.5) * 300;
+                const randomTy = -Math.random() * 400 - 100;
+                const duration = Math.random() * 3 + 4;
+                const delay = Math.random() * 2;
+
+                particle.style.left = randomX + 'px';
+                particle.style.top = randomY + 'px';
+                particle.style.setProperty('--tx', randomTx + 'px');
+                particle.style.setProperty('--ty', randomTy + 'px');
+                particle.style.animationDuration = duration + 's';
+                particle.style.animationDelay = delay + 's';
+
+                container.appendChild(particle);
+            }
+        }
+
+        // Generate particles for all slides
+        for (let i = 1; i <= 15; i++) {
+            generateParticles(`particles-${i}`);
+        }
+
+        // INTERSECTION OBSERVER for reveal animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('[data-reveal]').forEach(el => {
+            observer.observe(el);
+        });
+
+        // NAVIGATION DOTS
+        const slides = document.querySelectorAll('.slide');
+        const navDotsContainer = document.getElementById('navDots');
+        const totalSlides = slides.length;
+
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot';
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => {
+                slides[i].scrollIntoView({ behavior: 'smooth' });
+            });
+            navDotsContainer.appendChild(dot);
+        }
+
+        // UPDATE PROGRESS
+        function updateProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.querySelector('.progress-bar').style.width = scrollPercent + '%';
+
+            // Update active dot
+            let currentSlide = 0;
+            slides.forEach((slide, index) => {
+                if (slide.offsetTop <= scrollTop + window.innerHeight / 2) {
+                    currentSlide = index;
+                }
+            });
+
+            document.querySelectorAll('.nav-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        window.addEventListener('scroll', updateProgress);
+
+        // KEYBOARD NAVIGATION
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                window.scrollBy(0, window.innerHeight);
+            } else if (e.key === 'ArrowUp') {
+                window.scrollBy(0, -window.innerHeight);
+            }
+        });
+
+        // TOUCH NAVIGATION
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndY = e.changedTouches[0].clientY;
+            if (touchStartY - touchEndY > 50) {
+                window.scrollBy(0, window.innerHeight);
+            } else if (touchEndY - touchStartY > 50) {
+                window.scrollBy(0, -window.innerHeight);
+            }
+        });
+    </script>
+</body>
+</html>

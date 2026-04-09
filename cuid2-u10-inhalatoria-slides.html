@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración Inhalatoria - ENF3015 UDP 2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            background: #0b1520;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #0b1520;
+            color: #e0e7ff;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            height: 100vh;
+            height: 100dvh;
+            scroll-snap-align: start;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #0b1520 0%, #1a2a4a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Animaciones keyframes */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes particle-drift {
+            0% { transform: translateY(0) translateX(0); opacity: 0.8; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        }
+
+        @keyframes breath {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Partículas */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #818cf8;
+            border-radius: 50%;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation: particle-drift 15s infinite; }
+        .particle:nth-child(2) { left: 20%; animation: particle-drift 18s infinite 2s; }
+        .particle:nth-child(3) { left: 30%; animation: particle-drift 20s infinite 4s; }
+        .particle:nth-child(4) { left: 40%; animation: particle-drift 16s infinite 1s; }
+        .particle:nth-child(5) { left: 50%; animation: particle-drift 19s infinite 3s; }
+        .particle:nth-child(6) { left: 60%; animation: particle-drift 17s infinite 5s; }
+        .particle:nth-child(7) { left: 70%; animation: particle-drift 21s infinite 2.5s; }
+        .particle:nth-child(8) { left: 80%; animation: particle-drift 18s infinite 1.5s; }
+        .particle:nth-child(9) { left: 90%; animation: particle-drift 19s infinite 3.5s; }
+        .particle:nth-child(10) { left: 15%; animation: particle-drift 20s infinite 0.5s; }
+        .particle:nth-child(11) { left: 35%; animation: particle-drift 17s infinite 2s; }
+        .particle:nth-child(12) { left: 55%; animation: particle-drift 22s infinite 4.5s; }
+        .particle:nth-child(13) { left: 75%; animation: particle-drift 19s infinite 1s; }
+        .particle:nth-child(14) { left: 85%; animation: particle-drift 18s infinite 3s; }
+        .particle:nth-child(15) { left: 25%; animation: particle-drift 20s infinite 2s; }
+
+        /* Progress bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #818cf8, #a78bfa);
+            width: 0%;
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        /* Nav dots */
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #818cf8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .nav-dot.active {
+            background: #818cf8;
+            box-shadow: 0 0 20px #818cf8;
+            transform: scale(1.3);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(22, 38, 58, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(129, 140, 248, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .anim {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .anim.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Contenido específico */
+        .slide-content {
+            max-width: 900px;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        h1 { font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; color: #818cf8; }
+        h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1.5rem; color: #818cf8; }
+        h3 { font-size: 1.8rem; font-weight: 600; margin-bottom: 1rem; color: #e0e7ff; }
+        p { font-size: 1.2rem; line-height: 1.8; color: #cbd5e1; }
+
+        /* Cover slide */
+        .cover-content {
+            text-align: center;
+        }
+
+        .cover-content h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            animation: slideInLeft 0.8s ease;
+        }
+
+        .cover-content .meta {
+            font-size: 1.3rem;
+            color: #94a3b8;
+            animation: slideInRight 0.8s ease 0.2s both;
+        }
+
+        /* Breath animation para cover */
+        .breath-animation {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(129, 140, 248, 0.3), transparent);
+            animation: breath 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: rgba(22, 38, 58, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease backwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: #818cf8;
+            box-shadow: 0 0 30px rgba(129, 140, 248, 0.2);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            color: #818cf8;
+            margin-bottom: 0.8rem;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        /* Steps sequence */
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .step {
+            background: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid #818cf8;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: left;
+            animation: slideInLeft 0.6s ease backwards;
+        }
+
+        .step:nth-child(1) { animation-delay: 0.1s; }
+        .step:nth-child(2) { animation-delay: 0.2s; }
+        .step:nth-child(3) { animation-delay: 0.3s; }
+        .step:nth-child(4) { animation-delay: 0.4s; }
+        .step:nth-child(5) { animation-delay: 0.5s; }
+        .step:nth-child(6) { animation-delay: 0.6s; }
+
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #818cf8;
+            color: #0b1520;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+
+        /* Alert cards */
+        .alert-card {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 1.5rem;
+            animation: fadeInUp 0.6s ease backwards;
+        }
+
+        .alert-card h3 {
+            color: #fca5a5;
+        }
+
+        /* Dos columnas */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .column { flex: 1; }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(22, 38, 58, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(129, 140, 248, 0.2);
+        }
+
+        th {
+            background: rgba(129, 140, 248, 0.2);
+            color: #818cf8;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .two-columns { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            .nav-dots { right: 1rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .breath-animation { width: 200px; height: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+
+    <!-- Slide 1: Cover -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="breath-animation"></div>
+        <div class="slide-content cover-content anim">
+            <h1>Administración de Medicamentos<br>Vía Inhalatoria<br>y Aspiración de Secreciones</h1>
+            <div class="meta">
+                <p>ENF3015 - UDP 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Ventajas -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Ventajas Vía Inhalatoria</h2>
+            <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="card">
+                    <h3>🎯 Acción Local</h3>
+                    <p>Directa en vías aéreas</p>
+                </div>
+                <div class="card">
+                    <h3>💊 Dosis Menor</h3>
+                    <p>Menos efectos sistémicos</p>
+                </div>
+                <div class="card">
+                    <h3>⚡ Rápido</h3>
+                    <p>Inicio inmediato</p>
+                </div>
+                <div class="card">
+                    <h3>📈 Biodisponibilidad</h3>
+                    <p>Alta a nivel pulmonar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Dispositivos -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Dispositivos Inhalatorios</h2>
+            <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="card">
+                    <h3>💨 MDI/pMDI</h3>
+                    <p>Aerosol presurizado</p>
+                </div>
+                <div class="card">
+                    <h3>🌬️ DPI</h3>
+                    <p>Polvo seco<br>Requiere flujo inspiratorio</p>
+                </div>
+                <div class="card">
+                    <h3>🌫️ Nebulizador Jet</h3>
+                    <p>Por aire comprimido</p>
+                </div>
+                <div class="card">
+                    <h3>🔵 Nebulizador Ultrasónico</h3>
+                    <p>Por vibración</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Técnica MDI -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Técnica MDI (pMDI)</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <span class="step-number">1</span><strong>Agitar</strong> el dispositivo vigorosamente
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span><strong>Exhalar completamente</strong> antes de iniciar
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span><strong>Sellar la boquilla</strong> con los labios
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span><strong>Inspirar lento y profundo</strong> MIENTRAS activa
+                </div>
+                <div class="step">
+                    <span class="step-number">5</span><strong>Apnea 10 segundos</strong> para deposición
+                </div>
+                <div class="step">
+                    <span class="step-number">6</span><strong>Esperar 1 minuto</strong> entre puffs
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Cámara espaciadora -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Cámara Espaciadora</h2>
+            <div class="glass anim">
+                <h3>Beneficios</h3>
+                <p>✓ Mejora depósito pulmonar ↑30-40%</p>
+                <p>✓ Reduce depósito orofaríngeo</p>
+                <p><strong>Indicada en:</strong> Niños, ancianos, mala coordinación</p>
+            </div>
+            <div class="glass anim" style="margin-top: 1.5rem; animation-delay: 0.2s;">
+                <h3>Mantenimiento</h3>
+                <p>🧼 Limpiar semanalmente con jabón</p>
+                <p>💧 Secar al aire naturalmente</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Nebulización -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Nebulización</h2>
+            <div class="glass anim">
+                <h3>Indicaciones Clínicas</h3>
+                <p>• Crisis asmática aguda</p>
+                <p>• EPOC exacerbado</p>
+                <p>• Laringitis</p>
+                <p>• Bronquiolitis</p>
+            </div>
+            <div class="glass anim" style="margin-top: 1.5rem; animation-delay: 0.2s;">
+                <h3>Parámetros</h3>
+                <p><strong>Flujo O₂:</strong> 6-8 L/min</p>
+                <p><strong>Duración:</strong> 10-15 minutos</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Medicamentos inhalatorios -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Medicamentos Inhalatorios Frecuentes</h2>
+            <div class="table-container">
+                <table>
+                    <tr>
+                        <th>Medicamento</th>
+                        <th>Mecanismo</th>
+                        <th>Acción</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Salbutamol</strong></td>
+                        <td>β2 agonista</td>
+                        <td>Broncodilatador</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Budesonida</strong></td>
+                        <td>Corticoide</td>
+                        <td>Antiinflamatorio</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ipratropio</strong></td>
+                        <td>Anticolinérgico</td>
+                        <td>Broncodilatador</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Terbutalina</strong></td>
+                        <td>β2 agonista</td>
+                        <td>Broncodilatador rápido</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Aspiración - Indicaciones -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Aspiración de Secreciones</h2>
+            <h3 style="margin-bottom: 1.5rem;">Indicaciones</h3>
+            <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="card">
+                    <h3>🤐 Incapacidad</h3>
+                    <p>No puede toser eficaz</p>
+                </div>
+                <div class="card">
+                    <h3>🪜 Intubado</h3>
+                    <p>Traqueostomizado</p>
+                </div>
+                <div class="card">
+                    <h3>🧠 Nivel Conciencia</h3>
+                    <p>Alterado o deprimido</p>
+                </div>
+                <div class="card">
+                    <h3>📉 SpO₂</h3>
+                    <p>Descendente</p>
+                </div>
+            </div>
+            <p style="margin-top: 1.5rem;">🔊 <strong>Signos:</strong> Ruidos aéreos (roncus, gorgoteos)</p>
+        </div>
+    </div>
+
+    <!-- Slide 9: Equipo aspiración -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Equipo para Aspiración</h2>
+            <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="card">
+                    <h3>Sonda Aspiración</h3>
+                    <p>Fr 10-14</p>
+                </div>
+                <div class="card">
+                    <h3>Fuente Vacío</h3>
+                    <p>Presión adecuada</p>
+                </div>
+                <div class="card">
+                    <h3>Guantes Estériles</h3>
+                    <p>Técnica aséptica</p>
+                </div>
+                <div class="card">
+                    <h3>Suero Fisiológico</h3>
+                    <p>Para irrigación</p>
+                </div>
+                <div class="card">
+                    <h3>Jeringa</h3>
+                    <p>Para aspiración</p>
+                </div>
+                <div class="card">
+                    <h3>Bolsa Residuos</h3>
+                    <p>Para desechos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Técnica aspiración -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Técnica de Aspiración</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <span class="step-number">1</span><strong>Preoxigenar</strong> con O₂ 100% × 2 minutos
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span><strong>Preparar campo estéril</strong> con técnica aséptica
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span><strong>Introducir sonda SIN aspirar</strong> lentamente
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span><strong>Aspirar máximo 10-15 segundos</strong> durante retiro
+                </div>
+                <div class="step">
+                    <span class="step-number">5</span><strong>Reoxigenar entre intentos</strong> 2 minutos
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Complicaciones -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Complicaciones Aspiración</h2>
+            <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="alert-card">
+                    <h3>❌ Hipoxemia</h3>
+                    <p>Más frecuente</p>
+                </div>
+                <div class="alert-card">
+                    <h3>❌ Arritmias</h3>
+                    <p>Cardíacas</p>
+                </div>
+                <div class="alert-card">
+                    <h3>❌ Trauma Mucosa</h3>
+                    <p>Por técnica brusca</p>
+                </div>
+                <div class="alert-card">
+                    <h3>❌ Infección</h3>
+                    <p>Técnica no estéril</p>
+                </div>
+            </div>
+            <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; border-radius: 8px;">
+                <strong style="color: #fca5a5;">⚠️ Máximo 3 intentos</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: Cuidados traqueostomía -->
+    <div class="slide">
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        <div class="slide-content">
+            <h2>Cuidados de Traqueostomía</h2>
+            <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="card">
+                    <h3>🧼 Higiene Estoma</h3>
+                    <p>Cada 8 horas</p>
+                </div>
+                <div class="card">
+                    <h3>💨 Aspirar</h3>
+                    <p>Cuando sea necesario<br>No rutinariamente</p>
+                </div>
+                <div class="card">
+                    <h3>💧 Humidificación</h3>
+                    <p>Aire humidificado</p>
+                </div>
+                <div class="card">
+                    <h3>🗣️ Comunicación</h3>
+                    <p>Hablar siempre<br>Aunque no responda</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-dots" id="navDots"></div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.querySelector('.progress-bar');
+        let currentSlide = 0;
+        let isScrolling = false;
+
+        // Crear nav dots
+        const navDotsContainer = document.getElementById('navDots');
+        slides.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.classList.add('nav-dot');
+            if (index === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(index));
+            navDotsContainer.appendChild(dot);
+        });
+
+        // IntersectionObserver para animaciones
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.anim').forEach(el => observer.observe(el));
+
+        // Scroll snap y navegación
+        window.addEventListener('wheel', e => {
+            if (isScrolling) return;
+
+            isScrolling = true;
+            if (e.deltaY > 0) nextSlide();
+            else prevSlide();
+
+            setTimeout(() => isScrolling = false, 800);
+        }, { passive: true });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Touch swipe
+        let touchStart = 0;
+        document.addEventListener('touchstart', e => touchStart = e.touches[0].clientY);
+        document.addEventListener('touchend', e => {
+            const diff = touchStart - e.changedTouches[0].clientY;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) nextSlide();
+                else prevSlide();
+            }
+        });
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlide();
+        }
+
+        function updateSlide() {
+            const targetPos = currentSlide * window.innerHeight;
+            window.scrollTo({ top: targetPos, behavior: 'smooth' });
+            updateUI();
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        window.addEventListener('scroll', () => {
+            const scrollPos = window.scrollY;
+            currentSlide = Math.round(scrollPos / window.innerHeight);
+            currentSlide = Math.min(currentSlide, slides.length - 1);
+            updateUI();
+        });
+    </script>
+</body>
+</html>

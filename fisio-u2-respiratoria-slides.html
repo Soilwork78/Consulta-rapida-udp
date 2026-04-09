@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fisiopatología Respiratoria — Unidad 2 UDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+.slide { width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; scroll-snap-align: start; display: flex; flex-direction: column; position: relative; }
+.slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; max-height: 100%; overflow: hidden; padding: var(--slide-padding); }
+:root {
+  --title-size: clamp(1.5rem, 5vw, 4rem);
+  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+  --body-size: clamp(0.75rem, 1.5vw, 1.05rem);
+  --small-size: clamp(0.65rem, 1vw, 0.85rem);
+  --slide-padding: clamp(1.5rem, 5vw, 5rem);
+  --content-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --element-gap: clamp(0.25rem, 1vw, 0.75rem);
+  --bg-dark: #0b1520; --bg-mid: #111e2e; --bg-card: #16263a;
+  --teal: #00c9a7; --teal-dim: #00917a; --cyan: #38bdf8;
+  --amber: #fbbf24; --red-warn: #f87171; --green-ok: #4ade80;
+  --text-main: #e8f1fb; --text-muted: #7a9ab8;
+  --border: rgba(0,201,167,0.18);
+  --font-main: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-main); background: var(--bg-dark); color: var(--text-main); font-size: var(--body-size); }
+h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.1; }
+h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.2; }
+h3 { font-size: var(--h3-size); font-weight: 600; line-height: 1.3; }
+p, li { font-size: var(--body-size); line-height: 1.55; color: var(--text-main); }
+.mono { font-family: var(--font-mono); }
+.bg-gradient { background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1f35 50%, #0a1829 100%); }
+.grid-overlay::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(0,201,167,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,201,167,.04) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+.glow-circle { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; opacity: .3; }
+#nav-dots { position: fixed; right: clamp(12px,2vw,28px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.2); cursor: pointer; transition: all .25s; border: none; }
+.dot.active { background: var(--teal); width: 7px; height: 14px; border-radius: 4px; }
+.dot:hover { background: var(--cyan); }
+#progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--teal), var(--cyan)); transition: width .3s ease; z-index: 200; }
+#slide-counter { position: fixed; bottom: clamp(12px,2vh,24px); right: clamp(16px,2.5vw,32px); font-family: var(--font-mono); font-size: var(--small-size); color: var(--text-muted); z-index: 100; }
+#kbd-hint { position: fixed; bottom: clamp(12px,2vh,24px); left: clamp(16px,2.5vw,32px); font-size: var(--small-size); color: var(--text-muted); z-index: 100; display: flex; gap: 8px; align-items: center; }
+.kbd { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: .75em; }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .55s ease, transform .55s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; } .reveal-delay-2 { transition-delay: .2s; } .reveal-delay-3 { transition-delay: .3s; } .reveal-delay-4 { transition-delay: .4s; } .reveal-delay-5 { transition-delay: .5s; } .reveal-delay-6 { transition-delay: .6s; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: var(--small-size); font-weight: 600; letter-spacing: .5px; }
+.tag-teal  { background: rgba(0,201,167,.15); color: var(--teal); border: 1px solid rgba(0,201,167,.3); }
+.tag-amber { background: rgba(251,191,36,.15); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+.tag-red   { background: rgba(248,113,113,.15); color: var(--red-warn); border: 1px solid rgba(248,113,113,.3); }
+.tag-cyan  { background: rgba(56,189,248,.15); color: var(--cyan); border: 1px solid rgba(56,189,248,.3); }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 16px; font-size: var(--small-size); font-weight: 600; background: rgba(0,201,167,.1); color: var(--teal); border: 1px solid rgba(0,201,167,.25); }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: clamp(8px,1.5vw,16px); padding: clamp(0.75rem,2vw,1.5rem); }
+.card-grid { display: grid; gap: clamp(0.5rem,1.5vw,1rem); }
+.card-grid-2 { grid-template-columns: repeat(2,1fr); }
+.card-grid-3 { grid-template-columns: repeat(3,1fr); }
+.card-grid-4 { grid-template-columns: repeat(4,1fr); }
+.accent-line { width: clamp(40px,6vw,80px); height: 3px; background: linear-gradient(90deg, var(--teal), var(--cyan)); border-radius: 2px; margin-bottom: var(--content-gap); }
+.clinical-table { width: 100%; border-collapse: collapse; font-size: var(--small-size); }
+.clinical-table th { background: rgba(0,201,167,.12); color: var(--teal); padding: clamp(4px,1vw,10px) clamp(6px,1.5vw,14px); text-align: left; font-weight: 700; border-bottom: 1px solid var(--border); font-size: var(--small-size); }
+.clinical-table td { padding: clamp(4px,1vw,9px) clamp(6px,1.5vw,14px); border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; line-height: 1.45; }
+.clinical-table tr:hover td { background: rgba(0,201,167,.04); }
+.bullet-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.35rem,1vh,0.7rem); }
+.bullet-list li { display: flex; align-items: flex-start; gap: 10px; }
+.bullet-list li::before { content: '▸'; color: var(--teal); flex-shrink: 0; margin-top: .1em; }
+.numbered-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.35rem,1vh,0.7rem); counter-reset: item; padding-left: 0; }
+.numbered-list li { display: flex; align-items: flex-start; gap: 10px; counter-increment: item; }
+.numbered-list li::before { content: counter(item); color: var(--teal); flex-shrink: 0; font-weight: 700; min-width: 20px; }
+.mech-box { border-left: 3px solid var(--teal); padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); background: rgba(0,201,167,.06); border-radius: 0 8px 8px 0; }
+.mech-box .mech-title { font-size: var(--small-size); font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.warn-band { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 8px; padding: clamp(6px,1vw,12px) clamp(10px,1.5vw,18px); display: flex; align-items: flex-start; gap: 10px; }
+.warn-band .warn-icon { color: var(--red-warn); font-size: 1.2em; flex-shrink: 0; }
+.section-num { font-family: var(--font-mono); font-size: clamp(3rem,12vw,9rem); font-weight: 700; color: rgba(0,201,167,.08); position: absolute; right: var(--slide-padding); bottom: clamp(1rem,4vh,3rem); line-height: 1; pointer-events: none; user-select: none; }
+@media (max-height:700px) { :root { --slide-padding: clamp(0.75rem,3vw,2rem); --content-gap: clamp(0.35rem,1.5vw,0.85rem); --title-size: clamp(1.25rem,4.5vw,2.5rem); --h2-size: clamp(1rem,3vw,1.75rem); } }
+@media (max-height:600px) { :root { --slide-padding: clamp(0.5rem,2.5vw,1.2rem); --content-gap: clamp(0.25rem,1vw,0.6rem); --title-size: clamp(1.1rem,4vw,1.8rem); --body-size: clamp(0.65rem,1.2vw,0.88rem); } #nav-dots, #kbd-hint, .section-num { display: none; } }
+@media (max-height:500px) { :root { --slide-padding: clamp(0.4rem,2vw,0.9rem); --title-size: clamp(1rem,3.5vw,1.4rem); --h2-size: clamp(0.9rem,2.5vw,1.2rem); --body-size: clamp(0.62rem,1vw,0.8rem); } }
+@media (max-width:600px) { :root { --title-size: clamp(1.25rem,7vw,2.2rem); } .card-grid-2, .card-grid-3, .card-grid-4 { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } html { scroll-behavior: auto; } .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav-dots" aria-label="Navegación de diapositivas"></nav>
+<div id="slide-counter" aria-live="polite">1 / 12</div>
+<div id="kbd-hint"><span class="kbd">↑↓</span><span class="kbd">← →</span><span style="margin-left:4px">navegar</span></div>
+
+<main>
+
+<!-- SLIDE 1 — PORTADA -->
+<section class="slide bg-gradient grid-overlay" id="slide-1">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;right:-100px;opacity:.12"></div>
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--cyan);bottom:-100px;left:-50px;opacity:.07"></div>
+  <div class="slide-content" style="justify-content:center;">
+    <div style="max-width:min(90vw,820px);">
+      <div class="reveal" style="margin-bottom:var(--content-gap);"><span class="tag tag-teal">Fisiopatología 2° Año Enfermería · UDP</span></div>
+      <h1 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Fisiopatología<br><span style="color:var(--teal);">Respiratoria</span></h1>
+      <p class="reveal reveal-delay-2" style="color:var(--text-muted);max-width:600px;margin-bottom:var(--content-gap);">Unidad 2 · Espirometría · Asma · EPOC · SDRA · Insuficiencia Respiratoria</p>
+      <div class="reveal reveal-delay-3" style="display:flex;gap:clamp(8px,1.5vw,16px);flex-wrap:wrap;align-items:center;">
+        <span class="chip">5 sesiones</span>
+        <span class="chip">12 slides</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">1</div>
+</section>
+
+<!-- SLIDE 2 — Espirometría y V/Q -->
+<section class="slide bg-gradient grid-overlay" id="slide-2">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Espirometría y Relación Ventilación/Perfusión</h2>
+    <div class="card-grid card-grid-4" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">CVF</p>
+        <p style="font-size:var(--small-size);">Capacidad Vital Forzada. Volumen total espirado con fuerza. <strong>Normal >80%</strong> del predicho.</p>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">VEF1 (FEV1)</p>
+        <p style="font-size:var(--small-size);">Vol. espirado en 1er segundo. <strong>Normal >80%</strong>. Reducido en obstrucción.</p>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">VEF1/CVF</p>
+        <p style="font-size:var(--small-size);">Cociente de Tiffeneau. <strong>Normal ≥70%</strong>. <strong>&lt;70% = patrón obstructivo</strong>.</p>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--green-ok);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">Patrón restrictivo</p>
+        <p style="font-size:var(--small-size);">VEF1↓ CVF↓, VEF1/CVF normal/↑. Causas: fibrosis, derrame, obesidad.</p>
+      </div>
+    </div>
+    <div class="mech-box reveal reveal-delay-3">
+      <p class="mech-title">Relación V/Q</p>
+      <p>V/Q normal = 0.8. <strong>V/Q=0</strong> (shunt): sangre no oxigenada pasa. <strong>V/Q=∞</strong> (espacio muerto): ventilación sin perfusión.</p>
+    </div>
+  </div>
+  <div class="section-num">2</div>
+</section>
+
+<!-- SLIDE 3 — Asma: Fisiopatología -->
+<section class="slide bg-gradient grid-overlay" id="slide-3">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--cyan);bottom:-150px;right:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Asma: Fisiopatología Th2 e Hipersensibilidad</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <li><strong>Sensibilización:</strong> Alergeno → Th2 → IL-4/IL-13 → cambio de clase IgE en linfocito B</li>
+      <li><strong>Exposición:</strong> Alergeno + IgE en mastocitos → degranulación → histamina, leucotrienos (LTC4/D4), PGD2</li>
+      <li><strong>Broncoespasmo:</strong> Contracción músculo liso bronquial (minutos)</li>
+      <li><strong>Respuesta tardía (4-8h):</strong> Eosinófilos → IL-5 → daño epitelio → remodelado bronquial</li>
+    </ul>
+    <div class="mech-box reveal reveal-delay-3">
+      <p class="mech-title">Remodelado</p>
+      <p>Engrosamiento membrana basal + hipertrofia glándulas mucosas + hiperplasia músculo liso → <strong>obstrucción crónica</strong>.</p>
+    </div>
+  </div>
+  <div class="section-num">3</div>
+</section>
+
+<!-- SLIDE 4 — Asma: Clasificación GINA y Tratamiento -->
+<section class="slide bg-gradient grid-overlay" id="slide-4">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--green-ok);top:-100px;right:-80px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Asma: GINA y Tratamiento Escalonado</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <thead>
+        <tr><th>Gravedad</th><th>Síntomas</th><th>Nocturno</th><th>VEF1</th><th>Escalón</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Intermitente</strong></td><td>&lt;2 días/sem</td><td>≤2/mes</td><td>≥80%</td><td>1</td></tr>
+        <tr><td><strong>Leve persistente</strong></td><td>>2 días/sem</td><td>3-4/mes</td><td>≥80%</td><td>2</td></tr>
+        <tr><td><strong>Moderada persistente</strong></td><td>Diario</td><td>>1/sem</td><td>60-80%</td><td>3-4</td></tr>
+        <tr><td><strong>Grave persistente</strong></td><td>Continuo</td><td>Frecuente</td><td>&lt;60%</td><td>5</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">ESCALÓN 1-2</p>
+        <ul class="bullet-list">
+          <li>SABA PRN (salbutamol)</li>
+          <li>Dosis bajas ICS: fluticasona/budesonida</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">ESCALÓN 3-5</p>
+        <ul class="bullet-list">
+          <li>ICS + LABA (salmeterol)</li>
+          <li>Anti-IL-5 (mepolizumab)</li>
+          <li>Anti-IgE (omalizumab)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">4</div>
+</section>
+
+<!-- SLIDE 5 — EPOC: Fisiopatología -->
+<section class="slide bg-gradient grid-overlay" id="slide-5">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--amber);top:-150px;left:-120px;opacity:.07"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">EPOC: Bronquitis Crónica y Enfisema</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">BRONQUITIS CRÓNICA</p>
+        <p style="font-size:var(--small-size);margin-bottom:8px;">"Blue Bloater"</p>
+        <ul class="bullet-list">
+          <li>Inflamación crónica → hipertrofia glándulas mucosas</li>
+          <li>Tos productiva ≥3 meses/año × ≥2 años</li>
+          <li>Hipoxemia + hipercapnia precoz</li>
+          <li>Poliglobulia + cianosis</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">ENFISEMA</p>
+        <p style="font-size:var(--small-size);margin-bottom:8px;">"Pink Puffer"</p>
+        <ul class="bullet-list">
+          <li>Destrucción alvéolos → espacio muerto ↑</li>
+          <li>Hiperinsuflación (diafragma plano)</li>
+          <li>Normoxemia con gran esfuerzo respiratorio</li>
+          <li>Caquexia</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mech-box reveal reveal-delay-3">
+      <p class="mech-title">Patogenia</p>
+      <p>Humo tabaco → PMN/macrófagos → elastasa/proteasas → destrucción parénquima (α1-antitripsina insuficiente).</p>
+    </div>
+  </div>
+  <div class="section-num">5</div>
+</section>
+
+<!-- SLIDE 6 — EPOC: Clasificación GOLD y Manejo -->
+<section class="slide bg-gradient grid-overlay" id="slide-6">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--red-warn);bottom:-100px;right:-60px;opacity:.06"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">EPOC: Clasificación GOLD y Manejo</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <thead>
+        <tr><th>Grado</th><th>VEF1 (% predicho)</th><th>Gravedad</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>GOLD 1</strong></td><td>≥80%</td><td>Leve</td></tr>
+        <tr><td><strong>GOLD 2</strong></td><td>50-79%</td><td>Moderado</td></tr>
+        <tr><td><strong>GOLD 3</strong></td><td>30-49%</td><td>Grave</td></tr>
+        <tr><td><strong>GOLD 4</strong></td><td>&lt;30%</td><td>Muy grave</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">TRATAMIENTO ESTABLE</p>
+        <ul class="bullet-list">
+          <li>LAMA (tiotropio) ± LABA ± ICS</li>
+          <li>Rehabilitación pulmonar</li>
+          <li>O₂ si PaO₂ &lt;55 mmHg</li>
+          <li>Vacunas influenza/neumococo</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">EXACERBACIÓN</p>
+        <ul class="bullet-list">
+          <li>↑disnea/tos/esputo</li>
+          <li>Broncodilatadores nebulizados</li>
+          <li>Corticoides sistémicos + ATB</li>
+          <li>VNI si acidosis respiratoria</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">6</div>
+</section>
+
+<!-- SLIDE 7 — SDRA: Criterios de Berlín -->
+<section class="slide bg-gradient grid-overlay" id="slide-7">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--cyan);bottom:-200px;left:-150px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">SDRA: Síndrome de Distrés Respiratorio del Adulto</h2>
+    <ul class="numbered-list reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <li><strong>Inicio agudo:</strong> dentro de 7 días de injuria conocida</li>
+      <li><strong>RX/TAC:</strong> Opacidades bilaterales no explicables por derrame/colapso/nódulos</li>
+      <li><strong>Origen edema:</strong> No explicable por falla cardíaca</li>
+      <li><strong>PaO₂/FiO₂:</strong> Leve 200-300, Moderado 100-200, Grave &lt;100 (PEEP ≥5)</li>
+    </ul>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">FISIOPATOLOGÍA</p>
+        <ul class="bullet-list">
+          <li>Daño epitelio alveolar tipo II</li>
+          <li>↓surfactante → colapso</li>
+          <li>Shunt → hipoxemia</li>
+          <li>Inflamación sistémica + fuga capilar</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MANEJO</p>
+        <ul class="bullet-list">
+          <li>VM protectora: VT 6ml/kg, Pplat ≤30cmH₂O</li>
+          <li>PEEP optimizado</li>
+          <li>Decúbito prono 16h</li>
+          <li>Corticoides moderados</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">7</div>
+</section>
+
+<!-- SLIDE 8 — Insuficiencia Respiratoria Tipo I y II -->
+<section class="slide bg-gradient grid-overlay" id="slide-8">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--green-ok);top:-120px;left:-80px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Insuficiencia Respiratoria Tipo I y II</h2>
+    <table class="clinical-table reveal reveal-delay-2" style="margin-bottom:var(--content-gap); font-size:var(--small-size);">
+      <thead>
+        <tr><th>Tipo</th><th>PaO₂</th><th>PaCO₂</th><th>Mecanismo</th><th>Ejemplos</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Tipo I</strong></td><td>&lt;60 mmHg</td><td>Normal/↓</td><td>Shunt/V/Q bajo</td><td>Neumonía, SDRA, EAP</td></tr>
+        <tr><td><strong>Tipo II</strong></td><td>↓</td><td>&gt;45 mmHg</td><td>Hipoventilación</td><td>EPOC, miastenia, opioide</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">GSA IR TIPO I</p>
+        <ul class="bullet-list">
+          <li>pH↑ o normal</li>
+          <li>pCO₂ normal/↓</li>
+          <li>pO₂↓</li>
+          <li>A-a gradiente ↑</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">GSA IR TIPO II</p>
+        <ul class="bullet-list">
+          <li>pH↓ (acidosis)</li>
+          <li>pCO₂↑</li>
+          <li>pO₂↓</li>
+          <li>HCO₃ ↑ (compensación)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-4">
+      <span class="warn-icon">⚠</span>
+      <div><strong>EPOC con hipercapnia crónica:</strong> drive hipóxico. O₂ con cautela — objetivo SaO₂ 88-92%, no sobreoxigenar.</div>
+    </div>
+  </div>
+  <div class="section-num">8</div>
+</section>
+
+<!-- SLIDE 9 — Neumonía y Derrame Pleural -->
+<section class="slide bg-gradient grid-overlay" id="slide-9">
+  <div class="glow-circle" style="width:400px;height:400px;background:var(--red-warn);top:-100px;right:-60px;opacity:.06"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Neumonía y Derrame Pleural</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">NEUMONÍA</p>
+        <ul class="bullet-list">
+          <li>Consolidación alveolar (bacteriana) o intersticial (viral/atípica)</li>
+          <li>PSI/CURB-65 para gravedad</li>
+          <li>Hallazgos: MV abolido, matidez, crepitaciones, pectoriloquia</li>
+          <li>CXR: consolidación lobar/bronconeumónica</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">DERRAME PLEURAL</p>
+        <ul class="bullet-list">
+          <li>Trasudado: ICC, cirrosis, síndrome nefrótico</li>
+          <li>Exudado: infección, malignidad, TEP</li>
+          <li>Criterios de Light: proteínas >0.5, LDH >0.6</li>
+          <li>Toracocentesis diagnóstica/terapéutica</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-band reveal reveal-delay-3">
+      <span class="warn-icon">⚠</span>
+      <div><strong>Neumotórax a tensión = emergencia:</strong> Desviación traqueal contralateral, ingurgitación yugular, hipotensión, ruidos abolidos → descompresión inmediata.</div>
+    </div>
+  </div>
+  <div class="section-num">9</div>
+</section>
+
+<!-- SLIDE 10 — Tromboembolismo Pulmonar -->
+<section class="slide bg-gradient grid-overlay" id="slide-10">
+  <div class="glow-circle" style="width:500px;height:500px;background:var(--teal);bottom:-150px;right:-120px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Tromboembolismo Pulmonar (TEP)</h2>
+    <div class="mech-box reveal reveal-delay-2" style="margin-bottom:var(--content-gap);">
+      <p class="mech-title">Tríada de Virchow</p>
+      <p>Estasis venosa + Hipercoagulabilidad + Daño endotelial → TVP → embolismo pulmonar → ↑presión arteria pulmonar → sobrecarga VD → shock obstructivo.</p>
+    </div>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">PRESENTACIÓN TEP</p>
+        <ul class="bullet-list">
+          <li>Disnea súbita</li>
+          <li>Dolor pleurítico</li>
+          <li>Hemoptisis</li>
+          <li>Taquicardia</li>
+          <li>Score Wells ≥5 → probabilidad alta</li>
+          <li>D-dímero &lt;500 descarta en baja probabilidad</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MANEJO TEP</p>
+        <ul class="bullet-list">
+          <li>Estabilidad hemodinámica → anticoagulación (HBPM/rivaroxabán)</li>
+          <li>Inestabilidad (PAS&lt;90) → trombólisis sistémica (tPA)</li>
+          <li>Filtro VCI si contraindicación anticoagulación</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">10</div>
+</section>
+
+<!-- SLIDE 11 — Rol de Enfermería -->
+<section class="slide bg-gradient grid-overlay" id="slide-11">
+  <div class="glow-circle" style="width:450px;height:450px;background:var(--cyan);top:-150px;left:-100px;opacity:.08"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Rol de Enfermería — Sistema Respiratorio</h2>
+    <div class="card-grid card-grid-2" style="margin-bottom:var(--content-gap);">
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--teal);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">MONITORIZACIÓN</p>
+        <ul class="bullet-list">
+          <li>SpO₂ continua, FR, patrón respiratorio</li>
+          <li>Uso musculatura accesoria, cianosis</li>
+          <li>GSA: pH 7.35-7.45, pCO₂ 35-45, pO₂ 80-100, HCO₃ 22-26</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-2">
+        <p style="color:var(--amber);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">OXIGENOTERAPIA</p>
+        <ul class="bullet-list">
+          <li>Cánula nasal: 1-6L (FiO₂ 24-44%)</li>
+          <li>Mascarilla simple: 6-10L (FiO₂ 40-60%)</li>
+          <li>Mascarilla reservorio: 10-15L (FiO₂ ~100%)</li>
+          <li>CPAP/BiPAP para VNI</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--cyan);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">INHALADORES</p>
+        <ul class="bullet-list">
+          <li>MDI: inspiración lenta + apnea 10s</li>
+          <li>Cámara espaciadora en mayores/niños</li>
+          <li>Nebulización en agudización</li>
+        </ul>
+      </div>
+      <div class="card reveal reveal-delay-3">
+        <p style="color:var(--green-ok);font-weight:700;font-size:var(--small-size);margin-bottom:8px;">FISIOTERAPIA</p>
+        <ul class="bullet-list">
+          <li>Drenaje postural, percusión</li>
+          <li>Tos asistida</li>
+          <li>Respiración diafragmática</li>
+          <li>Incentivometría</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="section-num">11</div>
+</section>
+
+<!-- SLIDE 12 — RESUMEN -->
+<section class="slide bg-gradient grid-overlay" id="slide-12">
+  <div class="glow-circle" style="width:600px;height:600px;background:var(--teal);top:-200px;left:-150px;opacity:.1"></div>
+  <div class="slide-content">
+    <div class="accent-line reveal"></div>
+    <h2 class="reveal reveal-delay-1" style="margin-bottom:var(--content-gap);">Resumen — Fisiopatología Respiratoria</h2>
+    <ul class="bullet-list reveal reveal-delay-2" style="font-size:clamp(0.7rem,1.3vw,0.95rem);">
+      <li><strong>VEF1/CVF &lt;70%</strong> = patrón obstructivo (Asma/EPOC)</li>
+      <li><strong>Asma:</strong> Th2 → IgE → mastocito → histamina/LTC4 → broncoespasmo; remodelado tardío</li>
+      <li><strong>GINA:</strong> escalonado (escalón 1: SABA PRN → escalón 5: biológicos)</li>
+      <li><strong>EPOC:</strong> Blue Bloater (bronquitis, hipercapnia) vs Pink Puffer (enfisema, normoxemia)</li>
+      <li><strong>GOLD 1-4</strong> por VEF1. O₂ si PaO₂&lt;55. Objetivo SaO₂ 88-92% en EPOC</li>
+      <li><strong>SDRA criterios Berlín:</strong> bilateral, PaO₂/FiO₂&lt;300, no cardíaco. VM protectora 6ml/kg</li>
+      <li><strong>IR Tipo I:</strong> hipoxemia pura (neumonía/SDRA). <strong>Tipo II:</strong> hipercapnia (hipoventilación/EPOC)</li>
+      <li><strong>TEP:</strong> Virchow → Wells → D-dímero → anticoagulación o trombólisis</li>
+    </ul>
+  </div>
+  <div class="section-num">12</div>
+</section>
+
+</main>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const navDots = document.getElementById('nav-dots');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('slide-counter');
+let currentSlide = 0;
+let scrolling = false;
+
+slides.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', `Slide ${i + 1}`);
+  dot.addEventListener('click', () => goTo(i));
+  navDots.appendChild(dot);
+});
+
+function updateUI(idx) {
+  currentSlide = idx;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  progress.style.width = ((idx + 1) / slides.length) * 100 + '%';
+  counter.textContent = (idx + 1) + ' / ' + slides.length;
+  const target = slides[idx];
+  const offsetTop = target.offsetTop;
+  window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+}
+
+function goNext() { if (currentSlide < slides.length - 1) updateUI(currentSlide + 1); }
+function goPrev() { if (currentSlide > 0) updateUI(currentSlide - 1); }
+function goTo(i) { if (i >= 0 && i < slides.length) updateUI(i); }
+
+document.addEventListener('keydown', (e) => {
+  if (['ArrowDown','ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); goNext(); }
+  else if (['ArrowUp','ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); goPrev(); }
+  else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+});
+document.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  if (scrolling) return;
+  scrolling = true;
+  if (e.deltaY > 30) goNext();
+  else if (e.deltaY < -30) goPrev();
+  setTimeout(() => { scrolling = false; }, 700);
+}, { passive: false });
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (dy > 50) goNext();
+  else if (dy < -50) goPrev();
+});
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      const idx = slides.indexOf(entry.target);
+      if (idx !== -1) updateUI(idx);
+    }
+  });
+}, { threshold: 0.6 });
+slides.forEach(s => revealObserver.observe(s));
+updateUI(0);
+slides[0].querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>

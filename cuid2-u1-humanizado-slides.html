@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión del Cuidado Humanizado | UDP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b1520;
+            --bg-mid: #111e2e;
+            --bg-card: #16263a;
+            --teal: #00c9a7;
+            --cyan: #38bdf8;
+            --amber: #fbbf24;
+            --purple: #a78bfa;
+            --accent: #a78bfa;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 50%, var(--bg-dark) 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--teal) 50%, var(--cyan) 100%);
+            width: 0%;
+            z-index: 999;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8);
+        }
+
+        /* Particle Background */
+        .particles-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.4), rgba(0, 201, 167, 0.1));
+            pointer-events: none;
+        }
+
+        @keyframes particle-drift {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.1); }
+            66% { transform: translate(-15px, 25px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .particle {
+            animation: particle-drift linear infinite;
+        }
+
+        /* Slide Content Container */
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(167, 139, 250, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dot.active {
+            background: var(--accent);
+            width: 14px;
+            height: 14px;
+            box-shadow: 0 0 15px var(--accent);
+            border-color: var(--accent);
+        }
+
+        .dot:hover {
+            background: var(--accent);
+            transform: scale(1.2);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(22, 38, 58, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(167, 139, 250, 0.15);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes neon-glow {
+            0%, 100% {
+                text-shadow: 0 0 10px rgba(167, 139, 250, 0.5), 0 0 20px rgba(167, 139, 250, 0.3);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(167, 139, 250, 0.8), 0 0 40px rgba(167, 139, 250, 0.6);
+            }
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .revealed {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .revealed.slide-in-left {
+            animation: slideInLeft 0.8s ease-out forwards;
+        }
+
+        .revealed.slide-in-right {
+            animation: slideInRight 0.8s ease-out forwards;
+        }
+
+        /* Cover Slide */
+        .cover-slide {
+            text-align: center;
+        }
+
+        .cover-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            animation: neon-glow 3s ease-in-out infinite;
+            color: var(--accent);
+            opacity: 0;
+        }
+
+        .cover-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: var(--cyan);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.3s forwards;
+        }
+
+        .cover-instructor {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            color: var(--teal);
+            margin: 0.5rem 0;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.5s forwards;
+        }
+
+        .cover-course {
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            color: #94a3b8;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.7s forwards;
+        }
+
+        /* Question Cards */
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .question-card {
+            glass;
+            padding: 2.5rem;
+            text-align: center;
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            transform: perspective(800px) rotateX(2deg);
+            transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+            transform: perspective(800px) rotateX(0deg) translateY(-5px);
+            border-color: rgba(167, 139, 250, 0.4);
+            box-shadow: 0 20px 40px rgba(167, 139, 250, 0.2);
+        }
+
+        .question-text {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            animation: neon-glow 3s ease-in-out infinite;
+            text-align: center;
+            opacity: 0;
+        }
+
+        /* Key Term Badge */
+        .key-badge {
+            display: inline-block;
+            background: rgba(167, 139, 250, 0.2);
+            border: 2px solid var(--accent);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            color: var(--accent);
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            margin: 1.5rem auto;
+            position: relative;
+            opacity: 0;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .key-badge::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border: 2px solid var(--accent);
+            border-radius: 50px;
+            opacity: 0;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        /* Large Quote */
+        .quote-container {
+            text-align: center;
+            max-width: 900px;
+            opacity: 0;
+        }
+
+        .quote-text {
+            font-size: clamp(1.2rem, 3vw, 2.2rem);
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
+            animation: neon-glow 3s ease-in-out infinite;
+            font-style: italic;
+        }
+
+        .quote-author {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            color: var(--teal);
+            font-weight: 600;
+        }
+
+        /* Central Concept */
+        .central-concept {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3rem;
+            opacity: 0;
+        }
+
+        .concept-text {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 800;
+            color: var(--accent);
+            text-align: center;
+            z-index: 2;
+            animation: neon-glow 3s ease-in-out infinite;
+        }
+
+        .concept-ring {
+            position: absolute;
+            inset: 0;
+            border: 3px solid var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        /* Dimensions Grid */
+        .dimensions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        .dimension-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(167, 139, 250, 0.1);
+            border-radius: 12px;
+            font-size: clamp(0.85rem, 1.5vw, 1rem);
+            font-weight: 600;
+            color: var(--teal);
+            opacity: 0;
+        }
+
+        /* Card Rows */
+        .card-row {
+            display: flex;
+            gap: 2rem;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .card-large {
+            flex: 1;
+            min-width: 300px;
+            glass;
+            padding: 2.5rem;
+            text-align: center;
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+        }
+
+        .card-title {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .card-content {
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        /* Burnout Bars */
+        .burnout-bars {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .bar-container {
+            min-width: 200px;
+            opacity: 0;
+        }
+
+        .bar-label {
+            font-size: clamp(0.85rem, 1.5vw, 1rem);
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.8rem;
+            text-align: center;
+        }
+
+        .bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--teal));
+            width: 0%;
+            animation: slideInLeft 1.5s ease-out forwards;
+        }
+
+        /* Pillar Cards */
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .pillar-card {
+            glass;
+            padding: 2rem;
+            text-align: center;
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            position: relative;
+        }
+
+        .pillar-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .pillar-name {
+            font-size: clamp(1rem, 1.8vw, 1.3rem);
+            font-weight: 700;
+            color: var(--teal);
+        }
+
+        /* Strategy Grid */
+        .strategy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .strategy-card {
+            glass;
+            padding: 1.5rem;
+            text-align: center;
+            opacity: 0;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            font-size: clamp(0.85rem, 1.5vw, 1rem);
+            font-weight: 600;
+            color: var(--teal);
+            transition: all 0.3s ease;
+        }
+
+        .strategy-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(167, 139, 250, 0.2);
+        }
+
+        /* Number Badge */
+        .number-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--teal));
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--bg-dark);
+            margin: 1rem auto;
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Closing Animation */
+        .heart-pulse {
+            display: inline-block;
+            font-size: 3rem;
+            animation: pulse-ring 2s ease-out infinite;
+            opacity: 0;
+        }
+
+        /* Staggered Animations */
+        .stagger-1 { animation-delay: 0.2s; }
+        .stagger-2 { animation-delay: 0.4s; }
+        .stagger-3 { animation-delay: 0.6s; }
+        .stagger-4 { animation-delay: 0.8s; }
+        .stagger-5 { animation-delay: 1s; }
+        .stagger-6 { animation-delay: 1.2s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-dots {
+                right: 1rem;
+                gap: 1rem;
+            }
+
+            .slide {
+                padding: 1rem;
+            }
+
+            .questions-grid {
+                gap: 1rem;
+            }
+
+            .card-row {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+    <div class="particles-bg" id="particlesBg"></div>
+
+    <div class="nav-dots" id="navDots"></div>
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover-slide">
+        <div class="slide-content">
+            <h1 class="cover-title">Gestión del Cuidado Humanizado</h1>
+            <p class="cover-subtitle">Enfermería II</p>
+            <p class="cover-instructor">RN, MSc. Stephanie Grimalt</p>
+            <p class="cover-course">ENF3015 · UDP 2025</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 2: REFLEXIVE CARE -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">El Cuidado como Acto Reflexivo</h2>
+            <div class="questions-grid">
+                <div class="question-card stagger-1">
+                    <div class="question-text">¿Qué tenemos que repensar?</div>
+                </div>
+                <div class="question-card stagger-2">
+                    <div class="question-text">¿Cómo me siento en mi rol?</div>
+                </div>
+                <div class="question-card stagger-3">
+                    <div class="question-text">¿Qué profesional quiero ser?</div>
+                </div>
+                <div class="question-card stagger-4">
+                    <div class="question-text">¿Cómo se siente el paciente?</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 3: ART OF NURSING -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">El Arte de la Enfermería</h2>
+            <div class="quote-container">
+                <p class="quote-text">"La enfermería expresa un carácter creativo del espíritu, trabaja con el cuerpo vivo, en una presencia intencionada"</p>
+            </div>
+            <div class="key-badge">PRESENCIA INTENCIONADA</div>
+        </div>
+    </section>
+
+    <!-- SLIDE 4: SENSE OF CARE -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="central-concept">
+                <div class="concept-text">VULNERABILIDAD HUMANA</div>
+                <div class="concept-ring"></div>
+            </div>
+            <div class="dimensions-grid">
+                <div class="dimension-item stagger-1">Física</div>
+                <div class="dimension-item stagger-2">Psicológica</div>
+                <div class="dimension-item stagger-3">Emocional</div>
+                <div class="dimension-item stagger-4">Social</div>
+                <div class="dimension-item stagger-5">Espiritual</div>
+            </div>
+            <p style="margin-top: 2rem; opacity: 0; animation: fadeInUp 0.8s ease-out 1.2s forwards; text-align: center; font-size: clamp(1rem, 1.8vw, 1.2rem); color: var(--cyan);">→ Relación de Ayuda</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 5: TRANSPERSONAL CARE -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Cuidado Transpersonal (Watson)</h2>
+            <div class="questions-grid">
+                <div class="card-large stagger-1">
+                    <div class="card-content">Presencia plena en el momento del cuidado</div>
+                </div>
+                <div class="card-large stagger-2">
+                    <div class="card-content">Honra la humanidad del otro</div>
+                </div>
+                <div class="card-large stagger-3">
+                    <div class="card-content">Evita reducir al paciente a objeto pasivo</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 6: COMPASSION SATISFACTION -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Satisfacción vs Fatiga por Compasión</h2>
+            <div class="card-row">
+                <div class="card-large stagger-1 slide-in-left">
+                    <div class="card-title" style="color: var(--teal);">✓ Satisfacción por Compasión</div>
+                    <div class="card-content">Gratificación al cuidar, sentido de propósito</div>
+                </div>
+                <div class="card-large stagger-2 slide-in-right">
+                    <div class="card-title" style="color: var(--amber);">✕ Fatiga por Compasión</div>
+                    <div class="card-content">Agotamiento emocional, pérdida de energía</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 7: ICN CODE -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Código Ético CIE</h2>
+            <div class="pillars-grid">
+                <div class="pillar-card stagger-1">
+                    <span class="pillar-icon">⚖️</span>
+                    <div class="pillar-name">Respeto a los derechos</div>
+                </div>
+                <div class="pillar-card stagger-2">
+                    <span class="pillar-icon">🎯</span>
+                    <div class="pillar-name">Ejercicio competente</div>
+                </div>
+                <div class="pillar-card stagger-3">
+                    <span class="pillar-icon">🤝</span>
+                    <div class="pillar-name">Responsabilidad social</div>
+                </div>
+                <div class="pillar-card stagger-4">
+                    <span class="pillar-icon">💙</span>
+                    <div class="pillar-name">Cuidado centrado en la persona</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 8: BURNOUT -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Síndrome de Burnout</h2>
+            <div class="burnout-bars">
+                <div class="bar-container stagger-1">
+                    <div class="bar-label">Agotamiento Emocional</div>
+                    <div class="bar"><div class="bar-fill" style="background: linear-gradient(90deg, #ef4444, #f87171); width: 75%;"></div></div>
+                </div>
+                <div class="bar-container stagger-2">
+                    <div class="bar-label">Despersonalización</div>
+                    <div class="bar"><div class="bar-fill" style="background: linear-gradient(90deg, #f59e0b, #fbbf24); width: 65%;"></div></div>
+                </div>
+                <div class="bar-container stagger-3">
+                    <div class="bar-label">Falta de Realización</div>
+                    <div class="bar"><div class="bar-fill" style="background: linear-gradient(90deg, #6b7280, #9ca3af); width: 55%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 9: BURNOUT DETERMINANTS -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Determinantes del Burnout</h2>
+            <div class="pillars-grid">
+                <div class="pillar-card stagger-1">
+                    <div class="pillar-name">Individuo</div>
+                </div>
+                <div class="pillar-card stagger-2">
+                    <div class="pillar-name">Equipo</div>
+                </div>
+                <div class="pillar-card stagger-3">
+                    <div class="pillar-name">Institución</div>
+                </div>
+                <div class="pillar-card stagger-4">
+                    <div class="pillar-name">Sistema Sanitario</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 10: HUMANITUDE MODEL -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Modelo Humanitude</h2>
+            <p style="font-size: clamp(1rem, 1.8vw, 1.2rem); color: var(--cyan); margin-bottom: 2rem; text-align: center; opacity: 0; animation: fadeInUp 0.8s ease-out 0.2s forwards;">1979 · Yves Gineste & Rosette Marescotti</p>
+            <div class="pillars-grid">
+                <div class="pillar-card stagger-2">
+                    <span class="pillar-icon">👀</span>
+                    <div class="pillar-name">MIRADA</div>
+                </div>
+                <div class="pillar-card stagger-3">
+                    <span class="pillar-icon">💬</span>
+                    <div class="pillar-name">PALABRA</div>
+                </div>
+                <div class="pillar-card stagger-4">
+                    <span class="pillar-icon">✋</span>
+                    <div class="pillar-name">TACTO</div>
+                </div>
+                <div class="pillar-card stagger-5">
+                    <span class="pillar-icon">📏</span>
+                    <div class="pillar-name">VERTICALIDAD</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 11: WARMTH -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Calidez y Cuidado Cálido</h2>
+            <div class="quote-container">
+                <p class="quote-text">"Capacidad de establecer relación cercana de acogida, que demuestre ternura, confianza, afecto, solidaridad"</p>
+                <p class="quote-author">— Zita Elena Lagos et al.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 12: ANTI-BURNOUT STRATEGIES -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Estrategias Anti-Burnout</h2>
+            <div class="strategy-grid">
+                <div class="strategy-card stagger-1">📚 Investigar</div>
+                <div class="strategy-card stagger-2">🎓 Docencia y Liderazgo</div>
+                <div class="strategy-card stagger-3">🤗 Cuidarnos entre Compañeros</div>
+                <div class="strategy-card stagger-4">🌿 Ambientes Respetuosos</div>
+                <div class="strategy-card stagger-5">💆 Autocuidado</div>
+                <div class="strategy-card stagger-6">⚖️ Políticas Públicas</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 13: CLOSING -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="quote-container">
+                <p class="quote-text">"El proceso de transformación y sanación requiere de prácticas continuas"</p>
+                <p class="quote-author">— Thich Nhat Hanh</p>
+                <p style="margin-top: 2rem; font-size: clamp(1.1rem, 2vw, 1.4rem); color: var(--teal); font-weight: 700; opacity: 0; animation: fadeInUp 0.8s ease-out 0.5s forwards;">La humanización la construimos todos los días</p>
+            </div>
+            <div class="heart-pulse">💙</div>
+        </div>
+    </section>
+
+    <script>
+        // Initialize particles
+        function createParticles() {
+            const bg = document.getElementById('particlesBg');
+            const particleCount = 15;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 60 + 10) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                bg.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Slides and navigation
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+
+        // Create navigation dots
+        const navDots = document.getElementById('navDots');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.querySelector('.progress-bar').style.width = progress + '%';
+
+            // Update dots
+            document.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function revealElements() {
+            const elements = slides[currentSlide].querySelectorAll('[class*="card"], [class*="text"], [class*="title"], [class*="container"], [class*="badge"], [class*="bar"], [class*="item"]');
+            elements.forEach((el, i) => {
+                setTimeout(() => {
+                    el.classList.add('revealed');
+                }, i * 100);
+            });
+        }
+
+        function goToSlide(n) {
+            currentSlide = Math.max(0, Math.min(n, totalSlides - 1));
+            const offset = -currentSlide * 100;
+            window.scrollTo({ top: currentSlide * window.innerHeight, behavior: 'smooth' });
+            updateProgress();
+            revealElements();
+        }
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const slideIndex = Array.from(slides).indexOf(entry.target);
+                    currentSlide = slideIndex;
+                    updateProgress();
+                    revealElements();
+                }
+            });
+        }, observerOptions);
+
+        slides.forEach(slide => observer.observe(slide));
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') goToSlide(currentSlide + 1);
+            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
+        });
+
+        // Wheel navigation
+        let scrollTimeout;
+        document.addEventListener('wheel', (e) => {
+            if (scrollTimeout) return;
+            scrollTimeout = setTimeout(() => {
+                if (e.deltaY > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+                scrollTimeout = null;
+            }, 500);
+        }, { passive: true });
+
+        // Touch navigation
+        let touchStart = 0;
+        document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientY; });
+        document.addEventListener('touchend', (e) => {
+            const touchEnd = e.changedTouches[0].clientY;
+            if (touchStart - touchEnd > 50) goToSlide(currentSlide + 1);
+            if (touchEnd - touchStart > 50) goToSlide(currentSlide - 1);
+        });
+
+        // Initialize
+        updateProgress();
+        revealElements();
+    </script>
+</body>
+</html>

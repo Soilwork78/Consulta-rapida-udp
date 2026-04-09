@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Dosis y Goteo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #0b1520;
+            color: #e5e7eb;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0b1520 0%, #1a3a2a 100%);
+        }
+
+        /* PARTICLES */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(52, 211, 153, 0.3);
+            border-radius: 50%;
+            animation: particle-drift linear infinite;
+        }
+
+        /* ANIMATIONS */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(52, 211, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes particle-drift {
+            0% {
+                opacity: 0;
+                transform: translate(0, 0);
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty));
+            }
+        }
+
+        /* GLASSMORPHISM */
+        .glass {
+            background: rgba(22, 38, 58, 0.72);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            border-radius: 16px;
+        }
+
+        /* REVEAL ANIMATION */
+        [data-reveal] {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        [data-reveal].revealed {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        /* NAVIGATION */
+        .nav-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(52, 211, 153, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-dot.active {
+            background: #34d399;
+            box-shadow: 0 0 15px rgba(52, 211, 153, 0.6);
+        }
+
+        /* PROGRESS BAR */
+        .progress-bar {
+            position: fixed;
+            top: 3px;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #34d399, #6ee7b7);
+            z-index: 1001;
+            transition: width 0.2s;
+        }
+
+        /* TYPOGRAPHY */
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #34d399, #6ee7b7);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            font-weight: 600;
+        }
+
+        p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            line-height: 1.6;
+        }
+
+        /* CARDS */
+        .card {
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* FORMULA PANEL */
+        .formula-panel {
+            font-family: 'Courier New', monospace;
+            padding: 40px;
+            background: rgba(52, 211, 153, 0.15);
+            border: 2px solid rgba(52, 211, 153, 0.4);
+            border-radius: 12px;
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            font-weight: 600;
+            line-height: 2;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* LAYOUT HELPERS */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+        }
+
+        /* STAT BADGE */
+        .stat-badge {
+            display: inline-block;
+            padding: 16px 32px;
+            background: rgba(52, 211, 153, 0.2);
+            border: 2px solid rgba(52, 211, 153, 0.4);
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: clamp(1rem, 2.2vw, 1.3rem);
+            color: #6ee7b7;
+            margin: 20px 0;
+        }
+
+        /* CASE CARD */
+        .case-card {
+            padding: 30px;
+            background: rgba(52, 211, 153, 0.15);
+            border-left: 4px solid #34d399;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        /* SOLUTION */
+        .solution {
+            padding: 20px;
+            background: rgba(22, 38, 58, 0.8);
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(0.9rem, 1.8vw, 1.05rem);
+        }
+
+        /* STEP */
+        .step {
+            padding: 16px;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        /* COMPARISON TABLE */
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .comparison-item {
+            padding: 20px;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* MEDIA QUERIES */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px 20px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-dots {
+                right: 15px;
+            }
+
+            .formula-panel {
+                padding: 20px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide">
+        <div class="particles" id="particles-1"></div>
+        <div class="container">
+            <h1 data-reveal>Cálculo de Dosis y Goteo</h1>
+            <p style="font-size: clamp(1.2rem, 2.5vw, 1.5rem); margin-top: 40px; text-align: center;" data-reveal>
+                Para administración exacta de medicamentos e infusiones
+            </p>
+            <p style="font-size: clamp(1rem, 2vw, 1.2rem); margin-top: 60px; text-align: center; opacity: 0.7;" data-reveal>
+                EU: Carolina Villanueva Q.<br>ENF3015 • UDP 2025
+            </p>
+        </div>
+    </section>
+
+    <!-- SLIDE 2: OBJETIVOS DE APRENDIZAJE -->
+    <section class="slide">
+        <div class="particles" id="particles-2"></div>
+        <div class="container">
+            <h2 data-reveal>Resultados de Aprendizaje</h2>
+            <div class="grid-2" style="margin-top: 50px;">
+                <div class="glass" style="padding: 40px;" data-reveal style="animation: slideInLeft 0.6s ease;">
+                    <p style="font-size: 1.3rem; font-weight: 600; color: #34d399; margin-bottom: 15px;">
+                        📐 Objetivo 1
+                    </p>
+                    <p style="font-size: 1.05rem; line-height: 1.8;">
+                        Conocer y aplicar las <strong>fórmulas de cálculo de goteo</strong> en diferentes sistemas de perfusión
+                    </p>
+                </div>
+                <div class="glass" style="padding: 40px;" data-reveal style="animation: slideInRight 0.6s ease;">
+                    <p style="font-size: 1.3rem; font-weight: 600; color: #34d399; margin-bottom: 15px;">
+                        ✓ Objetivo 2
+                    </p>
+                    <p style="font-size: 1.05rem; line-height: 1.8;">
+                        Realizar <strong>cálculos de dosis y goteo</strong> para administración segura y exacta
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 3: SISTEMAS DE PERFUSIÓN -->
+    <section class="slide">
+        <div class="particles" id="particles-3"></div>
+        <div class="container">
+            <h2 data-reveal>Sistemas de Perfusión</h2>
+            <div class="grid-2" style="margin-top: 40px;">
+                <div class="glass" style="padding: 40px;" data-reveal style="animation: slideInLeft 0.6s ease;">
+                    <h3 style="color: #34d399; margin-bottom: 20px;">🔴 MACROGOTEO</h3>
+                    <p style="font-size: clamp(1.1rem, 2vw, 1.3rem); font-weight: 600;">
+                        1 mL = <span style="color: #34d399;">20 gotas</span>
+                    </p>
+                    <p style="margin-top: 10px; opacity: 0.8;">Factor de goteo: 20</p>
+                    <p style="margin-top: 8px; font-size: 0.9rem; opacity: 0.7;">Tubos estándar de macro goteo</p>
+                </div>
+                <div class="glass" style="padding: 40px;" data-reveal style="animation: slideInRight 0.6s ease;">
+                    <h3 style="color: #34d399; margin-bottom: 20px;">🟢 MICROGOTEO</h3>
+                    <p style="font-size: clamp(1.1rem, 2vw, 1.3rem); font-weight: 600;">
+                        1 mL = <span style="color: #34d399;">60 microgotas</span>
+                    </p>
+                    <p style="margin-top: 10px; opacity: 0.8;">Factor de goteo: 60</p>
+                    <p style="margin-top: 8px; font-size: 0.9rem; opacity: 0.7;">Tubos de precisión para perfusiones lentas</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 4: FACTOR DE GOTEO -->
+    <section class="slide">
+        <div class="particles" id="particles-4"></div>
+        <div class="container">
+            <h2 data-reveal>Factor de Goteo - Equivalencias</h2>
+            <div class="glass" style="padding: 40px; margin: 40px auto; max-width: 900px;" data-reveal>
+                <div class="comparison-row">
+                    <div class="comparison-item">
+                        <p style="font-weight: 700; color: #34d399; font-size: 1.2rem;">Macrogoteo</p>
+                        <p style="margin-top: 10px; font-size: 1.1rem;"><strong>20 gotas/mL</strong></p>
+                    </div>
+                    <div class="comparison-item">
+                        <p style="font-weight: 700; color: #34d399; font-size: 1.2rem;">Microgoteo</p>
+                        <p style="margin-top: 10px; font-size: 1.1rem;"><strong>60 microgotas/mL</strong></p>
+                    </div>
+                </div>
+                <div style="background: rgba(52, 211, 153, 0.15); border: 2px solid rgba(52, 211, 153, 0.3); padding: 20px; border-radius: 8px; text-align: center; margin-top: 30px;">
+                    <p style="font-weight: 700; color: #34d399; font-size: 1.15rem;">
+                        ⭐ REGLA: microgotas/min = mL/hr
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 5: FÓRMULA GOTAS POR MINUTO -->
+    <section class="slide">
+        <div class="particles" id="particles-5"></div>
+        <div class="container">
+            <h2 data-reveal>Fórmula: Gotas/Minuto</h2>
+            <div class="formula-panel" data-reveal style="animation: fadeInUp 0.8s ease;">
+                <p style="margin-bottom: 20px; font-size: 1.05rem; opacity: 0.8;">Opción 1:</p>
+                <p style="margin-bottom: 30px;">G/min = <span style="color: #34d399;">Volumen Total (mL)</span> ÷ (<span style="color: #34d399;">Tiempo total hrs</span> × 3)</p>
+
+                <p style="margin-bottom: 20px; font-size: 1.05rem; opacity: 0.8; border-top: 1px solid rgba(52, 211, 153, 0.2); padding-top: 20px;">Opción 2:</p>
+                <p>G/min = (<span style="color: #34d399;">Volumen Total × 20</span>) ÷ <span style="color: #34d399;">Tiempo total (min)</span></p>
+            </div>
+            <p style="text-align: center; margin-top: 30px; opacity: 0.8;" data-reveal>
+                Nota: El factor 20 es para macrogoteo
+            </p>
+        </div>
+    </section>
+
+    <!-- SLIDE 6: EJERCICIO GOTAS -->
+    <section class="slide">
+        <div class="particles" id="particles-6"></div>
+        <div class="container">
+            <h2 data-reveal>Ejercicio: Cálculo de Gotas/min</h2>
+            <div class="case-card" data-reveal>
+                <p style="font-size: 1.15rem; font-weight: 600;">
+                    SF 0.9% 500mL en 4 horas<br>
+                    <span style="font-size: 1.05rem;">¿Cuántas gotas/min con macrogoteo?</span>
+                </p>
+            </div>
+            <div class="glass" style="padding: 30px; max-width: 800px; margin: 30px auto;" data-reveal>
+                <p style="font-weight: 600; margin-bottom: 15px; color: #34d399;">Solución paso a paso:</p>
+                <div class="step">
+                    <p>Paso 1: G/min = 500 mL ÷ (4 hrs × 3)</p>
+                </div>
+                <div class="step">
+                    <p>Paso 2: G/min = 500 ÷ 12</p>
+                </div>
+                <div class="step">
+                    <p>Paso 3: G/min = <strong style="color: #34d399; font-size: 1.2rem;">41-42 gotas/min</strong></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 7: FÓRMULA MICROGOTAS -->
+    <section class="slide">
+        <div class="particles" id="particles-7"></div>
+        <div class="container">
+            <h2 data-reveal>Fórmula: Microgotas/Minuto</h2>
+            <div class="formula-panel" data-reveal style="animation: fadeInUp 0.8s ease;">
+                <p style="margin-bottom: 20px; font-size: 1.05rem; opacity: 0.8;">Opción 1:</p>
+                <p style="margin-bottom: 30px;">µg/min = (<span style="color: #34d399;">Volumen Total × 60</span>) ÷ <span style="color: #34d399;">Tiempo (min)</span></p>
+
+                <p style="margin-bottom: 20px; font-size: 1.05rem; opacity: 0.8; border-top: 1px solid rgba(52, 211, 153, 0.2); padding-top: 20px;">Opción 2 (EQUIVALENCIA):</p>
+                <p style="color: #34d399; font-weight: 700;">µg/min = mL/hr</p>
+            </div>
+            <div class="stat-badge" data-reveal>
+                🎯 1 microgota/min = 1 mL/hr
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 8: EJERCICIO MICROGOTAS -->
+    <section class="slide">
+        <div class="particles" id="particles-8"></div>
+        <div class="container">
+            <h2 data-reveal>Ejercicio: Cálculo de Microgotas</h2>
+            <div class="case-card" data-reveal>
+                <p style="font-size: 1.15rem; font-weight: 600;">
+                    Analgesia 250mL en 24 horas<br>
+                    <span style="font-size: 1.05rem;">¿Cuántas microgotas/min?</span>
+                </p>
+            </div>
+            <div class="glass" style="padding: 30px; max-width: 800px; margin: 30px auto;" data-reveal>
+                <p style="font-weight: 600; margin-bottom: 15px; color: #34d399;">Solución:</p>
+                <div class="step">
+                    <p>Paso 1: Pasar 24 hrs a minutos = 24 × 60 = 1440 min</p>
+                </div>
+                <div class="step">
+                    <p>Paso 2: µg/min = (250 × 60) ÷ 1440</p>
+                </div>
+                <div class="step">
+                    <p>Paso 3: µg/min = 15000 ÷ 1440</p>
+                </div>
+                <div class="step">
+                    <p><strong style="color: #34d399; font-size: 1.2rem;">= 10-11 microgotas/min</strong></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 9: VELOCIDAD INFUSIÓN mL/HR -->
+    <section class="slide">
+        <div class="particles" id="particles-9"></div>
+        <div class="container">
+            <h2 data-reveal>Velocidad de Infusión (mL/hr)</h2>
+            <div class="formula-panel" data-reveal style="animation: fadeInUp 0.8s ease;">
+                <p style="color: #34d399; font-weight: 700;">mL/hr = Volumen Total ÷ Tiempo (hrs)</p>
+            </div>
+            <div style="max-width: 900px; margin: 40px auto;" data-reveal>
+                <div class="comparison-row">
+                    <div class="comparison-item">
+                        <p style="font-weight: 700; color: #34d399;">✕ 3</p>
+                        <p style="margin-top: 10px;">Para convertir a gotas (macrogoteo)</p>
+                    </div>
+                    <div class="comparison-item">
+                        <p style="font-weight: 700; color: #34d399;">÷ 3</p>
+                        <p style="margin-top: 10px;">Para convertir de gotas a horas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 10: EJERCICIO COMPLETO -->
+    <section class="slide">
+        <div class="particles" id="particles-10"></div>
+        <div class="container">
+            <h2 data-reveal>Ejercicio Integrador</h2>
+            <div class="case-card" data-reveal>
+                <p style="font-size: 1.15rem; font-weight: 600;">
+                    Glucosalino 2000mL en 24 horas<br>
+                    <span style="font-size: 1.05rem;">Calcular: ¿mL/hr? | ¿Gotas/min? | ¿Microgotas/min?</span>
+                </p>
+            </div>
+            <div style="max-width: 900px; margin: 30px auto;">
+                <div class="solution" data-reveal>
+                    <p style="color: #34d399; font-weight: 700; margin-bottom: 10px;">1. mL/hr</p>
+                    <p>2000 mL ÷ 24 hrs = <strong style="color: #6ee7b7;">83 mL/hr</strong></p>
+                </div>
+                <div class="solution" data-reveal>
+                    <p style="color: #34d399; font-weight: 700; margin-bottom: 10px; margin-top: 15px;">2. Gotas/min (macrogoteo)</p>
+                    <p>83 mL/hr ÷ 3 = <strong style="color: #6ee7b7;">28 gotas/min</strong></p>
+                </div>
+                <div class="solution" data-reveal>
+                    <p style="color: #34d399; font-weight: 700; margin-bottom: 10px; margin-top: 15px;">3. Microgotas/min</p>
+                    <p>Equivalencia: <strong style="color: #6ee7b7;">83 microgotas/min</strong> (= mL/hr)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 11: CÁLCULO DE DOSIS -->
+    <section class="slide">
+        <div class="particles" id="particles-11"></div>
+        <div class="container">
+            <h2 data-reveal>Cálculo de Dosis - Regla de 3</h2>
+            <div class="formula-panel" data-reveal style="animation: fadeInUp 0.8s ease;">
+                <p style="margin-bottom: 20px; font-size: 1.05rem; opacity: 0.8;">Relación proporcional:</p>
+                <p style="margin-bottom: 30px; font-size: 1.2rem;">A ÷ C = B ÷ X</p>
+
+                <p style="margin-bottom: 20px; font-size: 1.05rem; opacity: 0.8; border-top: 1px solid rgba(52, 211, 153, 0.2); padding-top: 20px;">Despejando X:</p>
+                <p style="color: #34d399; font-weight: 700;">X = (B × C) ÷ A</p>
+            </div>
+            <div class="glass" style="padding: 30px; max-width: 800px; margin: 30px auto;" data-reveal>
+                <div class="step">
+                    <p><span style="color: #34d399;">A</span> = Concentración conocida</p>
+                </div>
+                <div class="step">
+                    <p><span style="color: #34d399;">B</span> = Volumen conocido</p>
+                </div>
+                <div class="step">
+                    <p><span style="color: #34d399;">C</span> = Dosis requerida</p>
+                </div>
+                <div class="step">
+                    <p><span style="color: #34d399;">X</span> = Volumen a administrar <strong>(RESPUESTA)</strong></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 12: PRESENTACIONES DE MEDICAMENTOS -->
+    <section class="slide">
+        <div class="particles" id="particles-12"></div>
+        <div class="container">
+            <h2 data-reveal>Presentaciones de Medicamentos</h2>
+            <div class="grid-2" style="margin-top: 40px;">
+                <div class="glass" style="padding: 30px;" data-reveal style="animation: float 3s ease-in-out;">
+                    <h3 style="color: #34d399; margin-bottom: 15px;">mg/mL</h3>
+                    <p style="font-size: 1.1rem;">Concentración en miligramos por mililitro</p>
+                    <p style="margin-top: 10px; font-size: 0.95rem; opacity: 0.8;">Ej: Ampicilina 1g/4mL</p>
+                </div>
+                <div class="glass" style="padding: 30px;" data-reveal style="animation: float 3s ease-in-out 0.2s;">
+                    <h3 style="color: #34d399; margin-bottom: 15px;">% (g/100mL)</h3>
+                    <p style="font-size: 1.1rem;">Concentración en porcentaje</p>
+                    <p style="margin-top: 10px; font-size: 0.95rem; opacity: 0.8;">Ej: Dextrosa 5% en agua</p>
+                </div>
+                <div class="glass" style="padding: 30px; grid-column: 1/-1;" data-reveal style="animation: float 3s ease-in-out 0.4s;">
+                    <h3 style="color: #34d399; margin-bottom: 15px;">mcg (Gamma)</h3>
+                    <p style="font-size: 1.1rem;">Microgramos - para dosis muy pequeñas en UCI/Pediatría</p>
+                    <p style="margin-top: 10px; font-size: 0.95rem; opacity: 0.8;">Ej: Dopamina 40 mcg/kg/min</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 13: EJERCICIO INTEGRADOR FINAL -->
+    <section class="slide">
+        <div class="particles" id="particles-13"></div>
+        <div class="container">
+            <h2 data-reveal>Ejercicio Integrador - Cálculo de Dosis</h2>
+
+            <div class="glass" style="padding: 30px; margin-bottom: 20px;" data-reveal>
+                <p style="font-weight: 600; color: #34d399; margin-bottom: 10px;">Caso 1: Ampicilina</p>
+                <p style="margin-bottom: 15px;">Tengo: Ampicilina <strong>1g/4mL</strong><br>Necesito: <strong>250mg</strong><br>¿Cuántos mL administro?</p>
+                <div class="solution">
+                    <p>A = 1000 mg (1g) | B = 4 mL | C = 250 mg | X = ?</p>
+                    <p style="margin-top: 10px;">X = (4 × 250) ÷ 1000 = <strong style="color: #34d399;">1 mL</strong></p>
+                </div>
+            </div>
+
+            <div class="glass" style="padding: 30px;" data-reveal>
+                <p style="font-weight: 600; color: #34d399; margin-bottom: 10px;">Caso 2: Amoxicilina jarabe</p>
+                <p style="margin-bottom: 15px;">Tengo: Amoxicilina <strong>500mg/5mL</strong><br>Necesito: <strong>300mg</strong><br>¿Cuántos mL administro?</p>
+                <div class="solution">
+                    <p>A = 500 mg | B = 5 mL | C = 300 mg | X = ?</p>
+                    <p style="margin-top: 10px;">X = (5 × 300) ÷ 500 = <strong style="color: #34d399;">3 mL</strong></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NAVIGATION DOTS -->
+    <div class="nav-dots" id="navDots"></div>
+
+    <script>
+        // GENERATE PARTICLES
+        function generateParticles(containerId, count = 15) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                const randomX = Math.random() * window.innerWidth;
+                const randomY = Math.random() * window.innerHeight * 0.5;
+                const randomTx = (Math.random() - 0.5) * 300;
+                const randomTy = -Math.random() * 400 - 100;
+                const duration = Math.random() * 3 + 4;
+                const delay = Math.random() * 2;
+
+                particle.style.left = randomX + 'px';
+                particle.style.top = randomY + 'px';
+                particle.style.setProperty('--tx', randomTx + 'px');
+                particle.style.setProperty('--ty', randomTy + 'px');
+                particle.style.animationDuration = duration + 's';
+                particle.style.animationDelay = delay + 's';
+
+                container.appendChild(particle);
+            }
+        }
+
+        // Generate particles for all slides
+        for (let i = 1; i <= 13; i++) {
+            generateParticles(`particles-${i}`);
+        }
+
+        // INTERSECTION OBSERVER for reveal animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('[data-reveal]').forEach(el => {
+            observer.observe(el);
+        });
+
+        // NAVIGATION DOTS
+        const slides = document.querySelectorAll('.slide');
+        const navDotsContainer = document.getElementById('navDots');
+        const totalSlides = slides.length;
+
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot';
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => {
+                slides[i].scrollIntoView({ behavior: 'smooth' });
+            });
+            navDotsContainer.appendChild(dot);
+        }
+
+        // UPDATE PROGRESS
+        function updateProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.querySelector('.progress-bar').style.width = scrollPercent + '%';
+
+            let currentSlide = 0;
+            slides.forEach((slide, index) => {
+                if (slide.offsetTop <= scrollTop + window.innerHeight / 2) {
+                    currentSlide = index;
+                }
+            });
+
+            document.querySelectorAll('.nav-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        window.addEventListener('scroll', updateProgress);
+
+        // KEYBOARD NAVIGATION
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                window.scrollBy(0, window.innerHeight);
+            } else if (e.key === 'ArrowUp') {
+                window.scrollBy(0, -window.innerHeight);
+            }
+        });
+
+        // TOUCH NAVIGATION
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndY = e.changedTouches[0].clientY;
+            if (touchStartY - touchEndY > 50) {
+                window.scrollBy(0, window.innerHeight);
+            } else if (touchEndY - touchStartY > 50) {
+                window.scrollBy(0, -window.innerHeight);
+            }
+        });
+    </script>
+</body>
+</html>

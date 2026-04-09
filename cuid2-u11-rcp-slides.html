@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCP Intrahospitalaria | UDP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b1520;
+            --bg-mid: #111e2e;
+            --bg-card: #16263a;
+            --teal: #00c9a7;
+            --cyan: #38bdf8;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --accent: #f87171;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 50%, var(--bg-dark) 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--red) 0%, var(--amber) 50%, var(--red) 100%);
+            width: 0%;
+            z-index: 999;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 20px rgba(248, 113, 113, 0.8);
+        }
+
+        .particles-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(248, 113, 113, 0.4), rgba(251, 191, 36, 0.1));
+            pointer-events: none;
+        }
+
+        @keyframes particle-drift {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.1); }
+            66% { transform: translate(-15px, 25px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .particle {
+            animation: particle-drift linear infinite;
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(248, 113, 113, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .dot.active {
+            background: var(--red);
+            width: 14px;
+            height: 14px;
+            box-shadow: 0 0 15px var(--red);
+            border-color: var(--red);
+        }
+
+        .dot:hover {
+            background: var(--red);
+            transform: scale(1.2);
+        }
+
+        .glass {
+            background: rgba(22, 38, 58, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(248, 113, 113, 0.15);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        @keyframes neon-glow {
+            0%, 100% {
+                text-shadow: 0 0 10px rgba(248, 113, 113, 0.5), 0 0 20px rgba(248, 113, 113, 0.3);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(248, 113, 113, 0.8), 0 0 40px rgba(248, 113, 113, 0.6);
+            }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes countdown {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .revealed {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .revealed.slide-in-left {
+            animation: slideInLeft 0.8s ease-out forwards;
+        }
+
+        .revealed.slide-in-right {
+            animation: slideInRight 0.8s ease-out forwards;
+        }
+
+        .cover-slide {
+            text-align: center;
+        }
+
+        .cover-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            animation: neon-glow 3s ease-in-out infinite;
+            color: var(--red);
+            opacity: 0;
+            animation: slideInDown 0.8s ease-out forwards;
+        }
+
+        .cover-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: var(--amber);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.3s forwards;
+        }
+
+        .cover-instructor {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            color: var(--cyan);
+            margin: 0.5rem 0;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.5s forwards;
+        }
+
+        .cover-course {
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            color: #94a3b8;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.7s forwards;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            color: var(--red);
+            margin-bottom: 2rem;
+            animation: neon-glow 3s ease-in-out infinite;
+            text-align: center;
+            opacity: 0;
+        }
+
+        .chain-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            width: 100%;
+            opacity: 0;
+        }
+
+        .chain-link {
+            glass;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border: 2px solid var(--red);
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+            min-width: 120px;
+            font-weight: 700;
+            color: var(--red);
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+        }
+
+        .chain-arrow {
+            font-size: 1.5rem;
+            color: var(--red);
+            opacity: 0;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        .big-stat {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
+            color: var(--red);
+            text-shadow: 0 0 20px rgba(248, 113, 113, 0.6);
+            opacity: 0;
+            animation: slideInDown 0.8s ease-out forwards;
+        }
+
+        .stat-text {
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            color: #cbd5e1;
+            text-align: center;
+            margin-top: 1rem;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.3s forwards;
+        }
+
+        .algorithm-step {
+            glass;
+            padding: 1.8rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--red);
+            opacity: 0;
+            animation: slideInLeft 0.8s ease-out;
+            font-size: clamp(1rem, 1.6vw, 1.15rem);
+            color: var(--amber);
+            font-weight: 600;
+        }
+
+        .two-panel {
+            display: flex;
+            gap: 2rem;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .panel {
+            glass;
+            padding: 2.5rem;
+            flex: 1;
+            min-width: 300px;
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            transform: perspective(800px) rotateX(2deg);
+        }
+
+        .panel-title {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 700;
+            color: var(--red);
+            margin-bottom: 1rem;
+        }
+
+        .panel-content {
+            font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .card {
+            glass;
+            padding: 2rem;
+            text-align: center;
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .card-title {
+            font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+            font-weight: 700;
+            color: var(--red);
+            margin-bottom: 1rem;
+        }
+
+        .card-content {
+            font-size: clamp(0.85rem, 1.4vw, 0.95rem);
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .stat-badge {
+            display: inline-block;
+            background: rgba(248, 113, 113, 0.2);
+            border: 2px solid var(--red);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            color: var(--red);
+            font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+            margin: 1rem;
+            opacity: 0;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .drawers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1000px;
+            opacity: 0;
+        }
+
+        .drawer {
+            glass;
+            padding: 1.5rem;
+            text-align: center;
+            border: 2px solid var(--red);
+            font-weight: 700;
+            color: var(--amber);
+            font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .drawer:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(248, 113, 113, 0.3);
+        }
+
+        .yes-no-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .yes-panel {
+            glass;
+            padding: 2rem;
+            border-left: 4px solid var(--teal);
+            opacity: 0;
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        .no-panel {
+            glass;
+            padding: 2rem;
+            border-left: 4px solid var(--red);
+            opacity: 0;
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        .yes-title {
+            color: var(--teal);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: clamp(1rem, 1.6vw, 1.2rem);
+        }
+
+        .no-title {
+            color: var(--red);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: clamp(1rem, 1.6vw, 1.2rem);
+        }
+
+        .list-item {
+            font-size: clamp(0.85rem, 1.3vw, 0.95rem);
+            color: #cbd5e1;
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+            border-left: 2px solid rgba(248, 113, 113, 0.3);
+        }
+
+        .stagger-1 { animation-delay: 0.2s; }
+        .stagger-2 { animation-delay: 0.4s; }
+        .stagger-3 { animation-delay: 0.6s; }
+        .stagger-4 { animation-delay: 0.8s; }
+        .stagger-5 { animation-delay: 1s; }
+
+        @media (max-width: 768px) {
+            .nav-dots {
+                right: 1rem;
+                gap: 1rem;
+            }
+
+            .slide {
+                padding: 1rem;
+            }
+
+            .yes-no-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chain-container {
+                gap: 0.5rem;
+            }
+
+            .chain-link {
+                min-width: 100px;
+                padding: 1rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+    <div class="particles-bg" id="particlesBg"></div>
+    <div class="nav-dots" id="navDots"></div>
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover-slide">
+        <div class="slide-content">
+            <h1 class="cover-title" style="animation: slideInDown 0.8s ease-out forwards, heartbeat 2s ease-in-out 1s infinite;">Reanimación Cardiopulmonar</h1>
+            <p class="cover-subtitle" style="animation: slideInDown 0.8s ease-out 0.1s forwards;">RCP Intrahospitalaria</p>
+            <p class="cover-instructor">Mg. Marcia Maldonado Holtheuer</p>
+            <p class="cover-course">ENF3015 · UDP 2025</p>
+            <div style="margin-top: 2rem; font-size: 3rem; opacity: 0; animation: slideInDown 0.8s ease-out 0.2s forwards, heartbeat 1.5s ease-in-out 0.5s infinite;">💓</div>
+        </div>
+    </section>
+
+    <!-- SLIDE 2: CHAIN OF SURVIVAL -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Cadena de Supervivencia Intrahospitalaria</h2>
+            <div class="chain-container">
+                <div class="chain-link stagger-1">🔍 VIGILANCIA</div>
+                <div class="chain-arrow">→</div>
+                <div class="chain-link stagger-2">📢 ACTIVAR SISTEMA</div>
+                <div class="chain-arrow">→</div>
+                <div class="chain-link stagger-3">💓 RCP PRECOZ</div>
+                <div class="chain-arrow">→</div>
+                <div class="chain-link stagger-4">⚡ DESFIBRILACIÓN</div>
+                <div class="chain-arrow">→</div>
+                <div class="chain-link stagger-5">🏥 SOPORTE AVANZADO</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 3: TIME IS LIFE -->
+    <section class="slide">
+        <div class="slide-content">
+            <div class="big-stat" style="color: var(--amber);">7-10%</div>
+            <div class="stat-text">Las posibilidades de recuperación disminuyen 7-10% por cada <strong>MINUTO</strong> sin RCP</div>
+            <p style="margin-top: 2rem; font-size: clamp(1.1rem, 2vw, 1.4rem); color: var(--red); font-weight: 700; text-align: center; opacity: 0; animation: fadeInUp 0.8s ease-out 0.6s forwards;">¡EL TIEMPO ES VIDA! ⏰</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 4: SVB ALGORITHM -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Algoritmo SVB</h2>
+            <div style="width: 100%; max-width: 800px;">
+                <div class="algorithm-step stagger-1">1. SEGURIDAD DE ESCENA - Verificar que el ambiente es seguro</div>
+                <div class="algorithm-step stagger-2">2. ¿RESPONDE? - Gritar y sacudir al paciente</div>
+                <div class="algorithm-step stagger-3">3. PEDIR AYUDA + CLAVE AZUL - Activar sistema de emergencia</div>
+                <div class="algorithm-step stagger-4">4. ¿PULSO + RESPIRACIÓN? - Evaluar en < 10 segundos</div>
+                <div class="algorithm-step stagger-5">5. INICIAR RCP - Comenzar compresiones inmediatamente</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 5: SIMULTANEOUS ASSESSMENT -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Evaluación Simultánea</h2>
+            <div class="two-panel">
+                <div class="panel stagger-1 slide-in-left">
+                    <div class="panel-title">🫁 RESPIRACIÓN</div>
+                    <div class="panel-content">
+                        • Evaluar en < 10 segundos<br>
+                        • ¿Jadea o boquea? = AUSENTE<br>
+                        • Buscar movimiento de tórax
+                    </div>
+                </div>
+                <div class="panel stagger-2 slide-in-right">
+                    <div class="panel-title">💓 PULSO</div>
+                    <div class="panel-content">
+                        • Carótida o femoral<br>
+                        • 5-10 segundos máximo<br>
+                        • No pulso palpable = INICIAR RCP
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 6: ACTIVATE SYSTEM -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Activar Sistema de Emergencia</h2>
+            <div class="cards-grid">
+                <div class="card stagger-1">
+                    <div class="card-title">🔵 CLAVE AZUL</div>
+                    <div class="card-content">Paro cardiorrespiratorio</div>
+                </div>
+                <div class="card stagger-2">
+                    <div class="card-title">🔴 CLAVE ROJA</div>
+                    <div class="card-content">Emergencia médica urgente</div>
+                </div>
+                <div class="card stagger-3">
+                    <div class="card-title">📞 LLAMAR A EQUIPO</div>
+                    <div class="card-content">Solicitar CARRO DE PARO</div>
+                </div>
+            </div>
+            <p style="margin-top: 2rem; text-align: center; color: var(--amber); font-weight: 700; font-size: clamp(1rem, 1.8vw, 1.2rem); opacity: 0; animation: fadeInUp 0.8s ease-out 0.8s forwards;">Cada segundo cuenta</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 7: CRASH CART -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Carro de Paro</h2>
+            <div class="drawers-grid stagger-1">
+                <div class="drawer">🧬 MEDICAMENTOS</div>
+                <div class="drawer">🌬️ VÍA AÉREA</div>
+                <div class="drawer">🫀 CIRCULACIÓN</div>
+                <div class="drawer">⚡ DESFIBRILADOR</div>
+                <div class="drawer">🔧 MATERIAL ESPECIAL</div>
+            </div>
+            <p style="margin-top: 2rem; text-align: center; color: #cbd5e1; font-size: clamp(0.95rem, 1.5vw, 1.1rem); opacity: 0; animation: fadeInUp 0.8s ease-out 0.6s forwards;">5 Cajones organizados y sellados. Revisar diariamente</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 8: QUALITY COMPRESSIONS -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Compresiones de Calidad</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; width: 100%; max-width: 1000px;">
+                <div class="stat-badge stagger-1">100-120 cpm</div>
+                <div class="stat-badge stagger-2">5-6 cm profundidad</div>
+                <div class="stat-badge stagger-3">Retroceso completo</div>
+                <div class="stat-badge stagger-4">Mínimas interrupciones</div>
+                <div class="stat-badge stagger-5">Relación 30:2</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 9: HAND POSITION -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Posición de Manos</h2>
+            <div class="panel stagger-1" style="max-width: 700px; opacity: 0; animation: fadeInUp 0.8s ease-out forwards;">
+                <div class="panel-title" style="font-size: 1.3rem;">Talón de una mano sobre mitad inferior del esternón</div>
+                <div class="panel-content" style="font-size: 1.05rem; margin: 1.5rem 0;">
+                    ✓ Entrelace la otra mano sobre la primera<br>
+                    ✓ Brazos extendidos, codos rígidos<br>
+                    ✓ Comprima hacia abajo con el peso del cuerpo<br>
+                    ✓ Permitir retroceso completo del tórax
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 10: OROPHARYNGEAL AIRWAY -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Cánula Orofaríngea (Mayo)</h2>
+            <div class="two-panel">
+                <div class="panel stagger-1 slide-in-left">
+                    <div class="panel-title">📏 MEDICIÓN</div>
+                    <div class="panel-content">
+                        Desde lóbulo oreja hasta comisura labial
+                    </div>
+                </div>
+                <div class="panel stagger-2 slide-in-right">
+                    <div class="panel-title">⚠️ CONTRAINDICACIÓN</div>
+                    <div class="panel-content">
+                        Reflejo nauseoso activo
+                    </div>
+                </div>
+            </div>
+            <p style="margin-top: 2rem; text-align: center; color: #cbd5e1; font-size: clamp(0.95rem, 1.5vw, 1.1rem); opacity: 0; animation: fadeInUp 0.8s ease-out 0.8s forwards;">Vía aérea de fácil colocación, mantiene permeabilidad</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 11: BVM VENTILATION -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Ventilación BVM (Ambú)</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; width: 100%; max-width: 1000px; margin: 2rem 0;">
+                <div class="stat-badge stagger-1" style="background: rgba(0, 201, 167, 0.2); border-color: var(--teal); color: var(--teal);">SIN O₂: 21%</div>
+                <div class="stat-badge stagger-2" style="background: rgba(251, 191, 36, 0.2); border-color: var(--amber); color: var(--amber);">CON O₂: 40-60%</div>
+                <div class="stat-badge stagger-3" style="background: rgba(248, 113, 113, 0.2); border-color: var(--red); color: var(--red);">CON RESERVORIO: 90-100%</div>
+            </div>
+            <div class="panel stagger-4" style="max-width: 700px; opacity: 0; animation: fadeInUp 0.8s ease-out 0.6s forwards;">
+                <div class="panel-title">Técnica Correcta</div>
+                <div class="panel-content">
+                    • 1 segundo por ventilación<br>
+                    • Solo hasta elevación del tórax<br>
+                    • Evitar sobredistensión pulmonar
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 12: ONE VS TWO OPERATORS -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Un Operador vs Dos Operadores</h2>
+            <div class="two-panel">
+                <div class="panel stagger-1 slide-in-left">
+                    <div class="panel-title">👤 UN OPERADOR</div>
+                    <div class="panel-content">
+                        • E-C grip (Una mano)<br>
+                        • Palanca mecánica limitada<br>
+                        • Mayor fatiga<br>
+                        • Menos compresiones profundas
+                    </div>
+                </div>
+                <div class="panel stagger-2 slide-in-right">
+                    <div class="panel-title">👥 DOS OPERADORES</div>
+                    <div class="panel-content">
+                        • Dos manos (Óptimo)<br>
+                        • Mayor potencia<br>
+                        • Menos fatiga<br>
+                        • Mejor calidad sostenida
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 13: HIGH-QUALITY RCP -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">RCP de Alta Calidad - SÍ vs NO</h2>
+            <div class="yes-no-grid">
+                <div class="yes-panel stagger-1">
+                    <div class="yes-title">✓ LOS REANIMADORES DEBEN</div>
+                    <div class="list-item">Realizar compresiones profundas y rápidas</div>
+                    <div class="list-item">Permitir retroceso completo</div>
+                    <div class="list-item">Minimizar interrupciones</div>
+                    <div class="list-item">Rotar cada 2 minutos</div>
+                    <div class="list-item">Usar datos objetivos para ALTO</div>
+                </div>
+                <div class="no-panel stagger-2">
+                    <div class="no-title">✕ LOS REANIMADORES NO DEBEN</div>
+                    <div class="list-item">Comprimir lentamente (< 100 cpm)</div>
+                    <div class="list-item">Permitir colapso del tórax</div>
+                    <div class="list-item">Interrumpir para comprobación de pulso</div>
+                    <div class="list-item">Mantener el mismo operador > 2 min</div>
+                    <div class="list-item">Abandonar sin criterios clínicos claros</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 14: BIBLIOGRAPHY -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="section-title">Referencias</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; width: 100%; max-width: 1000px;">
+                <div class="card stagger-1">
+                    <div class="card-title">AHA 2020</div>
+                    <div class="card-content">American Heart Association Guidelines for CPR</div>
+                </div>
+                <div class="card stagger-2">
+                    <div class="card-title">BLS</div>
+                    <div class="card-content">Basic Life Support Guidelines</div>
+                </div>
+                <div class="card stagger-3">
+                    <div class="card-title">ACLS</div>
+                    <div class="card-content">Advanced Cardiac Life Support</div>
+                </div>
+                <div class="card stagger-4">
+                    <div class="card-title">ILCOR</div>
+                    <div class="card-content">International Liaison Committee on Resuscitation</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function createParticles() {
+            const bg = document.getElementById('particlesBg');
+            const particleCount = 15;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 60 + 10) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                bg.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+
+        const navDots = document.getElementById('navDots');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.querySelector('.progress-bar').style.width = progress + '%';
+
+            document.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function revealElements() {
+            const elements = slides[currentSlide].querySelectorAll('[class*="card"], [class*="panel"], [class*="badge"], [class*="link"], [class*="stat"], [class*="algorithm"], [class*="drawer"], [class*="text"], [class*="title"], [class*="list"], [class*="grid"]');
+            elements.forEach((el, i) => {
+                setTimeout(() => {
+                    el.classList.add('revealed');
+                }, i * 80);
+            });
+        }
+
+        function goToSlide(n) {
+            currentSlide = Math.max(0, Math.min(n, totalSlides - 1));
+            window.scrollTo({ top: currentSlide * window.innerHeight, behavior: 'smooth' });
+            updateProgress();
+            revealElements();
+        }
+
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const slideIndex = Array.from(slides).indexOf(entry.target);
+                    currentSlide = slideIndex;
+                    updateProgress();
+                    revealElements();
+                }
+            });
+        }, observerOptions);
+
+        slides.forEach(slide => observer.observe(slide));
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') goToSlide(currentSlide + 1);
+            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
+        });
+
+        let scrollTimeout;
+        document.addEventListener('wheel', (e) => {
+            if (scrollTimeout) return;
+            scrollTimeout = setTimeout(() => {
+                if (e.deltaY > 0) goToSlide(currentSlide + 1);
+                else goToSlide(currentSlide - 1);
+                scrollTimeout = null;
+            }, 500);
+        }, { passive: true });
+
+        let touchStart = 0;
+        document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientY; });
+        document.addEventListener('touchend', (e) => {
+            const touchEnd = e.changedTouches[0].clientY;
+            if (touchStart - touchEnd > 50) goToSlide(currentSlide + 1);
+            if (touchEnd - touchStart > 50) goToSlide(currentSlide - 1);
+        });
+
+        updateProgress();
+        revealElements();
+    </script>
+</body>
+</html>
